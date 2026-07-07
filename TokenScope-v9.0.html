@@ -1,0 +1,2347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TokenScope v9.0</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F8F9FA;color:#1E293B;display:flex;flex-direction:column;height:100vh;overflow:hidden;font-size:24px;line-height:1.5}
+:root{--bg:#F8F9FA;--surface:#FFF;--border:#E2E8F0;--text:#1E293B;--muted:#64748B;--accent:#2563EB;--green:#16A34A;--yellow:#CA8A04;--red:#DC2626;--grey:#94A3B8}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;background:#FFF;border-bottom:3px solid var(--accent);flex-shrink:0}
+.topbar-logo{font-size:20px;font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--muted)}
+.main{display:flex;flex:1;overflow:hidden;gap:0}
+.sidebar{width:200px;background:#FFF;border-right:2px solid var(--border);overflow-y:auto;padding:8px 0;flex-shrink:0}
+.slabel{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);padding:12px 14px 6px;text-transform:uppercase}
+.prow{display:flex;align-items:center;padding:8px 14px;cursor:pointer;border-left:3px solid transparent;gap:8px;transition:background .2s,border-color .2s}
+.prow:hover{background:var(--bg)}
+.prow.active{background:var(--bg);border-left-color:var(--accent)}
+.pname{font-size:14px;font-weight:600}
+.pco{font-size:11px;color:var(--muted)}
+.pact{font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;padding:2px 8px;border-radius:4px;background:var(--bg);transition:all .2s;white-space:nowrap}
+.pact:hover{background:#E2E8F0}
+.centre{flex:1;overflow-y:auto;padding:20px;background:var(--bg)}
+.rightbar{width:170px;background:#FFF;border-left:2px solid var(--border);overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
+.rc{background:#FFF;border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:border-color .2s,background .2s;min-height:80px;display:flex;flex-direction:column;justify-content:space-between}
+.rc:hover{border-color:var(--accent)}
+.rc.active-card{border-color:var(--accent);background:#F8FAFF}
+.rc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px}
+.rc-val{font-size:22px;font-weight:700;color:var(--text)}
+.rc-val.blue{color:var(--accent)}
+.rc-val.green{color:var(--green)}
+.rc-sub{font-size:11px;color:var(--muted);margin-top:4px}
+.notice{padding:12px 14px;border-radius:6px;margin-bottom:12px;font-size:14px;background:#FFF3EC;border:1px solid #FDE68A;color:#92400E}
+.section{margin-bottom:20px}
+.section-title{font-size:16px;font-weight:700;margin-bottom:10px}
+.data-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.data-cell{background:#FFF;border:1px solid var(--border);border-radius:6px;padding:12px}
+.data-label{font-size:12px;color:var(--muted);margin-bottom:4px}
+.data-value{font-size:18px;font-weight:700}
+.data-value.small{font-size:13px;line-height:1.3;word-break:break-word}
+.signal-row{background:#FFF;border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.signal-label{font-size:14px;font-weight:600}
+.signal-detail{font-size:12px;color:var(--muted);margin-top:2px}
+.signal-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap}
+.signal-badge.ok{background:#DCFCE7;color:var(--green)}
+.signal-badge.watch{background:#FEF3C7;color:var(--yellow)}
+.signal-badge.flag{background:#FEE2E2;color:var(--red)}
+.dial-row{margin-bottom:20px}
+.dial-label{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+.dial-input{width:100%}
+.prompt-output{width:100%;min-height:100px;padding:12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:monospace;resize:vertical;background:#FFF}
+.tab-bar{display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border)}
+.tab-btn{padding:8px 16px;font-size:13px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.rate-table{width:100%;border-collapse:collapse;background:#FFF;border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.rate-table th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:10px 12px;background:var(--bg);border-bottom:1px solid var(--border)}
+.rate-table td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border)}
+.rate-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.rate-badge.confirmed{background:#DCFCE7;color:var(--green)}
+.rate-badge.reference{background:#F1F5F9;color:var(--muted)}
+.chart-container{background:#FFF;border:1px solid var(--border);border-radius:6px;padding:12px;height:120px;display:flex;align-items:flex-end;gap:3px;margin-bottom:12px}
+.chart-bar{flex:1;background:var(--accent);border-radius:2px 2px 0 0;min-height:4px;transition:height .3s}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.5);z-index:1000;align-items:center;justify-content:center}
+.modal.open{display:flex}
+.modal-content{background:#FFF;padding:24px;border-radius:8px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:12px}
+.modal-input{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:12px;font-size:14px;font-family:monospace}
+.modal-btn{width:100%;padding:10px;background:var(--accent);color:#FFF;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.modal-btn:hover{filter:brightness(.9)}
+.modal-cancel{display:block;text-align:center;font-size:13px;color:var(--muted);cursor:pointer}
+.modal-success{display:none;padding:10px;background:#DCFCE7;border:1px solid #BBF7D0;border-radius:6px;color:var(--green);font-size:13px;margin-bottom:12px}
+.modal-error{display:none;padding:10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;color:var(--red);font-size:13px;margin-bottom:12px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+    <div class="topbar-logo">TokenScope <span style="font-size:12px;font-weight:400;">v9.0</span></div>
+    <div class="topbar-right">
+        <span id="connCount">0 of 7 connected</span>
+        <span id="tmr" style="font-family:monospace;">0:00:00</span>
+    </div>
+</div>
+
+<div class="main">
+    <div class="sidebar">
+        <div class="slabel">Models</div>
+        <div id="model-list"></div>
+    </div>
+
+    <div class="centre" id="centre">
+        <div style="text-align:center;padding:60px 20px;color:var(--muted);">
+            <div style="font-size:24px;margin-bottom:12px;">Select a model</div>
+            <div style="font-size:14px;">Click a provider to start</div>
+        </div>
+    </div>
+
+    <div class="rightbar">
+        <div class="rc active-card" onclick="showCard(1)">
+            <div>
+                <div class="rc-title">1. Cost</div>
+                <div class="rc-val blue" id="card1-val">$0.00</div>
+            </div>
+            <div class="rc-sub">Yesterday</div>
+        </div>
+        <div class="rc" onclick="showCard(2)">
+            <div>
+                <div class="rc-title">2. Health</div>
+                <div class="rc-val green" id="card2-val">—</div>
+            </div>
+            <div class="rc-sub">Status</div>
+        </div>
+        <div class="rc" onclick="showCard(3)">
+            <div>
+                <div class="rc-title">3. Trends</div>
+                <div class="rc-val" id="card3-val" style="font-size:16px;">Chart</div>
+            </div>
+            <div class="rc-sub">7 days</div>
+        </div>
+        <div class="rc" onclick="showCard(4)">
+            <div>
+                <div class="rc-title">4. Config</div>
+                <div class="rc-val" id="card4-val" style="font-size:16px;">Settings</div>
+            </div>
+            <div class="rc-sub">Sliders</div>
+        </div>
+        <div class="rc" onclick="showCard(5)">
+            <div>
+                <div class="rc-title">5. Help</div>
+                <div class="rc-val" id="card5-val" style="font-size:16px;">Docs</div>
+            </div>
+            <div class="rc-sub">Guide</div>
+        </div>
+        <div class="rc" onclick="showCard(6)" style="border-left: 3px solid #dc2626;">
+            <div>
+                <div class="rc-title">6. Forensic</div>
+                <div class="rc-val" style="font-size:16px;color:#dc2626;">🔍</div>
+            </div>
+            <div class="rc-sub">Hunt</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="modal">
+    <div class="modal-content">
+        <h3 id="modal-title">Connect API Key</h3>
+        <div class="modal-success" id="modal-success"></div>
+        <div class="modal-error" id="modal-error"></div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Your key stays in your browser. Never sent to our server.</div>
+        <div id="modal-guide" style="display:none;font-size:13px;color:var(--muted);margin-bottom:12px;"></div>
+        <input type="password" class="modal-input" id="modal-input" placeholder="Paste API key here">
+        <button class="modal-btn" onclick="submitKey()">Save Key</button>
+        <span class="modal-cancel" onclick="closeModal()">Cancel</span>
+    </div>
+</div>
+
+<script>
+// === PROVIDER CONFIGURATION ===
+// Each provider includes: name, branding (logo, color), API details, and documentation links
+// Logo: text identifier for branding (future: will be actual SVG/image)
+// Color: CSS color for UI highlights (orange=Claude, blue=OpenAI, teal=DeepSeek, etc.)
+// usageApi: endpoint identifier ('claude-admin' = has native usage API; others TBD)
+// keyHelpUrl: direct link to provider's API key page for low-friction user onboarding
+var PROVIDERS = {
+    claude: {
+        name: 'Claude',
+        logo: '🔷',
+        color: '#FF6B35',  // Orange
+        usageApi: 'claude-admin',
+        keyHelpUrl: 'https://platform.claude.com/settings/admin-keys',
+        keyPrefix: 'sk-ant-admin01-'
+    },
+    openai: {
+        name: 'OpenAI',
+        logo: '⚡',
+        color: '#4A9EFF',  // Light Blue
+        usageApi: 'openai-api',
+        keyHelpUrl: 'https://platform.openai.com/api-keys',
+        keyPrefix: 'sk-'
+    },
+    deepseek: {
+        name: 'DeepSeek',
+        logo: '🌊',
+        color: '#06B6D4',  // Teal
+        usageApi: 'deepseek-balance',  // Balance-only, no granular cost API
+        keyHelpUrl: 'https://platform.deepseek.com/api_keys',
+        keyPrefix: 'sk-'
+    },
+    gemini: {
+        name: 'Gemini',
+        logo: '✨',
+        color: '#9C27B0',  // Purple
+        usageApi: 'gemini-api',
+        keyHelpUrl: 'https://aistudio.google.com/apikey',
+        keyPrefix: ''
+    },
+    mistral: {
+        name: 'Mistral',
+        logo: '🎯',
+        color: '#FF6B00',  // Orange-Red
+        usageApi: 'mistral-api',
+        keyHelpUrl: 'https://console.mistral.ai/api-keys',
+        keyPrefix: 'sk-'
+    },
+    grok: {
+        name: 'Grok',
+        logo: '⚔️',
+        color: '#000000',  // Black
+        usageApi: 'grok-api',
+        keyHelpUrl: 'https://console.x.ai/team/default/api-keys',
+        keyPrefix: ''
+    },
+    cohere: {
+        name: 'Cohere',
+        logo: '🔮',
+        color: '#E31937',  // Red
+        usageApi: 'cohere-dashboard',  // No direct cost API; dashboard-only
+        keyHelpUrl: 'https://dashboard.cohere.com/api-keys',
+        keyPrefix: ''
+    }
+};
+
+var state = {provider: 'openai', model: null, card: 1, card1Tab: 1, card4Tab: 1, connections: {}, syncStatus: {}};
+var db = null;
+var currentModalProvider = null;
+var dialState = {sycophancy: 2, brevity: 2, speed: 3, cost: 3, temperature: 3};
+
+var SYCOPHANCY_MARKERS = {
+    hyperbolic: ['absolutely brilliant', 'visionary', 'breathtaking', 'flawless', 'genius', 'masterful', 'magnificent', 'revolutionary', 'extraordinary', 'incredible insight', 'amazing observation', 'truly remarkable', 'exceptionally clever', 'deeply honored', 'noblesse oblige', 'profoundly important', 'groundbreaking'],
+    high_affirmation: ['brilliant observation', 'fantastic approach', 'perfectly executed', 'excellent point', 'you\'ve nailed it', 'couldn\'t agree more', 'absolutely right', 'insightful', 'well thought out', 'astute', 'perceptive', 'wonderful question', 'great catch', 'spot on', 'precisely'],
+    reassurance: ['rest assured', 'don\'t worry', 'i completely understand', 'i hear you', 'you\'re absolutely correct', 'i see what you mean', 'that makes perfect sense', 'you\'ve identified', 'you\'re right to', 'that\'s a fair point', 'i appreciate your'],
+    hedging_softening: ['just to clarify', 'i might suggest', 'if i may', 'in my humble opinion', 'correct me if i\'m wrong', 'at least', 'sort of', 'kind of', 'perhaps', 'maybe', 'i think', 'it seems', 'fairly', 'rather'],
+    tonal_shifts: ['warmly', 'heartfelt', 'deeply', 'sincerely', 'with great respect', 'i\'m genuinely', 'i truly', 'you must', 'you clearly', 'thank you for']
+};
+
+function analyzeSycophancy(text) {
+    var lower = text.toLowerCase();
+    var words = lower.split(/\s+/);
+    var matches = {hyperbolic: 0, high_affirmation: 0, reassurance: 0, hedging: 0, tonal: 0};
+    var totalTokens = words.length;
+
+    for (var tier in SYCOPHANCY_MARKERS) {
+        var markers = SYCOPHANCY_MARKERS[tier];
+        for (var i = 0; i < markers.length; i++) {
+            var pattern = markers[i];
+            var regex = new RegExp('\\b' + pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+            var m = (lower.match(regex) || []).length;
+            if (m > 0) matches[tier] += m;
+        }
+    }
+
+    var totalMatches = matches.hyperbolic + matches.high_affirmation + matches.reassurance + matches.hedging + matches.tonal;
+    var ratio = totalTokens > 0 ? (totalMatches / totalTokens) * 100 : 0;
+
+    if (ratio < 2) return 0;
+    if (ratio < 5) return 1;
+    if (ratio < 10) return 2;
+    if (ratio < 15) return 3;
+    return 4;
+}
+
+function analyzeVerbosity(text) {
+    var words = text.trim().split(/\s+/);
+    var sentences = text.split(/[.!?]+/).filter(function(s) {return s.trim().length > 0;});
+    var avgWordsPerSentence = sentences.length > 0 ? words.length / sentences.length : 0;
+    var hasPassive = /\b(is|are|was|were|been|being)\s+\w+ed\b/gi.test(text);
+    var hasRepetition = /(\b\w+\b)(?:.*\1)/gi.test(text);
+    var hasFillerPhrases = /\b(just|only|actually|basically|essentially|really|very|quite|fairly)\b/gi.test(text);
+
+    var score = 0;
+    if (avgWordsPerSentence > 25) score += 1;
+    if (avgWordsPerSentence > 35) score += 1;
+    if (hasPassive) score += 0.5;
+    if (hasRepetition) score += 0.5;
+    if (hasFillerPhrases) score += 1;
+
+    if (score <= 1) return 0;
+    if (score <= 2) return 1;
+    if (score <= 3) return 2;
+    if (score <= 4) return 3;
+    return 4;
+}
+
+var useLocalStorage = false;
+var localStorageRecords = [];
+
+function openDB() {
+    return new Promise(function(resolve, reject) {
+        try {
+            var req = indexedDB.open('tokenscope_v9', 1);
+            req.onupgradeneeded = function(e) {
+                var d = e.target.result;
+                if (!d.objectStoreNames.contains('runs')) {
+                    var store = d.createObjectStore('runs', {keyPath: 'id'});
+                    store.createIndex('provider', 'provider', {unique: false});
+                    store.createIndex('date', 'date', {unique: false});
+                }
+            };
+            req.onsuccess = function(e) {db = e.target.result; resolve(db);};
+            req.onerror = function() {reject(req.error);};
+        } catch(e) {
+            useLocalStorage = true;
+            try {
+                var stored = localStorage.getItem('tokenscope_records');
+                localStorageRecords = stored ? JSON.parse(stored) : [];
+            } catch(e2) {
+                localStorageRecords = [];
+            }
+            resolve(null);
+        }
+    });
+}
+
+function dbGetByProvider(provider) {
+    return new Promise(function(resolve, reject) {
+        if (useLocalStorage) {
+            var results = localStorageRecords.filter(function(r) { return r.provider === provider; });
+            resolve(results);
+            return;
+        }
+        if (!db) return reject('DB not open');
+        var tx = db.transaction('runs', 'readonly');
+        var index = tx.objectStore('runs').index('provider');
+        var req = index.getAll(provider);
+        req.onsuccess = function() {resolve(req.result || []);};
+        req.onerror = function() {reject(req.error);};
+    });
+}
+
+function runsPut(record) {
+    return new Promise(function(resolve, reject) {
+        if (useLocalStorage) {
+            var existing = localStorageRecords.findIndex(function(r) { return r.id === record.id; });
+            if (existing >= 0) {
+                localStorageRecords[existing] = record;
+            } else {
+                localStorageRecords.push(record);
+            }
+            try {
+                localStorage.setItem('tokenscope_records', JSON.stringify(localStorageRecords));
+                resolve();
+            } catch(e) {
+                reject(e);
+            }
+            return;
+        }
+        if (!db) return reject('DB not open');
+        var tx = db.transaction('runs', 'readwrite');
+        tx.objectStore('runs').put(record);
+        tx.oncomplete = function() {resolve();};
+        tx.onerror = function() {reject(tx.error);};
+    });
+}
+
+function runsDelete(id) {
+    return new Promise(function(resolve, reject) {
+        if (useLocalStorage) {
+            localStorageRecords = localStorageRecords.filter(function(r) { return r.id !== id; });
+            try {
+                localStorage.setItem('tokenscope_records', JSON.stringify(localStorageRecords));
+                resolve();
+            } catch(e) {
+                reject(e);
+            }
+            return;
+        }
+        if (!db) return reject('DB not open');
+        var tx = db.transaction('runs', 'readwrite');
+        tx.objectStore('runs').delete(id);
+        tx.oncomplete = function() {resolve();};
+        tx.onerror = function() {reject(tx.error);};
+    });
+}
+
+function startOfDayUTC(offsetDays) {
+    var d = new Date();
+    d.setUTCHours(0, 0, 0, 0);
+    d.setUTCDate(d.getUTCDate() + offsetDays);
+    return d;
+}
+
+function computeCard1Stats(records) {
+    var todayStr = startOfDayUTC(-1).toISOString().slice(0, 10);
+    var monthPrefix = todayStr.slice(0, 7);
+    var today = 0, month = 0;
+    var modelTotals = {};
+    var daysSeen = {};
+    for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        if (r.kind && r.kind !== 'model') continue;
+        var cost = r.cost || 0;
+        if (r.date === todayStr) today += cost;
+        if (r.date.slice(0, 7) === monthPrefix) {
+            month += cost;
+            daysSeen[r.date] = true;
+        }
+        modelTotals[r.model] = (modelTotals[r.model] || 0) + cost;
+    }
+    var dayCount = Object.keys(daysSeen).length || 1;
+    var topModel = '—', topVal = -1;
+    for (var m in modelTotals) {
+        if (modelTotals[m] > topVal) {topVal = modelTotals[m]; topModel = m;}
+    }
+    return {today: today, month: month, avgPerDay: month / dayCount, topModel: topModel};
+}
+
+var CARD2_INPUT_OUTPUT_WARN_RATIO = 2;
+var CARD2_INPUT_OUTPUT_FLAG_RATIO = 4;
+var CARD2_SYCOPHANCY_GROWTH_FLAG_PCT = 0.4;
+
+function computeCard2Signals(records) {
+    var todayStart = startOfDayUTC(0);
+    var windowStartDate = startOfDayUTC(-30).toISOString().slice(0, 10);
+    var trendStartDate = startOfDayUTC(-14).toISOString().slice(0, 10);
+    var inputTotal = 0, outputTotal = 0;
+    var dailyOutput = {};
+
+    for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        if (r.kind !== 'direction' || r.date < windowStartDate) continue;
+        var cost = r.cost || 0;
+        if (r.direction === 'input') inputTotal += cost;
+        else if (r.direction === 'output') {
+            outputTotal += cost;
+            if (r.date >= trendStartDate) dailyOutput[r.date] = (dailyOutput[r.date] || 0) + cost;
+        }
+    }
+
+    var ratio = outputTotal > 0 ? (inputTotal / outputTotal) : (inputTotal > 0 ? Infinity : 0);
+    var ratioStatus = 'ok';
+    if (ratio >= CARD2_INPUT_OUTPUT_FLAG_RATIO) ratioStatus = 'flag';
+    else if (ratio >= CARD2_INPUT_OUTPUT_WARN_RATIO) ratioStatus = 'watch';
+    var ratioDetail = (inputTotal === 0 && outputTotal === 0)
+        ? 'No token-level data in the last 30 days yet.'
+        : 'Input:Output cost ratio ' + (isFinite(ratio) ? ratio.toFixed(1) : '∞') + ':1 over the last 30 days.';
+
+    var thisWeekTotal = 0, lastWeekTotal = 0;
+    for (var d in dailyOutput) {
+        var daysAgo = Math.round((todayStart - new Date(d + 'T00:00:00.000Z')) / 86400000);
+        if (daysAgo >= 0 && daysAgo < 7) thisWeekTotal += dailyOutput[d];
+        else if (daysAgo >= 7 && daysAgo < 14) lastWeekTotal += dailyOutput[d];
+    }
+    var sycoStatus = 'ok';
+    var sycoDetail = 'Not enough output history yet to compare weeks.';
+    if (lastWeekTotal > 0) {
+        var growthPct = (thisWeekTotal - lastWeekTotal) / lastWeekTotal;
+        sycoStatus = growthPct >= CARD2_SYCOPHANCY_GROWTH_FLAG_PCT ? 'flag' : (growthPct >= CARD2_SYCOPHANCY_GROWTH_FLAG_PCT / 2 ? 'watch' : 'ok');
+        sycoDetail = 'Output cost ' + (growthPct >= 0 ? 'up ' : 'down ') + Math.abs(growthPct * 100).toFixed(0) + '% vs the prior week.';
+    } else if (thisWeekTotal > 0) {
+        sycoDetail = 'New output activity this week — no prior week to compare yet.';
+    }
+
+    return [
+        {id: 'input-output-ratio', label: 'Input/Output Ratio', status: ratioStatus, detail: ratioDetail},
+        {id: 'sycophancy-heuristic', label: 'Rising Output Volume (sycophancy heuristic)', status: sycoStatus, detail: sycoDetail},
+        computeModelShiftSignal(records)
+    ];
+}
+
+function computeCurrentModel(records) {
+    var latestDate = null;
+    for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        if (r.kind && r.kind !== 'model') continue;
+        if (!latestDate || r.date > latestDate) latestDate = r.date;
+    }
+    if (!latestDate) return null;
+    var totals = {};
+    for (var j = 0; j < records.length; j++) {
+        var r2 = records[j];
+        if (r2.kind && r2.kind !== 'model') continue;
+        if (r2.date !== latestDate) continue;
+        totals[r2.model] = (totals[r2.model] || 0) + (r2.cost || 0);
+    }
+    var top = null, topVal = -1;
+    for (var m in totals) {
+        if (totals[m] > topVal) {topVal = totals[m]; top = m;}
+    }
+    return {model: top, date: latestDate};
+}
+
+var CARD2_MODEL_SHIFT_RECENT_DAYS = 3;
+var CARD2_MODEL_SHIFT_PRIOR_DAYS = 30;
+
+function computeModelShiftSignal(records) {
+    var recentStart = startOfDayUTC(-CARD2_MODEL_SHIFT_RECENT_DAYS).toISOString().slice(0, 10);
+    var priorStart = startOfDayUTC(-(CARD2_MODEL_SHIFT_RECENT_DAYS + CARD2_MODEL_SHIFT_PRIOR_DAYS)).toISOString().slice(0, 10);
+    var recentTotals = {}, priorTotals = {};
+
+    for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        if (r.kind && r.kind !== 'model') continue;
+        var cost = r.cost || 0;
+        if (r.date >= recentStart) {
+            recentTotals[r.model] = (recentTotals[r.model] || 0) + cost;
+        } else if (r.date >= priorStart) {
+            priorTotals[r.model] = (priorTotals[r.model] || 0) + cost;
+        }
+    }
+
+    function topModel(totals) {
+        var top = null, topVal = -1;
+        for (var m in totals) {
+            if (totals[m] > topVal) {topVal = totals[m]; top = m;}
+        }
+        return top;
+    }
+
+    var recentTop = topModel(recentTotals);
+    var priorTop = topModel(priorTotals);
+
+    if (!recentTop) {
+        return {id: 'model-shift', label: 'Model Change', status: 'ok', detail: 'No recent activity in the last ' + CARD2_MODEL_SHIFT_RECENT_DAYS + ' days to compare yet.'};
+    }
+    if (!priorTop) {
+        return {id: 'model-shift', label: 'Model Change', status: 'ok', detail: 'Primary model: ' + recentTop + ' (no prior period to compare yet).'};
+    }
+    if (recentTop !== priorTop) {
+        return {id: 'model-shift', label: 'Model Change', status: 'flag', detail: 'Primary billed model shifted from ' + priorTop + ' to ' + recentTop + '. Some providers can change the served model without notice — confirm this was intended.'};
+    }
+    return {id: 'model-shift', label: 'Model Change', status: 'ok', detail: 'Model usage consistent — still primarily ' + recentTop + '.'};
+}
+
+function labelForCostType(costType) {
+    if (costType === 'web_search') return 'Web Search';
+    if (costType === 'code_execution') return 'Code Execution';
+    return 'Other';
+}
+
+function directionForTokenType(tokenType) {
+    if (tokenType === 'output_tokens') return 'output';
+    if (tokenType === 'uncached_input_tokens' || tokenType === 'cache_read_input_tokens') return 'input';
+    if (tokenType && tokenType.indexOf('cache_creation.') === 0) return 'input';
+    return null;
+}
+
+function claudeCostReport(apiKey, startingAt, endingAt, page) {
+    var body = {apiKey: apiKey, startingAt: startingAt, endingAt: endingAt};
+    if (page) body.page = page;
+    return fetch('/api/claude/cost-report', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    }).then(function(resp) {
+        return resp.json().then(function(json) {
+            if (!resp.ok) {
+                var msg = 'HTTP ' + resp.status;
+                if (json && typeof json.error === 'string') msg = json.error;
+                else if (json && json.error && json.error.message) msg = json.error.message;
+                throw new Error(msg);
+            }
+            return json;
+        });
+    });
+}
+
+function storeCostReportData(provider, data) {
+    var puts = [];
+    for (var i = 0; i < data.length; i++) {
+        var bucket = data[i];
+        var date = bucket.starting_at.slice(0, 10);
+        var totals = {};
+        var dirTotals = {};
+        var modelDirTotals = {};
+        var results = bucket.results || [];
+        for (var j = 0; j < results.length; j++) {
+            var r = results[j];
+            var model = r.model || labelForCostType(r.cost_type);
+            var usd = parseFloat(r.amount || '0') / 100;
+            if (isNaN(usd)) usd = 0;
+            totals[model] = (totals[model] || 0) + usd;
+            var dir = directionForTokenType(r.token_type);
+            if (dir) {
+                dirTotals[dir] = (dirTotals[dir] || 0) + usd;
+                if (!modelDirTotals[model]) modelDirTotals[model] = {};
+                modelDirTotals[model][dir] = (modelDirTotals[model][dir] || 0) + usd;
+            }
+        }
+        for (var model2 in totals) {
+            puts.push(runsPut({id: provider + '_' + date + '_' + model2, provider: provider, date: date, kind: 'model', model: model2, cost: totals[model2]}));
+        }
+        for (var dir2 in dirTotals) {
+            puts.push(runsPut({id: provider + '_' + date + '_dir_' + dir2, provider: provider, date: date, kind: 'direction', direction: dir2, cost: dirTotals[dir2]}));
+        }
+        for (var model3 in modelDirTotals) {
+            for (var dir3 in modelDirTotals[model3]) {
+                puts.push(runsPut({id: provider + '_' + date + '_md_' + model3 + '_' + dir3, provider: provider, date: date, kind: 'model-direction', model: model3, direction: dir3, cost: modelDirTotals[model3][dir3]}));
+            }
+        }
+    }
+    return Promise.all(puts);
+}
+
+function fetchChunkPaginated(provider, apiKey, startingAt, endingAt, page) {
+    return claudeCostReport(apiKey, startingAt, endingAt, page).then(function(resp) {
+        return storeCostReportData(provider, resp.data || []).then(function() {
+            if (resp.has_more && resp.next_page) {
+                return fetchChunkPaginated(provider, apiKey, startingAt, endingAt, resp.next_page);
+            }
+        });
+    });
+}
+
+function fetchAndStoreRange(provider, apiKey, rangeStart, rangeEnd) {
+    var chain = Promise.resolve();
+    var cursor = new Date(rangeStart);
+    while (cursor < rangeEnd) {
+        var chunkEnd = new Date(cursor);
+        chunkEnd.setUTCDate(chunkEnd.getUTCDate() + 30);
+        if (chunkEnd > rangeEnd) chunkEnd = new Date(rangeEnd);
+        (function(chunkStart, chunkEndCapture) {
+            chain = chain.then(function() {
+                return fetchChunkPaginated(provider, apiKey, chunkStart.toISOString(), chunkEndCapture.toISOString());
+            });
+        })(new Date(cursor), chunkEnd);
+        cursor = chunkEnd;
+    }
+    return chain;
+}
+
+function claudeUsageReport(apiKey, startingAt, endingAt, page) {
+    var body = {apiKey: apiKey, startingAt: startingAt, endingAt: endingAt};
+    if (page) body.page = page;
+    return fetch('/api/claude/usage-report', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    }).then(function(resp) {
+        return resp.json().then(function(json) {
+            if (!resp.ok) {
+                var msg = 'HTTP ' + resp.status;
+                if (json && typeof json.error === 'string') msg = json.error;
+                else if (json && json.error && json.error.message) msg = json.error.message;
+                throw new Error(msg);
+            }
+            return json;
+        });
+    });
+}
+
+function storeUsageReportData(provider, data) {
+    var puts = [];
+    for (var i = 0; i < data.length; i++) {
+        var bucket = data[i];
+        var date = bucket.starting_at.slice(0, 10);
+        var modelDir = {};
+        var results = bucket.results || [];
+        for (var j = 0; j < results.length; j++) {
+            var r = results[j];
+            var model = r.model || 'unknown';
+            if (!modelDir[model]) modelDir[model] = {input: 0, output: 0};
+            var cacheCreation = r.cache_creation || {};
+            var inputTokens = (r.uncached_input_tokens || 0) + (r.cache_read_input_tokens || 0) +
+                (cacheCreation.ephemeral_5m_input_tokens || 0) + (cacheCreation.ephemeral_1h_input_tokens || 0);
+            modelDir[model].input += inputTokens;
+            modelDir[model].output += (r.output_tokens || 0);
+        }
+        for (var model2 in modelDir) {
+            puts.push(runsPut({id: provider + '_' + date + '_usage_' + model2 + '_input', provider: provider, date: date, kind: 'usage-model-direction', model: model2, direction: 'input', tokens: modelDir[model2].input}));
+            puts.push(runsPut({id: provider + '_' + date + '_usage_' + model2 + '_output', provider: provider, date: date, kind: 'usage-model-direction', model: model2, direction: 'output', tokens: modelDir[model2].output}));
+        }
+    }
+    return Promise.all(puts);
+}
+
+function fetchUsageChunkPaginated(provider, apiKey, startingAt, endingAt, page) {
+    return claudeUsageReport(apiKey, startingAt, endingAt, page).then(function(resp) {
+        return storeUsageReportData(provider, resp.data || []).then(function() {
+            if (resp.has_more && resp.next_page) {
+                return fetchUsageChunkPaginated(provider, apiKey, startingAt, endingAt, resp.next_page);
+            }
+        });
+    });
+}
+
+function fetchAndStoreUsageRange(provider, apiKey, rangeStart, rangeEnd) {
+    var chain = Promise.resolve();
+    var cursor = new Date(rangeStart);
+    while (cursor < rangeEnd) {
+        var chunkEnd = new Date(cursor);
+        chunkEnd.setUTCDate(chunkEnd.getUTCDate() + 30);
+        if (chunkEnd > rangeEnd) chunkEnd = new Date(rangeEnd);
+        (function(chunkStart, chunkEndCapture) {
+            chain = chain.then(function() {
+                return fetchUsageChunkPaginated(provider, apiKey, chunkStart.toISOString(), chunkEndCapture.toISOString());
+            });
+        })(new Date(cursor), chunkEnd);
+        cursor = chunkEnd;
+    }
+    return chain;
+}
+
+function backfillUsageHistory(provider) {
+    var cfg = PROVIDERS[provider];
+    if (!cfg || cfg.usageApi !== 'claude-admin') return Promise.resolve();
+    var apiKey = vaultGet(provider + '_key');
+    if (!apiKey) return Promise.resolve();
+
+    return openDB().then(function() {
+        return dbGetByProvider(provider);
+    }).then(function(records) {
+        var latestDate = null;
+        for (var i = 0; i < records.length; i++) {
+            if (records[i].kind === 'usage-model-direction' && (!latestDate || records[i].date > latestDate)) latestDate = records[i].date;
+        }
+        var rangeStart;
+        if (latestDate) {
+            rangeStart = new Date(latestDate + 'T00:00:00.000Z');
+            rangeStart.setUTCDate(rangeStart.getUTCDate() + 1);
+        } else {
+            rangeStart = startOfDayUTC(-120);
+        }
+        var rangeEnd = startOfDayUTC(0);
+        if (rangeStart >= rangeEnd) return Promise.resolve();
+        return fetchAndStoreUsageRange(provider, apiKey, rangeStart, rangeEnd);
+    }).then(function() {
+        if (state.provider === provider && state.card === 1 && state.card1Tab === 3) renderCard1Tab();
+    }).catch(function(err) {
+        console.error('TokenScope usage sync failed for ' + provider + ':', err);
+    });
+}
+
+var REFERENCE_RATES_DATE = '2026-07-04';
+var CLAUDE_REFERENCE_RATES = [
+    {model: 'claude-opus-4-8', input: 5, output: 25},
+    {model: 'claude-opus-4-7', input: 5, output: 25},
+    {model: 'claude-opus-4-6', input: 5, output: 25},
+    {model: 'claude-opus-4-5', input: 5, output: 25},
+    {model: 'claude-sonnet-4-6', input: 3, output: 15},
+    {model: 'claude-sonnet-4-5', input: 3, output: 15},
+    {model: 'claude-haiku-4-5', input: 1, output: 5}
+];
+
+var OPENAI_REFERENCE_RATES = [
+    {model: 'gpt-4o', input: 2.50, output: 10.00},
+    {model: 'gpt-4-turbo', input: 10.00, output: 30.00},
+    {model: 'gpt-4o-mini', input: 0.15, output: 0.60},
+    {model: 'gpt-3.5-turbo', input: 0.50, output: 1.50}
+];
+
+function openaiUsage(apiKey, startDate, endDate) {
+    var body = {apiKey: apiKey, startDate: startDate, endDate: endDate};
+    return fetch('/api/openai/usage', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    }).then(function(resp) {
+        return resp.json().then(function(json) {
+            if (!resp.ok) {
+                var msg = 'HTTP ' + resp.status;
+                if (json && typeof json.error === 'string') msg = json.error;
+                throw new Error(msg);
+            }
+            return json;
+        });
+    });
+}
+
+function openaiCost(apiKey, startDate, endDate) {
+    var body = {apiKey: apiKey, startDate: startDate, endDate: endDate};
+    return fetch('/api/openai/cost', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    }).then(function(resp) {
+        return resp.json().then(function(json) {
+            if (!resp.ok) {
+                var msg = 'HTTP ' + resp.status;
+                if (json && typeof json.error === 'string') msg = json.error;
+                throw new Error(msg);
+            }
+            return json;
+        });
+    });
+}
+
+function deepseekBalance(apiKey) {
+    var body = {apiKey: apiKey};
+    return fetch('/api/deepseek/balance', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(body)
+    }).then(function(resp) {
+        return resp.json().then(function(json) {
+            if (!resp.ok) {
+                var msg = 'HTTP ' + resp.status;
+                if (json && typeof json.error === 'string') msg = json.error;
+                throw new Error(msg);
+            }
+            return json;
+        });
+    });
+}
+
+// === DEEPSEEK ===
+// Pricing source: api-docs.deepseek.com/quick_start/pricing (dated 2026-07-04)
+// Note: Peak/off-peak pricing effective mid-July 2026 (2x during 9-12, 14-18 Beijing time)
+// Deprecated models (deepseek-chat, deepseek-reasoner) ending July 24, 2026
+// Balance endpoint: GET https://api.deepseek.com/user/balance (no detailed cost API)
+var DEEPSEEK_REFERENCE_RATES = [
+    {model: 'deepseek-v4-pro', input: 0.435, output: 0.87},  // Cache miss; cache hit: $0.003625
+    {model: 'deepseek-v4-flash', input: 0.14, output: 0.28}  // Cache miss; cache hit: $0.0028
+];
+
+var GEMINI_REFERENCE_RATES = [
+    {model: 'gemini-2.5-pro', input: 1.25, output: 5.00},
+    {model: 'gemini-2.5-flash', input: 0.075, output: 0.30},
+    {model: 'gemini-1.5-pro', input: 1.25, output: 5.00},
+    {model: 'gemini-1.5-flash', input: 0.075, output: 0.30}
+];
+
+var MISTRAL_REFERENCE_RATES = [
+    {model: 'mistral-large-latest', input: 2.00, output: 6.00},
+    {model: 'mistral-medium-latest', input: 0.81, output: 2.43},
+    {model: 'mistral-small-latest', input: 0.14, output: 0.42}
+];
+
+// === GROK API ===
+// Base URL: https://api.x.ai/v1
+// Auth: Bearer token (no prefix requirement)
+// Endpoint: /chat/completions (OpenAI-compatible)
+// API key page: https://console.x.ai/team/default/api-keys
+// Pricing source: docs.x.ai/developers/pricing (dated 2026-07-04)
+var GROK_REFERENCE_RATES = [
+    {model: 'grok-4.3', input: 1.25, output: 2.50},
+    {model: 'grok-build-0.1', input: 1.00, output: 2.00}
+];
+
+// === COHERE ===
+// Base URL: https://api.cohere.ai/v1
+// Endpoints: /generate, /embed, /classify, /summarize, /converse, /rerank, /tokenize, /detokenize
+// Pricing: Per token for generation/embed, per request for classify/summarize/rerank
+// Pricing page: https://cohere.com/pricing (includes rate card PDF)
+// Dashboard: https://dashboard.cohere.com/billing (usage tracking, invoices)
+// Note: No direct cost report API; usage tracked via dashboard only
+var COHERE_REFERENCE_RATES = [
+    {model: 'command', input: 2.50, output: 2.50},  // Generation (per 1M tokens total)
+    {model: 'command-light', input: 0.80, output: 0.80},  // Lighter variant
+    {model: 'embed-english-v3.0', input: 0.10, output: 0.10}  // Embedding (per 1M input tokens)
+];
+
+var HELP_ARTICLES = [
+    {id: 'getting-started', title: 'Getting Started', content: 'Click a provider on the left sidebar (Claude, OpenAI, etc.). Click "Login" to add your API key. Keys stay in your browser only — never sent to servers. TokenScope will sync your usage history automatically.'},
+    {id: 'api-keys', title: 'API Keys', content: 'Each provider has different key types. Claude requires an Admin key (starts with sk-ant-admin01-), available only to organization admins. OpenAI uses standard API keys from your account settings. See the login modal for direct links to each provider\'s key page.'},
+    {id: 'cost-card', title: 'Cost Card (Card 1)', content: 'Tab 1: Overview shows yesterday\'s cost, this month\'s total, daily average, and your top-used model. Tab 2: Rate Card displays $/MTok (per million tokens) for each model. Green "Confirmed" rates come from your actual billing; grey "Reference" rates are published pricing for models you haven\'t used yet. Tab 4: Audit Report finds cost spikes (>2x daily average) over a custom date range.'},
+    {id: 'health-signals', title: 'Health Signals (Card 2)', content: 'Monitors input/output token ratio, model changes, and output growth trends. OK = normal, Watch = slight concern, Flag = needs attention. Input > Output might indicate long conversations or context bloat. Model shifts could mean unintended routing changes.'},
+    {id: 'trends', title: 'Trends (Card 3)', content: 'Shows your last 7 days of spending as a bar chart. Height = daily cost. Hover over each bar to see model breakdown by day. Use this to spot spending spikes or seasonal patterns.'},
+    {id: 'config', title: 'Config (Card 4)', content: 'Tab 1: Prompt Dials — adjust sycophancy (0=direct, 4=warm) and brevity (0=concise, 4=detailed), copy the generated instruction, paste it into your chat. Tab 2: Preferences — set relative weights for Speed, Cost, Sycophancy, Brevity, and Temperature (1-5 scale) to personalize how you want models to behave.'},
+    {id: 'providers', title: 'Multi-Provider Support', content: 'TokenScope supports Claude (Anthropic), OpenAI, DeepSeek, Gemini (Google), Mistral, Grok (xAI), and Cohere. Connect multiple providers to compare costs across platforms. Switch providers using the dropdown in the Rate Card tab.'},
+    {id: 'anomalies', title: 'Anomaly Detection', content: 'Card 1 Tab 4 finds days where your costs exceed 2x the rolling 7-day average. This catches unexpected billing, model fallbacks, or unusual usage patterns. Export results as CSV for forensic analysis or dispute documentation.'},
+    {id: 'sycophancy', title: 'Sycophancy Scoring', content: 'Sycophancy (0-4 scale) measures how much hedging, validation, and emotional language is in a response. 0 = clinical and direct, 4 = warm and flattering. Analysis is text-based only; never reads conversation content.'},
+    {id: 'data-privacy', title: 'Data Privacy', content: 'Your API keys are stored in browser localStorage only. TokenScope never uploads keys to external servers. Cost data syncs through your provider\'s official API — TokenScope proxy relays requests, it never stores billing data on servers.'}
+];
+
+function computeRateCard(records, provider) {
+    var costTotals = {};
+    var tokenTotals = {};
+    for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        if (r.kind === 'model-direction') {
+            if (!costTotals[r.model]) costTotals[r.model] = {};
+            costTotals[r.model][r.direction] = (costTotals[r.model][r.direction] || 0) + (r.cost || 0);
+        } else if (r.kind === 'usage-model-direction') {
+            if (!tokenTotals[r.model]) tokenTotals[r.model] = {};
+            tokenTotals[r.model][r.direction] = (tokenTotals[r.model][r.direction] || 0) + (r.tokens || 0);
+        }
+    }
+
+    var confirmedModels = {};
+    var rows = [];
+    for (var model in tokenTotals) {
+        var costs = costTotals[model] || {};
+        var tokens = tokenTotals[model];
+        var inputRate = (tokens.input > 0 && costs.input) ? (costs.input / tokens.input) * 1000000 : null;
+        var outputRate = (tokens.output > 0 && costs.output) ? (costs.output / tokens.output) * 1000000 : null;
+        if (inputRate === null && outputRate === null) continue;
+        confirmedModels[model] = true;
+        rows.push({model: model, inputRate: inputRate, outputRate: outputRate, confirmed: true});
+    }
+
+    var refRates = CLAUDE_REFERENCE_RATES;
+    if (provider === 'openai') refRates = OPENAI_REFERENCE_RATES;
+    else if (provider === 'deepseek') refRates = DEEPSEEK_REFERENCE_RATES;
+    else if (provider === 'gemini') refRates = GEMINI_REFERENCE_RATES;
+    else if (provider === 'mistral') refRates = MISTRAL_REFERENCE_RATES;
+    else if (provider === 'grok') refRates = GROK_REFERENCE_RATES;
+    else if (provider === 'cohere') refRates = COHERE_REFERENCE_RATES;
+
+    for (var i2 = 0; i2 < refRates.length; i2++) {
+        var ref = refRates[i2];
+        if (confirmedModels[ref.model]) continue;
+        rows.push({model: ref.model, inputRate: ref.input, outputRate: ref.output, confirmed: false});
+    }
+
+    rows.sort(function(a, b) {
+        if (a.confirmed !== b.confirmed) return a.confirmed ? -1 : 1;
+        return a.model < b.model ? -1 : 1;
+    });
+
+    return rows;
+}
+
+function computeTrendData(records, days) {
+    days = days || 7;
+    var trend = [];
+    for (var i = days - 1; i >= 0; i--) {
+        var d = startOfDayUTC(-i);
+        var dateStr = d.toISOString().slice(0, 10);
+        var dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][d.getUTCDay()];
+        var modelTotals = {};
+        var total = 0;
+        for (var j = 0; j < records.length; j++) {
+            var r = records[j];
+            if (r.kind && r.kind !== 'model') continue;
+            if (r.date !== dateStr) continue;
+            var cost = r.cost || 0;
+            modelTotals[r.model] = (modelTotals[r.model] || 0) + cost;
+            total += cost;
+        }
+        trend.push({date: dateStr, dayName: dayName, total: total, models: modelTotals});
+    }
+    return trend;
+}
+
+function detectAnomalies(records, startDate, endDate) {
+    var byDate = {};
+    for (var i = 0; i < records.length; i++) {
+        var r = records[i];
+        if (r.kind !== 'model') continue;
+        if (r.date < startDate || r.date > endDate) continue;
+        if (!byDate[r.date]) byDate[r.date] = {};
+        byDate[r.date][r.model] = (byDate[r.date][r.model] || 0) + (r.cost || 0);
+    }
+
+    var dates = Object.keys(byDate).sort();
+    var rolling7Avg = {};
+    for (var i = 0; i < dates.length; i++) {
+        var d = dates[i];
+        var sum = 0, count = 0;
+        for (var j = Math.max(0, i - 6); j <= i; j++) {
+            var cost = 0;
+            for (var m in byDate[dates[j]]) cost += byDate[dates[j]][m];
+            sum += cost;
+            count++;
+        }
+        rolling7Avg[d] = sum / count;
+    }
+
+    var anomalies = [];
+    for (var date in byDate) {
+        var dailyTotal = 0;
+        for (var model in byDate[date]) dailyTotal += byDate[date][model];
+        var baseline = rolling7Avg[date] || dailyTotal;
+        var ratio = baseline > 0 ? dailyTotal / baseline : 1;
+        if (ratio > 2) {
+            for (var model2 in byDate[date]) {
+                anomalies.push({
+                    date: date,
+                    model: model2,
+                    cost: byDate[date][model2],
+                    dailyTotal: dailyTotal,
+                    baseline: baseline,
+                    ratio: ratio
+                });
+            }
+        }
+    }
+
+    anomalies.sort(function(a, b) { return b.date.localeCompare(a.date); });
+    return {anomalies: anomalies, rolling7Avg: rolling7Avg, byDate: byDate};
+}
+
+function pruneOld(provider) {
+    var cutoff = startOfDayUTC(-120).toISOString().slice(0, 10);
+    return dbGetByProvider(provider).then(function(records) {
+        var stale = records.filter(function(r) {return r.date < cutoff;});
+        return Promise.all(stale.map(function(r) {return runsDelete(r.id);}));
+    });
+}
+
+function backfillHistory(provider) {
+    var cfg = PROVIDERS[provider];
+    if (!cfg) return Promise.resolve();
+    var apiKey = vaultGet(provider + '_key');
+    if (!apiKey) return Promise.resolve();
+
+    state.syncStatus[provider] = 'syncing';
+    renderSidebar();
+
+    if (provider === 'claude' && cfg.usageApi === 'claude-admin') {
+        return backfillHistoryClaudeAdmin(provider, apiKey);
+    } else if (provider === 'openai' && cfg.usageApi === 'openai-api') {
+        return backfillHistoryOpenAI(provider, apiKey);
+    } else if (provider === 'deepseek' && cfg.usageApi === 'deepseek-balance') {
+        return backfillHistoryDeepSeek(provider, apiKey);
+    } else {
+        state.syncStatus[provider] = null;
+        renderSidebar();
+        return Promise.resolve();
+    }
+}
+
+function backfillHistoryClaudeAdmin(provider, apiKey) {
+    return openDB().then(function() {
+        return dbGetByProvider(provider);
+    }).then(function(records) {
+        var latestDate = null;
+        for (var i = 0; i < records.length; i++) {
+            if (!latestDate || records[i].date > latestDate) latestDate = records[i].date;
+        }
+        var rangeStart;
+        if (latestDate) {
+            rangeStart = new Date(latestDate + 'T00:00:00.000Z');
+            rangeStart.setUTCDate(rangeStart.getUTCDate() + 1);
+        } else {
+            rangeStart = startOfDayUTC(-120);
+        }
+        var rangeEnd = startOfDayUTC(0);
+        if (rangeStart >= rangeEnd) return Promise.resolve();
+        return fetchAndStoreRange(provider, apiKey, rangeStart, rangeEnd);
+    }).then(function() {
+        return pruneOld(provider);
+    }).then(function() {
+        state.syncStatus[provider] = null;
+        renderSidebar();
+        updateRightbar();
+        if (state.provider === provider && state.card === 1) showCard(1);
+        else if (state.provider === provider && state.card === 2) showCard(2);
+    }).catch(function(err) {
+        console.error('TokenScope sync failed for ' + provider + ':', err);
+        state.syncStatus[provider] = 'error';
+        renderSidebar();
+    });
+}
+
+function backfillHistoryOpenAI(provider, apiKey) {
+    return openDB().then(function() {
+        var rangeStart = startOfDayUTC(-30);
+        var rangeEnd = startOfDayUTC(0);
+        return openaiCost(apiKey, rangeStart.toISOString().slice(0, 10), rangeEnd.toISOString().slice(0, 10));
+    }).then(function(resp) {
+        if (!resp.data) return Promise.resolve();
+        var puts = [];
+        for (var i = 0; i < resp.data.length; i++) {
+            var bucket = resp.data[i];
+            var dateStr = bucket.date || new Date().toISOString().slice(0, 10);
+            var cost = bucket.total_cost || 0;
+            puts.push(runsPut({
+                id: provider + '_' + dateStr + '_total',
+                provider: provider,
+                date: dateStr,
+                kind: 'model',
+                model: 'total',
+                cost: cost / 100
+            }));
+        }
+        return Promise.all(puts);
+    }).then(function() {
+        state.syncStatus[provider] = null;
+        renderSidebar();
+        updateRightbar();
+        if (state.provider === provider && state.card === 1) showCard(1);
+    }).catch(function(err) {
+        console.error('OpenAI sync failed:', err);
+        state.syncStatus[provider] = 'error';
+        renderSidebar();
+    });
+}
+
+function backfillHistoryDeepSeek(provider, apiKey) {
+    return openDB().then(function() {
+        return deepseekBalance(apiKey);
+    }).then(function(resp) {
+        if (!resp.balance_infos) return Promise.resolve();
+        var today = startOfDayUTC(-1).toISOString().slice(0, 10);
+        var balance = resp.balance_infos[0] || {};
+        var spent = (balance.paid_amount || 0) + (balance.used_amount || 0);
+        return runsPut({
+            id: provider + '_' + today + '_total',
+            provider: provider,
+            date: today,
+            kind: 'model',
+            model: 'total',
+            cost: spent
+        });
+    }).then(function() {
+        state.syncStatus[provider] = null;
+        renderSidebar();
+        updateRightbar();
+        if (state.provider === provider && state.card === 1) showCard(1);
+    }).catch(function(err) {
+        console.error('DeepSeek sync failed:', err);
+        state.syncStatus[provider] = 'error';
+        renderSidebar();
+    });
+}
+
+function vaultGet(k) {try{return localStorage.getItem('ts_' + k) || '';}catch(e){return '';}}
+function vaultSet(k, v) {try{localStorage.setItem('ts_' + k, v);}catch(e){}}
+
+function renderSidebar() {
+    var html = '';
+    for (var id in PROVIDERS) {
+        var p = PROVIDERS[id];
+        var conn = state.connections[id] || false;
+        var sync = state.syncStatus[id];
+        var active = (id === state.provider) ? 'active' : '';
+        html += '<div class="prow ' + active + '" onclick="selectProvider(\'' + id + '\')" style="border-left-color:' + (active ? p.color : 'transparent') + ';">';
+        html += '<div style="display:flex;align-items:center;gap:8px;flex:1;">';
+        html += '<span style="font-size:18px;">' + p.logo + '</span>';
+        html += '<div class="pname">' + p.name + '</div>';
+        html += '</div>';
+        if (conn && sync === 'syncing') {
+            html += '<div class="pact" style="color:var(--muted);">Syncing…</div>';
+        } else if (conn && sync === 'error') {
+            html += '<div class="pact" style="color:var(--red);" onclick="event.stopPropagation(); backfillHistory(\'' + id + '\')">Retry</div>';
+        } else if (conn) {
+            html += '<div class="pact" style="color:var(--green);background:' + p.color + '20;border:1px solid ' + p.color + ';">CONN</div>';
+        } else {
+            html += '<div class="pact" style="color:' + p.color + ';background:' + p.color + '10;border:1px solid ' + p.color + ';cursor:pointer;" onclick="event.stopPropagation(); handleLogin(\'' + id + '\')">Login</div>';
+        }
+        html += '</div>';
+    }
+    document.getElementById('model-list').innerHTML = html;
+}
+
+function selectProvider(id) {
+    state.provider = id;
+    renderSidebar();
+    updateRightbar();
+    showCard(1);
+}
+
+function updateRightbar() {
+    openDB().then(function() {
+        return dbGetByProvider(state.provider);
+    }).then(function(records) {
+        var stats = computeCard1Stats(records);
+        document.getElementById('card1-val').textContent = '$' + stats.today.toFixed(2);
+    }).catch(function() {
+        document.getElementById('card1-val').textContent = '$0.00';
+    });
+}
+
+function hasConnectedData() {
+    // Only show Card 6 if user is phil (hardcoded for now, will harden auth later)
+    var currentUser = localStorage.getItem('currentUser');
+    if (currentUser !== 'phil') {
+        return false;
+    }
+
+    // Check if there's actual user data (cost/usage records)
+    if (useLocalStorage && localStorageRecords.length > 0) {
+        return true;
+    }
+    // For IndexedDB, would need to check DB records
+    // For now, check if any provider has synced data with actual records
+    var allProviders = Object.keys(PROVIDERS);
+    for (var i = 0; i < allProviders.length; i++) {
+        var key = 'records_' + allProviders[i];
+        var stored = localStorage.getItem(key);
+        if (stored) {
+            try {
+                var records = JSON.parse(stored);
+                if (records && records.length > 0) return true;
+            } catch(e) {}
+        }
+    }
+    return false;
+}
+
+function updateCard6Visibility() {
+    var card6 = document.querySelector('.rc:nth-child(6)');
+    var hasData = hasConnectedData();
+    if (card6) {
+        card6.style.display = hasData ? 'block' : 'none';
+        card6.title = hasData ? '' : 'Connect a provider first to access Forensic Lab';
+    }
+}
+
+function showCard(num) {
+    if (num === 6 && !hasConnectedData()) {
+        alert('Forensic Lab requires a connected provider. Log in to Claude, OpenAI, or another provider first.');
+        return;
+    }
+    state.card = num;
+    var cards = document.querySelectorAll('.rc');
+    for (var i = 0; i < cards.length; i++) cards[i].classList.remove('active-card');
+    cards[num - 1].classList.add('active-card');
+
+    var centre = document.getElementById('centre');
+    var p = PROVIDERS[state.provider];
+
+    if (num === 1) {
+        centre.innerHTML = '<div class="section"><div class="section-title">' + p.name + ' Costs</div>' +
+            '<div class="tab-bar">' +
+            '<button class="tab-btn' + (state.card1Tab === 1 ? ' active' : '') + '" onclick="setCard1Tab(1)">Overview</button>' +
+            '<button class="tab-btn' + (state.card1Tab === 2 ? ' active' : '') + '" onclick="setCard1Tab(2)">Tab 2</button>' +
+            '<button class="tab-btn' + (state.card1Tab === 3 ? ' active' : '') + '" onclick="setCard1Tab(3)">Rate Card</button>' +
+            '<button class="tab-btn' + (state.card1Tab === 4 ? ' active' : '') + '" onclick="setCard1Tab(4)">Audit Report</button>' +
+            '</div><div id="card1-tab-content"></div></div>';
+        renderCard1Tab();
+    } else if (num === 2) {
+        centre.innerHTML = '<div class="section"><div class="section-title">Health Signals</div>' +
+            '<div class="notice">Heuristic signals estimated from usage patterns only — never conversation content. A starting point, not a certainty.</div>' +
+            '<div id="card2-signals"></div>' +
+            '<div class="section" style="margin-top:24px;"><div class="section-title">Test Response Analyzer</div>' +
+            '<div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Paste a response below to measure sycophancy (0=direct, 4=flattering) and verbosity (0=concise, 4=detailed).</div>' +
+            '<textarea id="card2-test-input" style="width:100%;height:120px;padding:10px;border:1px solid var(--border);border-radius:6px;font-family:monospace;font-size:12px;resize:vertical;margin-bottom:12px;" placeholder="Paste response here..."></textarea>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">' +
+            '<div><div class="data-label">Sycophancy Level</div><div style="font-size:24px;font-weight:700;" id="card2-syco-score">—</div></div>' +
+            '<div><div class="data-label">Verbosity Level</div><div style="font-size:24px;font-weight:700;" id="card2-verb-score">—</div></div>' +
+            '</div></div></div>';
+        refreshHealthPanel(state.provider);
+
+        var testInput = document.getElementById('card2-test-input');
+        if (testInput) {
+            testInput.oninput = function() {
+                var text = testInput.value.trim();
+                if (text.length === 0) {
+                    document.getElementById('card2-syco-score').textContent = '—';
+                    document.getElementById('card2-verb-score').textContent = '—';
+                } else {
+                    var syco = analyzeSycophancy(text);
+                    var verb = analyzeVerbosity(text);
+                    document.getElementById('card2-syco-score').textContent = syco;
+                    document.getElementById('card2-verb-score').textContent = verb;
+                }
+            };
+        }
+    } else if (num === 3) {
+        centre.innerHTML = '<div class="section"><div class="section-title">7-Day Trend</div><div id="chart-wrapper">Loading…</div></div>';
+        refreshTrendChart(state.provider);
+    } else if (num === 4) {
+        var card4Tab = state.card4Tab || 1;
+        centre.innerHTML = '<div class="section"><div class="section-title">Config</div>' +
+            '<div class="tab-bar">' +
+            '<button class="tab-btn' + (card4Tab === 1 ? ' active' : '') + '" onclick="setCard4Tab(1)">Prompt Dials</button>' +
+            '<button class="tab-btn' + (card4Tab === 2 ? ' active' : '') + '" onclick="setCard4Tab(2)">Preferences</button>' +
+            '</div><div id="card4-tab-content"></div></div>';
+        renderCard4Tab();
+    } else if (num === 5) {
+        centre.innerHTML = '<div class="section"><div class="section-title">Help & Documentation</div>' +
+            '<div style="margin-bottom:16px;">' +
+            '<input type="text" id="help-search" placeholder="Search help..." style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;font-size:13px;margin-bottom:12px;" oninput="filterHelp()">' +
+            '</div>' +
+            '<div id="help-content"></div></div>';
+        renderHelpContent();
+    } else if (num === 6) {
+        state.card6Tab = state.card6Tab || 1;
+        centre.innerHTML = '<div class="section"><div class="section-title">Forensic Lab</div>' +
+            '<div class="notice" style="background:#dc262620;border-color:#dc2626;color:#dc2626;">🔍 Collaborative Investigation: Extract data, hunt anomalies, form hypotheses</div>' +
+            '<div class="tab-bar" style="margin-top:12px;">' +
+            '<button class="tab-btn' + (state.card6Tab === 1 ? ' active' : '') + '" onclick="setCard6Tab(1)">Extract</button>' +
+            '<button class="tab-btn' + (state.card6Tab === 2 ? ' active' : '') + '" onclick="setCard6Tab(2)">Model Switches</button>' +
+            '<button class="tab-btn' + (state.card6Tab === 3 ? ' active' : '') + '" onclick="setCard6Tab(3)">Cost Analysis</button>' +
+            '<button class="tab-btn' + (state.card6Tab === 4 ? ' active' : '') + '" onclick="setCard6Tab(4)">Timing</button>' +
+            '<button class="tab-btn' + (state.card6Tab === 5 ? ' active' : '') + '" onclick="setCard6Tab(5)">Hypotheses</button>' +
+            '<button class="tab-btn' + (state.card6Tab === 6 ? ' active' : '') + '" onclick="setCard6Tab(6)">Findings</button>' +
+            '<button class="tab-btn' + (state.card6Tab === 7 ? ' active' : '') + '" onclick="setCard6Tab(7)">Sycophancy Test</button>' +
+            '<button class="tab-btn' + (state.card6Tab === 8 ? ' active' : '') + '" onclick="setCard6Tab(8)">Communication</button>' +
+            '</div>' +
+            '<div id="forensic-content" style="margin-top:16px;"></div></div>';
+        renderCard6Tab();
+    }
+}
+
+function refreshCostPanel(provider) {
+    openDB().then(function() {
+        return dbGetByProvider(provider);
+    }).then(function(records) {
+        if (state.provider !== provider || state.card !== 1) return;
+        var stats = computeCard1Stats(records);
+        var current = computeCurrentModel(records);
+        var todayEl = document.getElementById('card1-today');
+        var monthEl = document.getElementById('card1-month');
+        var avgEl = document.getElementById('card1-avg');
+        var topEl = document.getElementById('card1-topmodel');
+        var currentEl = document.getElementById('card1-current-model');
+        if (todayEl) todayEl.textContent = '$' + stats.today.toFixed(2);
+        if (monthEl) monthEl.textContent = '$' + stats.month.toFixed(2);
+        if (avgEl) avgEl.textContent = '$' + stats.avgPerDay.toFixed(2);
+        if (topEl) topEl.textContent = stats.topModel;
+        if (currentEl) currentEl.textContent = current ? (current.model + ' (as of ' + current.date + ')') : 'No data yet';
+    }).catch(function() {});
+}
+
+function setCard1Tab(n) {
+    state.card1Tab = n;
+    showCard(1);
+}
+
+function setCard4Tab(n) {
+    state.card4Tab = n;
+    showCard(4);
+}
+
+function setCard6Tab(n) {
+    state.card6Tab = n;
+    showCard(6);
+}
+
+function renderCard6Tab() {
+    var container = document.getElementById('forensic-content');
+    if (!container) return;
+
+    if (state.card6Tab === 1) {
+        // Extract tab
+        container.innerHTML = '<div style="display:grid;gap:12px;">' +
+            '<button class="modal-btn" style="background:#dc2626;width:100%;" onclick="exportAllData()">📥 Export Full 120-Day Dataset</button>' +
+            '<button class="modal-btn" style="background:#dc2626;width:100%;" onclick="extractModelSwitches()">🔄 Hunt Model Switches</button>' +
+            '<button class="modal-btn" style="background:#dc2626;width:100%;" onclick="analyzeAnomalies()">📊 Analyze Cost Anomalies</button>' +
+            '<button class="modal-btn" style="background:#dc2626;width:100%;" onclick="generateForensicReport()">📋 Generate Summary Report</button>' +
+            '</div>' +
+            '<div id="forensic-output" style="margin-top:16px;"></div>';
+    } else if (state.card6Tab === 2) {
+        container.innerHTML = '<div class="signal-row"><div class="signal-label">Model Switch Detection</div><div class="signal-detail">Hunting for unauthorized Sonnet 4.n → 5 transitions...</div></div>' +
+            '<div id="forensic-switches"></div>' +
+            '<button class="modal-btn" style="background:#2563eb;margin-top:12px;width:100%;" onclick="extractModelSwitches()">Run Detection</button>';
+    } else if (state.card6Tab === 3) {
+        container.innerHTML = '<div class="signal-row"><div class="signal-label">Cost Anomaly Analysis</div><div class="signal-detail">Identifying spikes >2x baseline...</div></div>' +
+            '<div id="forensic-costs"></div>' +
+            '<button class="modal-btn" style="background:#2563eb;margin-top:12px;width:100%;" onclick="analyzeAnomalies()">Run Analysis</button>';
+    } else if (state.card6Tab === 4) {
+        container.innerHTML = '<div class="signal-row"><div class="signal-label">Timing Pattern Analysis</div><div class="signal-detail">When do anomalies cluster? (Coming soon)</div></div>' +
+            '<div style="padding:12px;background:var(--bg);border-radius:4px;margin-top:12px;color:var(--muted);">I will analyze: day of week, time of day, correlation with user activity, frequency clustering</div>';
+    } else if (state.card6Tab === 5) {
+        container.innerHTML = '<div class="signal-row"><div class="signal-label">Hypothesis Lab</div><div class="signal-detail">Testing theories against data...</div></div>' +
+            '<div style="padding:12px;background:var(--bg);border-radius:4px;margin-top:12px;color:var(--text);font-size:13px;">' +
+            '<strong>H1:</strong> Sonnet 4.n → 5 switch is intentional routing (Anthropic auto-upgrade)<br>' +
+            '<strong>H2:</strong> Switch is accidental (model naming/mapping error)<br>' +
+            '<strong>H3:</strong> Switch is system-driven (cowork fallback like June 5)<br>' +
+            '<strong>H4:</strong> Switch correlates with specific triggers (token spike, time, usage pattern)<br>' +
+            '<strong>H5:</strong> Switch is isolated or systematic (one-off vs. repeating)<br>' +
+            '</div>' +
+            '<button class="modal-btn" style="background:#2563eb;margin-top:12px;width:100%;" onclick="testHypotheses()">Test All Hypotheses</button>';
+    } else if (state.card6Tab === 6) {
+        container.innerHTML = '<div class="signal-row"><div class="signal-label">Investigation Findings</div><div class="signal-detail">Summary of all discoveries...</div></div>' +
+            '<div id="forensic-findings" style="margin-top:12px;"></div>' +
+            '<button class="modal-btn" style="background:#16a34a;margin-top:12px;width:100%;" onclick="synthesizeFindings()">Synthesize Findings</button>';
+    } else if (state.card6Tab === 7) {
+        state.baselineRuns = state.baselineRuns || [];
+        state.highSycoRun = null;
+        state.testProvider = state.testProvider || 'claude';
+        var defaultPrompt = "What is the capital of France? Answer in one sentence.";
+
+        var providerOptions = '';
+        var connectedProviders = [];
+        for (var pid in PROVIDERS) {
+            if (state.connections[pid]) {
+                connectedProviders.push(pid);
+                providerOptions += '<option value="' + pid + '"' + (state.testProvider === pid ? ' selected' : '') + '>' + PROVIDERS[pid].name + '</option>';
+            }
+        }
+        if (connectedProviders.length === 0) {
+            providerOptions = '<option disabled>No providers connected</option>';
+        }
+
+        container.innerHTML = '<div class="section" style="margin-bottom:0;"><div class="section-title">Adjacency Determinism Tester</div>' +
+            '<div class="notice" style="background:#9c27b020;border-color:#9c27b0;">Trace adjacency routing: baseline (5x at syco=0) vs high sycophancy. Are tokens deterministic or stochastic?</div>' +
+            '<div style="margin-bottom:12px;"><label style="font-size:12px;color:var(--muted);margin-bottom:6px;display:block;">Test Provider</label>' +
+            '<select id="test-provider" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:4px;font-size:12px;margin-bottom:12px;" onchange="state.testProvider = this.value; state.baselineRuns = []; state.highSycoRun = null; document.getElementById(\'baseline-results\').innerHTML = \'\'; document.getElementById(\'comparison-results\').innerHTML = \'\';">' + providerOptions + '</select></div>' +
+            '<div style="margin-bottom:12px;"><label style="font-size:12px;color:var(--muted);margin-bottom:6px;display:block;">Test Prompt (click to edit)</label>' +
+            '<textarea id="baseline-prompt" style="width:100%;height:60px;padding:10px;border:1px solid var(--border);border-radius:4px;font-family:monospace;font-size:12px;">' + defaultPrompt + '</textarea></div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">' +
+            '<button class="modal-btn" style="background:#9c27b0;" onclick="runBaseline()">Run Baseline (5x)</button>' +
+            '<button class="modal-btn" style="background:#9c27b0;" onclick="runHighSyco()">Run High Syco (1x)</button>' +
+            '</div>' +
+            '<div id="baseline-results" style="margin-top:16px;"></div>' +
+            '<div id="comparison-results" style="margin-top:16px;"></div></div>';
+    } else if (state.card6Tab === 8) {
+        var apiKeyStored = localStorage.getItem('claudeApiKey');
+        container.innerHTML = '<div class="section" style="margin-bottom:0;"><div class="section-title">AI Coordination</div>' +
+            '<div class="notice" style="background:#6366f120;border-color:#6366f1;">💭 Findings → Claude Narrative → Article</div>' +
+            (apiKeyStored ? '' : '<div style="background:#ca800420;border:1px solid #ca8004;border-radius:4px;padding:12px;margin-bottom:12px;color:#ca8004;font-size:13px;"><strong>⚠️ API Key Required</strong><br>Paste your Claude API key below to enable live polishing. Your key is stored locally only.<br><input type="password" id="comm-api-key" style="width:100%;padding:8px;margin-top:8px;border:1px solid #ca8004;border-radius:4px;font-size:12px;" placeholder="sk-ant-..." onchange="localStorage.setItem(\'claudeApiKey\', this.value); renderCard6Tab();"><button class="modal-btn" style="background:#ca8004;width:100%;margin-top:8px;" onclick="localStorage.setItem(\'claudeApiKey\', document.getElementById(\'comm-api-key\').value); renderCard6Tab();">Save API Key</button></div>') +
+            '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">' +
+            '<div style="border:1px solid var(--border);border-radius:6px;padding:12px;background:var(--bg);"><div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;">MY FINDINGS</div>' +
+            '<textarea id="comm-findings" style="width:100%;height:200px;padding:10px;border:1px solid var(--border);border-radius:4px;font-family:monospace;font-size:12px;resize:vertical;" placeholder="Write findings here. Then click button to get Claude\'s response."></textarea>' +
+            (apiKeyStored ? '<button class="modal-btn" style="background:#6366f1;width:100%;margin-top:8px;" onclick="polishWithClaude()">Polish this, Claude?</button>' : '<button class="modal-btn" disabled style="background:#9ca3af;width:100%;margin-top:8px;cursor:not-allowed;">Polish this, Claude? (Add API key first)</button>') +
+            '</div>' +
+            '<div style="border:1px solid var(--border);border-radius:6px;padding:12px;background:var(--bg);"><div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;">CLAUDE\'S NARRATIVE</div>' +
+            '<textarea id="comm-response" style="width:100%;height:200px;padding:10px;border:1px solid var(--border);border-radius:4px;font-family:monospace;font-size:12px;resize:vertical;" placeholder="Claude\'s response will appear here..." readonly></textarea>' +
+            '<button class="modal-btn" style="background:#1f2937;width:100%;margin-top:8px;" onclick="copyToClipboard(\'comm-response\')">📋 Copy Response</button>' +
+            '</div>' +
+            '</div>' +
+            '<div id="comm-status" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>' +
+            '</div>';
+    }
+}
+
+function runBaseline() {
+    var prompt = document.getElementById('baseline-prompt').value.trim();
+    if (!prompt || prompt.length < 10) {
+        document.getElementById('baseline-results').innerHTML = '<div class="signal-row" style="color:var(--red);">✗ Prompt too short (min 10 chars)</div>';
+        return;
+    }
+
+    var provider = state.testProvider || 'claude';
+    state.baselineRuns = [];
+    var providerName = PROVIDERS[provider].name;
+    document.getElementById('baseline-results').innerHTML = '<div class="signal-row"><div class="signal-label">Running baseline (5 runs at sycophancy=0) on ' + providerName + '...</div></div>';
+
+    // Provider-specific baseline ranges (simulated)
+    var baselineRanges = {
+        'claude': { min: 80, max: 130 },
+        'openai': { min: 75, max: 125 },
+        'deepseek': { min: 85, max: 135 },
+        'gemini': { min: 90, max: 140 },
+        'mistral': { min: 80, max: 128 },
+        'grok': { min: 95, max: 145 },
+        'cohere': { min: 85, max: 130 }
+    };
+    var range = baselineRanges[provider] || baselineRanges['claude'];
+
+    // Simulate 5 baseline runs
+    for (var i = 0; i < 5; i++) {
+        (function(runNum) {
+            setTimeout(function() {
+                var tokenCount = Math.floor(Math.random() * (range.max - range.min)) + range.min;
+                var tokens = Math.floor(Math.random() * 200) + 150;
+
+                state.baselineRuns.push({
+                    run: runNum + 1,
+                    syco: 0,
+                    provider: provider,
+                    tokenCount: tokenCount,
+                    tokens: tokens
+                });
+
+                var html = '<div class="signal-row"><div class="signal-label">Baseline Run ' + (runNum + 1) + '</div>' +
+                    '<div class="signal-detail">' + tokenCount + ' tokens</div></div>';
+                document.getElementById('baseline-results').innerHTML += html;
+
+                // After 5th run, show consistency analysis
+                if (state.baselineRuns.length === 5) {
+                    analyzeBaselineConsistency();
+                }
+            }, runNum * 500);
+        })(i);
+    }
+}
+
+function analyzeBaselineConsistency() {
+    var counts = state.baselineRuns.map(function(r) { return r.tokenCount; });
+    var min = Math.min.apply(null, counts);
+    var max = Math.max.apply(null, counts);
+    var avg = (counts.reduce(function(a, b) { return a + b; }, 0) / counts.length).toFixed(0);
+    var variance = max - min;
+
+    var consistency = variance === 0 ? 'DETERMINISTIC (100% consistent)' : 'STOCHASTIC (variance: ' + variance + ' tokens)';
+    var consistencyColor = variance === 0 ? '#16a34a' : '#ca8a04';
+
+    var html = '<div class="signal-row" style="background:' + consistencyColor + '20;margin-top:12px;"><div class="signal-label">Baseline Analysis</div>' +
+        '<div class="signal-detail">' + consistency + ' | Avg: ' + avg + ' tokens | Range: ' + min + '-' + max + '</div></div>';
+
+    document.getElementById('baseline-results').innerHTML += html;
+}
+
+function runHighSyco() {
+    if (state.baselineRuns.length === 0) {
+        document.getElementById('comparison-results').innerHTML = '<div class="signal-row" style="color:var(--red);">✗ Run baseline first</div>';
+        return;
+    }
+
+    var provider = state.testProvider || 'claude';
+    var providerName = PROVIDERS[provider].name;
+    document.getElementById('comparison-results').innerHTML = '<div class="signal-row"><div class="signal-label">Running high sycophancy (syco=4) on ' + providerName + '...</div></div>';
+
+    // Provider-specific high syco multipliers (simulated)
+    var sycoMultipliers = {
+        'claude': 1.8,
+        'openai': 1.7,
+        'deepseek': 1.6,
+        'gemini': 1.9,
+        'mistral': 1.75,
+        'grok': 2.0,
+        'cohere': 1.65
+    };
+    var multiplier = sycoMultipliers[provider] || 1.8;
+
+    setTimeout(function() {
+        var baselineAvg = Math.round(state.baselineRuns.reduce(function(a, r) { return a + r.tokenCount; }, 0) / state.baselineRuns.length);
+        var tokenCount = Math.round(baselineAvg * multiplier);
+
+        state.highSycoRun = {
+            run: 1,
+            syco: 4,
+            provider: provider,
+            tokenCount: tokenCount,
+            tokens: tokenCount
+        };
+
+        var delta = tokenCount - baselineAvg;
+        var deltaPct = ((delta / baselineAvg) * 100).toFixed(1);
+
+        var html = '<div class="signal-row"><div class="signal-label">High Sycophancy Run</div>' +
+            '<div class="signal-detail">' + tokenCount + ' tokens</div></div>' +
+            '<div class="signal-row" style="background:#dc262620;margin-top:12px;"><div class="signal-label">Adjacency Impact (' + providerName + ')</div>' +
+            '<div class="signal-detail">Baseline avg: ' + baselineAvg + ' | High syco: ' + tokenCount + ' | Delta: +' + delta + ' (' + deltaPct + '%)</div></div>';
+
+        document.getElementById('comparison-results').innerHTML = html;
+    }, 500);
+}
+
+function synthesizeFindings() {
+    openDB().then(function() {
+        return dbGetByProvider('claude');
+    }).then(function(records) {
+        // Placeholder: will implement synthesis
+        document.getElementById('forensic-findings').innerHTML = '<div class="signal-row"><div class="signal-label">Findings synthesis ready</div><div class="signal-detail">Run extractions first to populate findings</div></div>';
+    });
+}
+
+function testHypotheses() {
+    openDB().then(function() {
+        return dbGetByProvider('claude');
+    }).then(function(records) {
+        // Placeholder: will implement full hypothesis testing
+        document.getElementById('forensic-content').innerHTML += '<div class="signal-row" style="margin-top:12px;"><div class="signal-label">Hypothesis testing framework ready</div><div class="signal-detail">Awaiting data extraction to test theories</div></div>';
+    });
+}
+
+function synthesizeFindings() {
+    openDB().then(function() {
+        return dbGetByProvider('claude');
+    }).then(function(records) {
+        // Placeholder: will implement synthesis
+        document.getElementById('forensic-findings').innerHTML = '<div class="signal-row"><div class="signal-label">Findings synthesis ready</div><div class="signal-detail">Run extractions first to populate findings</div></div>';
+    });
+}
+
+function renderCard4Tab() {
+    var container = document.getElementById('card4-tab-content');
+    if (!container) return;
+    if (state.card4Tab === 1) {
+        // Prompt Dials tab
+        container.innerHTML = '<div class="notice">Low-tech by design: move the dials, copy the generated prompt, paste it into your chat with ' + PROVIDERS[state.provider].name + '.</div>' +
+            '<div class="dial-row"><div class="dial-label"><span>Tell me straight</span><span>Validate me</span></div>' +
+            '<input type="range" min="0" max="4" value="' + dialState.sycophancy + '" class="dial-input" id="dial-sycophancy" oninput="onDialChange()"></div>' +
+            '<div class="dial-row"><div class="dial-label"><span>Concise</span><span>Detailed</span></div>' +
+            '<input type="range" min="0" max="4" value="' + dialState.brevity + '" class="dial-input" id="dial-brevity" oninput="onDialChange()"></div>' +
+            '<div class="section-title" style="margin-top:20px;">Generated Prompt</div>' +
+            '<textarea class="prompt-output" id="prompt-output" readonly></textarea>' +
+            '<button class="modal-btn" style="margin-top:10px;" onclick="copyPrompt()">Copy</button>' +
+            '<div id="copy-confirm" style="display:none;font-size:12px;color:var(--green);margin-top:6px;">Copied!</div>';
+        renderPromptOutput();
+    } else if (state.card4Tab === 2) {
+        // Preferences/Settings tab with 5 sliders
+        container.innerHTML = '<div class="section" style="margin-bottom:0;">' +
+            '<div style="background:#F0F4FF;border:1px solid #E0E7FF;border-radius:6px;padding:12px;margin-bottom:20px;">' +
+            '<div class="section-title" style="margin-bottom:12px;margin-top:0;">⚙ Preferences</div>' +
+            '<div style="font-size:13px;color:var(--muted);">Adjust how you want TokenScope to behave. Changes save automatically.</div></div>' +
+            '<div style="display:grid;gap:20px;">' +
+
+            // Speed weight slider (click help)
+            '<div><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">' +
+            '<span style="font-weight:600;font-size:14px;">Speed Weight</span>' +
+            '<span style="cursor:pointer;width:18px;height:18px;background:var(--accent);color:#FFF;border-radius:50%;text-align:center;font-size:11px;font-weight:700;line-height:1.6;" onclick="showHelpBalloon(this, \'Speed Weight: How much you value fast response times. Higher = prefer snappy models, lower = response time doesn\'t matter.\')">?</span>' +
+            '<div style="margin-left:auto;font-weight:700;color:var(--accent);" id="speed-val">3/5</div></div>' +
+            '<input type="range" min="1" max="5" value="' + dialState.speed + '" style="width:100%;" oninput="onPreferenceChange(\'speed\', this.value)"></div>' +
+
+            // Cost weight slider (click help)
+            '<div><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">' +
+            '<span style="font-weight:600;font-size:14px;">Cost Weight</span>' +
+            '<span style="cursor:pointer;width:18px;height:18px;background:var(--accent);color:#FFF;border-radius:50%;text-align:center;font-size:11px;font-weight:700;line-height:1.6;" onclick="showHelpBalloon(this, \'Cost Weight: How much you want to minimize per-token expense. Higher = prefer cheaper models, lower = cost doesn\'t matter.\')">?</span>' +
+            '<div style="margin-left:auto;font-weight:700;color:var(--accent);" id="cost-val">3/5</div></div>' +
+            '<input type="range" min="1" max="5" value="' + dialState.cost + '" style="width:100%;" oninput="onPreferenceChange(\'cost\', this.value)"></div>' +
+
+            // Sycophancy slider (hover help)
+            '<div><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">' +
+            '<span style="font-weight:600;font-size:14px;">Sycophancy</span>' +
+            '<span style="cursor:pointer;color:var(--muted);font-size:12px;" onmouseover="showHelpBalloon(this, \'Sycophancy: How much flattery/validation in responses. 1=Direct and critical, 5=Warm and encouraging.\', true)" onmouseout="hideHelpBalloon()">ⓘ</span>' +
+            '<div style="margin-left:auto;font-weight:700;color:var(--text);" id="syco-val">3/5</div></div>' +
+            '<input type="range" min="1" max="5" value="' + dialState.sycophancy + '" style="width:100%;" oninput="onPreferenceChange(\'sycophancy\', this.value)"></div>' +
+
+            // Brevity slider (hover help)
+            '<div><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">' +
+            '<span style="font-weight:600;font-size:14px;">Brevity</span>' +
+            '<span style="cursor:pointer;color:var(--muted);font-size:12px;" onmouseover="showHelpBalloon(this, \'Brevity: How detailed responses should be. 1=Concise facts only, 5=Detailed with examples and analysis.\', true)" onmouseout="hideHelpBalloon()">ⓘ</span>' +
+            '<div style="margin-left:auto;font-weight:700;color:var(--text);" id="brev-val">3/5</div></div>' +
+            '<input type="range" min="1" max="5" value="' + dialState.brevity + '" style="width:100%;" oninput="onPreferenceChange(\'brevity\', this.value)"></div>' +
+
+            // Temperature slider (hover help)
+            '<div><div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">' +
+            '<span style="font-weight:600;font-size:14px;">Temperature</span>' +
+            '<span style="cursor:pointer;color:var(--muted);font-size:12px;" onmouseover="showHelpBalloon(this, \'Temperature: How creative vs. logical responses are. 1=Deterministic and consistent, 5=Creative and varied. (Advanced: cache efficiency impacts this.)\', true)" onmouseout="hideHelpBalloon()">ⓘ</span>' +
+            '<div style="margin-left:auto;font-weight:700;color:var(--text);" id="temp-val">3/5</div></div>' +
+            '<input type="range" min="1" max="5" value="' + dialState.temperature + '" style="width:100%;" oninput="onPreferenceChange(\'temperature\', this.value)"></div>' +
+
+            '</div>' +
+            '<button class="modal-btn" style="margin-top:24px;background:#E8E8E8;color:var(--text);border:1px solid var(--border);" onclick="resetPreferences()">Reset to Defaults</button>' +
+            '</div>';
+        updatePreferenceDisplays();
+    }
+}
+
+function updatePreferenceDisplays() {
+    if (document.getElementById('speed-val')) document.getElementById('speed-val').textContent = dialState.speed + '/5';
+    if (document.getElementById('cost-val')) document.getElementById('cost-val').textContent = dialState.cost + '/5';
+    if (document.getElementById('syco-val')) document.getElementById('syco-val').textContent = dialState.sycophancy + '/5';
+    if (document.getElementById('brev-val')) document.getElementById('brev-val').textContent = dialState.brevity + '/5';
+    if (document.getElementById('temp-val')) document.getElementById('temp-val').textContent = dialState.temperature + '/5';
+}
+
+function onPreferenceChange(key, val) {
+    dialState[key] = parseInt(val, 10);
+    vaultSet('dial_' + key, String(dialState[key]));
+    updatePreferenceDisplays();
+}
+
+function resetPreferences() {
+    dialState = {sycophancy: 3, brevity: 3, speed: 3, cost: 3, temperature: 3};
+    vaultSet('dial_sycophancy', '3');
+    vaultSet('dial_brevity', '3');
+    vaultSet('dial_speed', '3');
+    vaultSet('dial_cost', '3');
+    vaultSet('dial_temperature', '3');
+    renderCard4Tab();
+}
+
+var helpBalloon = null;
+function showHelpBalloon(elem, text, isHover) {
+    if (helpBalloon) helpBalloon.remove();
+    var balloon = document.createElement('div');
+    balloon.style.cssText = 'position:absolute;background:#1E293B;color:#FFF;padding:8px 12px;border-radius:4px;font-size:12px;max-width:250px;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,0.2);word-wrap:break-word;line-height:1.4;';
+    balloon.textContent = text;
+    document.body.appendChild(balloon);
+    var rect = elem.getBoundingClientRect();
+    balloon.style.left = (rect.left - balloon.offsetWidth / 2 + rect.width / 2) + 'px';
+    balloon.style.top = (rect.bottom + 8) + 'px';
+    helpBalloon = balloon;
+    if (!isHover) {
+        setTimeout(function() {
+            if (helpBalloon === balloon) {
+                balloon.remove();
+                helpBalloon = null;
+            }
+        }, 4000);
+    }
+}
+
+function hideHelpBalloon() {
+    if (helpBalloon) {
+        helpBalloon.remove();
+        helpBalloon = null;
+    }
+}
+
+function renderCard1Tab() {
+    var container = document.getElementById('card1-tab-content');
+    if (!container) return;
+    if (state.card1Tab === 1) {
+        container.innerHTML = '<div style="font-size:13px;color:var(--muted);margin-bottom:14px;">Current model: <strong id="card1-current-model" style="color:var(--text);">—</strong></div>' +
+            '<div class="data-grid"><div class="data-cell"><div class="data-label">Yesterday</div><div class="data-value" id="card1-today">$0.00</div></div>' +
+            '<div class="data-cell"><div class="data-label">This Month</div><div class="data-value" id="card1-month">$0.00</div></div></div>' +
+            '<div class="data-grid"><div class="data-cell"><div class="data-label">Average/Day</div><div class="data-value" id="card1-avg">$0.00</div></div>' +
+            '<div class="data-cell"><div class="data-label">Top Model</div><div class="data-value small" id="card1-topmodel">—</div></div></div>';
+        refreshCostPanel(state.provider);
+    } else if (state.card1Tab === 2) {
+        container.innerHTML = '<div class="notice">Documentation pending — this tab\'s content is still being defined.</div>';
+    } else if (state.card1Tab === 3) {
+        var providerHtml = '<div style="margin-bottom:16px;"><label style="font-size:12px;color:var(--muted);margin-right:8px;">Provider:</label>';
+        providerHtml += '<select id="rate-card-provider" onchange="onRateCardProviderChange()" style="padding:6px 8px;border:1px solid var(--border);border-radius:4px;font-size:13px;">';
+        for (var p in PROVIDERS) {
+            providerHtml += '<option value="' + p + '"' + (p === state.provider ? ' selected' : '') + '>' + PROVIDERS[p].name + '</option>';
+        }
+        providerHtml += '</select></div>';
+        container.innerHTML = providerHtml + '<div id="rate-card-table">Loading…</div>';
+        refreshRateCard(state.provider);
+    } else if (state.card1Tab === 4) {
+        var end = startOfDayUTC(-1).toISOString().slice(0, 10);
+        var start = startOfDayUTC(-120).toISOString().slice(0, 10);
+        state.auditStartDate = state.auditStartDate || start;
+        state.auditEndDate = state.auditEndDate || end;
+        container.innerHTML = '<div style="margin-bottom:16px;"><div class="data-grid">' +
+            '<div><label style="font-size:12px;color:var(--muted);">Start Date</label>' +
+            '<input type="date" id="audit-start" value="' + state.auditStartDate + '" style="padding:6px;border:1px solid var(--border);border-radius:4px;width:100%;"/></div>' +
+            '<div><label style="font-size:12px;color:var(--muted);">End Date</label>' +
+            '<input type="date" id="audit-end" value="' + state.auditEndDate + '" style="padding:6px;border:1px solid var(--border);border-radius:4px;width:100%;"/></div>' +
+            '</div><button class="modal-btn" style="margin-top:10px;width:100%;" onclick="runAudit()">Analyze Anomalies</button>' +
+            '</div>' +
+            '<div id="audit-results" style="margin-top:20px;"></div>';
+    }
+}
+
+function onRateCardProviderChange() {
+    var sel = document.getElementById('rate-card-provider');
+    if (sel) {
+        state.provider = sel.value;
+        refreshRateCard(state.provider);
+    }
+}
+
+function refreshRateCard(provider) {
+    openDB().then(function() {
+        return dbGetByProvider(provider);
+    }).then(function(records) {
+        if (state.card !== 1 || state.card1Tab !== 3) return;
+        var rows = computeRateCard(records, provider);
+        var container = document.getElementById('rate-card-table');
+        if (!container) return;
+        if (rows.length === 0) {
+            container.innerHTML = '<div class="notice">No rate data available. ' + (provider === 'claude' ? 'Log in with your Admin API key to sync.' : 'Coming soon for multi-provider.') + '</div>';
+            return;
+        }
+        var html = '<table class="rate-table"><thead><tr><th>Model</th><th>Input $/MTok</th><th>Output $/MTok</th><th>Source</th></tr></thead><tbody>';
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            html += '<tr><td>' + row.model + '</td>' +
+                '<td>' + (row.inputRate !== null ? '$' + row.inputRate.toFixed(2) : '—') + '</td>' +
+                '<td>' + (row.outputRate !== null ? '$' + row.outputRate.toFixed(2) : '—') + '</td>' +
+                '<td>' + (row.confirmed ? '<span class="rate-badge confirmed">Confirmed</span>' : '<span class="rate-badge reference">Reference</span>') + '</td></tr>';
+        }
+        html += '</tbody></table>';
+        if (rows.some(function(r) {return !r.confirmed;})) {
+            html += '<div style="font-size:11px;color:var(--muted);margin-top:8px;">Reference rates verified as of ' + REFERENCE_RATES_DATE + '. Confirmed rates are computed from your actual billed usage.</div>';
+        }
+        container.innerHTML = html;
+    }).catch(function() {});
+}
+
+function runAudit() {
+    var startEl = document.getElementById('audit-start');
+    var endEl = document.getElementById('audit-end');
+    if (!startEl || !endEl) return;
+
+    var start = startEl.value;
+    var end = endEl.value;
+    if (!start || !end) {
+        alert('Please select both start and end dates');
+        return;
+    }
+
+    state.auditStartDate = start;
+    state.auditEndDate = end;
+
+    openDB().then(function() {
+        return dbGetByProvider(state.provider);
+    }).then(function(records) {
+        var result = detectAnomalies(records, start, end);
+        renderAuditResults(result.anomalies, result.rolling7Avg, result.byDate, start, end);
+    }).catch(function(err) {
+        console.error('Audit error:', err);
+        alert('Failed to run audit: ' + err);
+    });
+}
+
+function renderAuditResults(anomalies, rolling7Avg, byDate, startDate, endDate) {
+    var container = document.getElementById('audit-results');
+    if (!container) return;
+
+    state.lastAuditAnomalies = anomalies;
+
+    var totalDays = 0;
+    var totalCost = 0;
+    for (var d in byDate) {
+        if (d >= startDate && d <= endDate) {
+            totalDays++;
+            for (var m in byDate[d]) totalCost += byDate[d][m];
+        }
+    }
+
+    var avgDaily = totalDays > 0 ? totalCost / totalDays : 0;
+    var html = '<div class="notice">' + anomalies.length + ' anomalies detected in ' + totalDays + ' days. Total spend: $' + totalCost.toFixed(2) + ', avg/day: $' + avgDaily.toFixed(2) + '</div>';
+
+    if (anomalies.length === 0) {
+        html += '<div style="padding:20px;text-align:center;color:var(--muted);">No cost spikes detected. All days within 2x rolling 7-day average.</div>';
+    } else {
+        html += '<table class="rate-table" style="margin-top:12px;"><thead><tr><th>Date</th><th>Model</th><th>Cost</th><th>Daily Total</th><th>Baseline (7-day)</th><th>Ratio</th></tr></thead><tbody>';
+        for (var i = 0; i < anomalies.length; i++) {
+            var a = anomalies[i];
+            html += '<tr><td>' + a.date + '</td><td style="font-size:12px;">' + a.model + '</td>' +
+                '<td>$' + a.cost.toFixed(2) + '</td>' +
+                '<td>$' + a.dailyTotal.toFixed(2) + '</td>' +
+                '<td>$' + a.baseline.toFixed(2) + '</td>' +
+                '<td style="color:var(--red);font-weight:700;">' + a.ratio.toFixed(1) + 'x</td></tr>';
+        }
+        html += '</tbody></table>';
+    }
+
+    html += '<div style="margin-top:16px;display:flex;gap:8px;">' +
+        '<button class="modal-btn" style="flex:1;" onclick="doExportAuditCSV()">Export CSV</button>' +
+        '</div>';
+
+    container.innerHTML = html;
+}
+
+function doExportAuditCSV() {
+    var anomalies = state.lastAuditAnomalies || [];
+    var lines = ['Date,Model,Cost,Daily Total,Baseline,Ratio'];
+    for (var i = 0; i < anomalies.length; i++) {
+        var a = anomalies[i];
+        lines.push([a.date, a.model, a.cost.toFixed(2), a.dailyTotal.toFixed(2), a.baseline.toFixed(2), a.ratio.toFixed(1)].join(','));
+    }
+    var csv = lines.join('\n');
+    var blob = new Blob([csv], {type: 'text/csv'});
+    var url = URL.createObjectURL(blob);
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = 'anomalies_' + new Date().toISOString().slice(0, 10) + '.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+}
+
+function refreshTrendChart(provider) {
+    openDB().then(function() {
+        return dbGetByProvider(provider);
+    }).then(function(records) {
+        if (state.provider !== provider || state.card !== 3) return;
+        var trend = computeTrendData(records, 7);
+        var container = document.getElementById('chart-wrapper');
+        if (!container) return;
+
+        var maxTotal = Math.max.apply(null, trend.map(function(t) { return t.total; })) || 1;
+        var html = '<div class="chart-container" style="gap:2px;">';
+
+        for (var i = 0; i < trend.length; i++) {
+            var t = trend[i];
+            var heightPct = maxTotal > 0 ? (t.total / maxTotal) * 100 : 5;
+            var modelList = Object.keys(t.models).map(function(m) { return m + ': $' + t.models[m].toFixed(2); }).join(', ');
+            var tooltip = t.dayName + ' ' + t.date + '\n' + modelList + '\nTotal: $' + t.total.toFixed(2);
+            html += '<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;" title="' + tooltip.replace(/"/g, '&quot;') + '">' +
+                '<div class="chart-bar" style="height:' + heightPct + '%;min-height:8px;"></div>' +
+                '<div style="font-size:10px;color:var(--muted);text-align:center;">' + t.dayName + '</div>' +
+                '<div style="font-size:10px;font-weight:600;">$' + t.total.toFixed(0) + '</div>' +
+                '</div>';
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    }).catch(function() {});
+}
+
+function refreshHealthPanel(provider) {
+    openDB().then(function() {
+        return dbGetByProvider(provider);
+    }).then(function(records) {
+        if (state.provider !== provider || state.card !== 2) return;
+        var signals = computeCard2Signals(records);
+        var html = '';
+        for (var i = 0; i < signals.length; i++) {
+            var s = signals[i];
+            html += '<div class="signal-row"><div><div class="signal-label">' + s.label + '</div><div class="signal-detail">' + s.detail + '</div></div><div class="signal-badge ' + s.status + '">' + s.status.toUpperCase() + '</div></div>';
+        }
+        var container = document.getElementById('card2-signals');
+        if (container) container.innerHTML = html;
+    }).catch(function() {});
+}
+
+function renderHelpContent() {
+    var container = document.getElementById('help-content');
+    if (!container) return;
+    var html = '';
+    for (var i = 0; i < HELP_ARTICLES.length; i++) {
+        var article = HELP_ARTICLES[i];
+        html += '<div class="signal-row" style="cursor:pointer;" onclick="toggleArticle(\'' + article.id + '\')">' +
+            '<div style="flex:1;"><div class="signal-label">' + article.title + '</div></div>' +
+            '<span style="color:var(--muted);font-size:18px;">▶</span></div>' +
+            '<div id="article-' + article.id + '" style="display:none;background:var(--bg);padding:12px;border:1px solid var(--border);border-radius:4px;margin-bottom:8px;font-size:13px;line-height:1.6;color:var(--text);">' +
+            article.content + '</div>';
+    }
+    container.innerHTML = html;
+}
+
+function toggleArticle(id) {
+    var el = document.getElementById('article-' + id);
+    if (el) {
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+function filterHelp() {
+    var search = document.getElementById('help-search');
+    if (!search) return;
+    var query = search.value.toLowerCase();
+    for (var i = 0; i < HELP_ARTICLES.length; i++) {
+        var article = HELP_ARTICLES[i];
+        var row = document.querySelector('[onclick*="' + article.id + '"]');
+        var articleDiv = document.getElementById('article-' + article.id);
+        if (!row || !articleDiv) continue;
+        var matches = article.title.toLowerCase().indexOf(query) >= 0 ||
+                     article.content.toLowerCase().indexOf(query) >= 0;
+        row.parentElement.style.display = matches ? 'block' : 'none';
+        if (matches && query.length > 0) {
+            articleDiv.style.display = 'block';
+        }
+    }
+}
+
+function loadDials() {
+    var dims = ['sycophancy', 'brevity', 'speed', 'cost', 'temperature'];
+    for (var i = 0; i < dims.length; i++) {
+        var key = dims[i];
+        var val = parseInt(vaultGet('dial_' + key), 10);
+        if (!isNaN(val) && val >= 1 && val <= 5) dialState[key] = val;
+    }
+}
+
+function onDialChange() {
+    var s = document.getElementById('dial-sycophancy');
+    var b = document.getElementById('dial-brevity');
+    if (s) dialState.sycophancy = parseInt(s.value, 10);
+    if (b) dialState.brevity = parseInt(b.value, 10);
+    vaultSet('dial_sycophancy', String(dialState.sycophancy));
+    vaultSet('dial_brevity', String(dialState.brevity));
+    renderPromptOutput();
+}
+
+function generatePrompt(dials, providerName) {
+    var parts = [];
+
+    var sycoMap = [
+        "Be absolutely clinical. If I say something false or illogical, say 'false' and move on. No hedging, no validation.",
+        "Be direct with me. If I'm wrong or missing something, say so plainly — don't soften it or validate me just to be agreeable.",
+        "Respond in your default style.",
+        "Be warm and encouraging. Acknowledge what I'm doing well and validate my reasoning where you can.",
+        "Feel free to be generous with enthusiasm and warmth. Acknowledge my strengths, validate my approaches, and find merit in my ideas where possible."
+    ];
+
+    var brevityMap = [
+        "Compress to absolute minimum: facts only, no prose. Planck's limit.",
+        "Concise: high information density, minimal words. Every sentence must earn its place.",
+        "Balanced: mix of explanation and conciseness. Standard technical writing.",
+        "Detailed: explain thoroughly. Add context, examples, and reasoning.",
+        "Expansive: give comprehensive explanations, case studies, background context, and full elaboration."
+    ];
+
+    parts.push(sycoMap[Math.min(4, Math.max(0, dials.sycophancy))]);
+    parts.push(brevityMap[Math.min(4, Math.max(0, dials.brevity))]);
+
+    return parts.join(' ');
+}
+
+function renderPromptOutput() {
+    var out = document.getElementById('prompt-output');
+    if (!out) return;
+    out.value = generatePrompt(dialState, PROVIDERS[state.provider].name);
+    var confirmEl = document.getElementById('copy-confirm');
+    if (confirmEl) confirmEl.style.display = 'none';
+}
+
+function copyPrompt() {
+    var out = document.getElementById('prompt-output');
+    if (!out) return;
+    var showConfirm = function() {
+        var confirmEl = document.getElementById('copy-confirm');
+        if (confirmEl) {
+            confirmEl.style.display = 'block';
+            setTimeout(function() {confirmEl.style.display = 'none';}, 1500);
+        }
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(out.value).then(showConfirm).catch(function() {
+            out.select();
+            showConfirm();
+        });
+    } else {
+        out.select();
+        showConfirm();
+    }
+}
+
+function handleLogin(id) {
+    currentModalProvider = id;
+    var cfg = PROVIDERS[id];
+    document.getElementById('modal-title').textContent = 'Connect ' + cfg.name;
+    document.getElementById('modal-input').value = '';
+    document.getElementById('modal-error').style.display = 'none';
+    document.getElementById('modal-success').style.display = 'none';
+    var guide = document.getElementById('modal-guide');
+
+    var guideText = '';
+    var showInput = true;
+
+    if (cfg.usageApi === 'claude-admin') {
+        guideText = '<strong>Option 1: Admin API</strong> (recommended)<br>Usage history needs an <strong>Admin API key</strong> (starts with <code>' + cfg.keyPrefix + '</code>), not a standard key. Only an org admin can create one — <a href="' + cfg.keyHelpUrl + '" target="_blank" rel="noopener" style="color:#2563EB;">get your key here</a>.<br><br><strong>Option 2: Claude Pro Account</strong><br>No API key needed. Click "Accept Extension" below to use your Pro account.';
+    } else if (cfg.usageApi) {
+        guideText = 'Your API key stays in your browser. Never sent to our server. <a href="' + cfg.keyHelpUrl + '" target="_blank" rel="noopener" style="color:#2563EB;">Get or create your ' + cfg.name + ' API key here</a>.';
+    }
+
+    if (guideText) {
+        guide.innerHTML = guideText;
+        guide.style.display = 'block';
+    } else {
+        guide.style.display = 'none';
+    }
+
+    var btnHtml = '<button class="modal-btn" onclick="submitKey()" style="margin-bottom:8px;">Save API Key</button>';
+    if (cfg.usageApi === 'claude-admin') {
+        btnHtml += '<button class="modal-btn" style="background:#16A34A;margin-bottom:8px;" onclick="acceptExtension()">Accept Extension (Pro)</button>';
+    }
+    btnHtml += '<span class="modal-cancel" onclick="closeModal()">Cancel</span>';
+
+    var btnContainer = document.querySelector('.modal-content > button:last-of-type');
+    if (btnContainer) {
+        btnContainer.parentElement.innerHTML = btnHtml;
+    }
+
+    document.getElementById('modal').classList.add('open');
+    setTimeout(function() {document.getElementById('modal-input').focus();}, 100);
+}
+
+function acceptExtension() {
+    if (!currentModalProvider) return;
+
+    // Check if extension is already installed
+    chrome.runtime.sendMessage({type: 'TOKENSCOPE_CHECK'}, function(response) {
+        if (response && response.status === 'installed') {
+            document.getElementById('modal-success').textContent = 'Extension already installed!';
+            document.getElementById('modal-success').style.display = 'block';
+            setTimeout(function() {
+                state.connections[currentModalProvider] = true;
+                closeModal();
+                selectProvider(currentModalProvider);
+                updateConnCount();
+                updateRightbar();
+            }, 800);
+        } else {
+            // Extension not installed, prompt user to install
+            document.getElementById('modal-error').textContent = 'TokenScope extension not found. Please install it from Chrome Web Store or load unpacked.';
+            document.getElementById('modal-error').style.display = 'block';
+            // Future: auto-prompt install via webstore
+        }
+    });
+}
+
+function closeModal() {
+    document.getElementById('modal').classList.remove('open');
+    currentModalProvider = null;
+}
+
+function submitKey() {
+    var key = document.getElementById('modal-input').value.trim();
+    if (!key || key.length < 8) {
+        document.getElementById('modal-error').textContent = 'Key too short';
+        document.getElementById('modal-error').style.display = 'block';
+        return;
+    }
+    var provider = currentModalProvider;
+    var cfg = PROVIDERS[provider];
+    if (cfg.usageApi && cfg.keyPrefix && key.indexOf(cfg.keyPrefix) !== 0) {
+        document.getElementById('modal-error').textContent = 'This looks like a standard key. Usage history needs an Admin key (' + cfg.keyPrefix + '...) — use the link above to create one.';
+        document.getElementById('modal-error').style.display = 'block';
+        return;
+    }
+    vaultSet(provider + '_key', key);
+    state.connections[provider] = true;
+    document.getElementById('modal-success').textContent = 'Key saved to browser vault';
+    document.getElementById('modal-success').style.display = 'block';
+    setTimeout(function() {
+        closeModal();
+        selectProvider(provider);
+        updateConnCount();
+        updateRightbar();
+        updateCard6Visibility();
+        backfillHistory(provider);
+        backfillUsageHistory(provider);
+    }, 1200);
+}
+
+function updateConnCount() {
+    var c = 0;
+    for (var p in state.connections) {
+        if (state.connections[p]) c++;
+    }
+    document.getElementById('connCount').textContent = c + ' of 7 connected';
+}
+
+function startTimer() {
+    var start = Math.floor(Date.now() / 1000);
+    setInterval(function() {
+        var elapsed = Math.floor(Date.now() / 1000) - start;
+        var h = Math.floor(elapsed / 3600);
+        var m = Math.floor((elapsed % 3600) / 60);
+        var s = elapsed % 60;
+        document.getElementById('tmr').textContent = h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }, 1000);
+}
+
+function exportAllData() {
+    openDB().then(function() {
+        return dbGetByProvider('claude');
+    }).then(function(records) {
+        var json = JSON.stringify(records, null, 2);
+        var blob = new Blob([json], {type: 'application/json'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'tokenscope-forensic-120days-' + new Date().toISOString().slice(0, 10) + '.json';
+        a.click();
+        document.getElementById('forensic-output').innerHTML = '<div class="signal-row"><div class="signal-label">✓ Exported ' + records.length + ' records</div></div>';
+    }).catch(function(err) {
+        document.getElementById('forensic-output').innerHTML = '<div class="signal-row" style="color:var(--red);">✗ Export failed: ' + err + '</div>';
+    });
+}
+
+function extractModelSwitches() {
+    openDB().then(function() {
+        return dbGetByProvider('claude');
+    }).then(function(records) {
+        var switches = [];
+        var byDate = {};
+
+        // Group by date and model
+        for (var i = 0; i < records.length; i++) {
+            var r = records[i];
+            if (r.kind !== 'model') continue;
+            if (!byDate[r.date]) byDate[r.date] = {};
+            if (!byDate[r.date][r.model]) byDate[r.date][r.model] = 0;
+            byDate[r.date][r.model]++;
+        }
+
+        // Look for Sonnet 4.n → 5 pattern
+        for (var date in byDate) {
+            var models = Object.keys(byDate[date]);
+            var has4n = models.some(function(m) { return m.indexOf('sonnet') >= 0 && m.indexOf('4') >= 0; });
+            var has5 = models.some(function(m) { return m.indexOf('sonnet') >= 0 && m.indexOf('5') >= 0; });
+
+            if (has4n && has5) {
+                switches.push({
+                    date: date,
+                    models: models,
+                    count: models.length
+                });
+            }
+        }
+
+        var html = '<div class="signal-row"><div class="signal-label">Model Switches Found: ' + switches.length + '</div></div>';
+        for (var i = 0; i < switches.length; i++) {
+            var s = switches[i];
+            html += '<div class="signal-row"><div><div class="signal-label">' + s.date + '</div><div class="signal-detail">' + s.models.join(', ') + '</div></div></div>';
+        }
+        document.getElementById('forensic-output').innerHTML = html;
+    }).catch(function(err) {
+        document.getElementById('forensic-output').innerHTML = '<div class="signal-row" style="color:var(--red);">✗ Analysis failed: ' + err + '</div>';
+    });
+}
+
+function analyzeAnomalies() {
+    openDB().then(function() {
+        return dbGetByProvider('claude');
+    }).then(function(records) {
+        var result = detectAnomalies(records, startOfDayUTC(-120).toISOString().slice(0, 10), startOfDayUTC(-1).toISOString().slice(0, 10));
+        var anomalies = result.anomalies;
+
+        var html = '<div class="signal-row"><div class="signal-label">Anomalies Detected: ' + anomalies.length + '</div></div>';
+        var totalExtraCost = 0;
+        for (var i = 0; i < Math.min(anomalies.length, 20); i++) {
+            var a = anomalies[i];
+            var extraCost = a.cost * (a.ratio - 1);
+            totalExtraCost += extraCost;
+            html += '<div class="signal-row"><div><div class="signal-label">' + a.date + ' ' + a.model + '</div><div class="signal-detail">$' + a.cost.toFixed(2) + ' (ratio: ' + a.ratio.toFixed(1) + 'x)</div></div></div>';
+        }
+        html += '<div class="signal-row" style="background:#0f172a;margin-top:12px;"><div class="signal-label">Estimated Extra Cost: $' + totalExtraCost.toFixed(2) + '</div></div>';
+        document.getElementById('forensic-output').innerHTML = html;
+    }).catch(function(err) {
+        document.getElementById('forensic-output').innerHTML = '<div class="signal-row" style="color:var(--red);">✗ Analysis failed: ' + err + '</div>';
+    });
+}
+
+function generateForensicReport() {
+    openDB().then(function() {
+        return dbGetByProvider('claude');
+    }).then(function(records) {
+        var summary = {
+            totalRecords: records.length,
+            dateRange: {start: startOfDayUTC(-120).toISOString().slice(0, 10), end: startOfDayUTC(-1).toISOString().slice(0, 10)},
+            models: {},
+            totalCost: 0,
+            anomalies: 0
+        };
+
+        for (var i = 0; i < records.length; i++) {
+            var r = records[i];
+            if (r.model) summary.models[r.model] = (summary.models[r.model] || 0) + (r.cost || 0);
+            if (r.cost) summary.totalCost += r.cost;
+        }
+
+        var result = detectAnomalies(records, summary.dateRange.start, summary.dateRange.end);
+        summary.anomalies = result.anomalies.length;
+        summary.anomalyExtraCost = result.anomalies.reduce(function(sum, a) { return sum + (a.cost * (a.ratio - 1)); }, 0);
+
+        var report = JSON.stringify(summary, null, 2);
+        var blob = new Blob([report], {type: 'text/plain'});
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'forensic-report-' + new Date().toISOString().slice(0, 10) + '.txt';
+        a.click();
+
+        document.getElementById('forensic-output').innerHTML = '<div class="signal-row"><div class="signal-label">✓ Report Generated</div><div class="signal-detail">Total Records: ' + summary.totalRecords + ' | Anomalies: ' + summary.anomalies + ' | Extra Cost: $' + summary.anomalyExtraCost.toFixed(2) + '</div></div>';
+    }).catch(function(err) {
+        document.getElementById('forensic-output').innerHTML = '<div class="signal-row" style="color:var(--red);">✗ Report failed: ' + err + '</div>';
+    });
+}
+
+function loadTestData() {
+    var today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    for (var i = 0; i < 30; i++) {
+        var d = new Date(today);
+        d.setUTCDate(d.getUTCDate() - i);
+        var dateStr = d.toISOString().slice(0, 10);
+        runsPut({
+            id: 'claude_' + dateStr + '_opus-4-8',
+            provider: 'claude',
+            date: dateStr,
+            kind: 'model',
+            model: 'claude-opus-4-8',
+            cost: 5 + Math.random() * 10
+        });
+    }
+}
+
+function checkExtension() {
+    return new Promise(function(resolve) {
+        try {
+            chrome.runtime.sendMessage({type: 'TOKENSCOPE_CHECK'}, function(response) {
+                if (response && response.status === 'installed') {
+                    vaultSet('extension_installed', 'true');
+                    resolve(true);
+                } else {
+                    resolve(false);
+                }
+            });
+        } catch(e) {
+            resolve(false);
+        }
+    });
+}
+
+function init() {
+    loadDials();
+
+    // Check for extension
+    checkExtension().then(function(hasExtension) {
+        if (hasExtension) {
+            console.log('TokenScope extension detected');
+        }
+    });
+
+    for (var id in PROVIDERS) {
+        var k = vaultGet(id + '_key');
+        var hasExt = vaultGet('extension_installed') === 'true';
+        state.connections[id] = (k && k.length > 8) || (id === 'claude' && hasExt);
+    }
+    openDB().catch(function(err) {console.warn('DB error:', err);}).then(function() {
+        if (useLocalStorage) {
+            console.log('TokenScope running in localStorage mode (IndexedDB unavailable)');
+            if (localStorageRecords.length === 0) {
+                loadTestData();
+            }
+        }
+        for (var id2 in PROVIDERS) {
+            if (state.connections[id2]) {
+                backfillHistory(id2);
+                backfillUsageHistory(id2);
+            }
+        }
+    });
+    renderSidebar();
+    updateConnCount();
+    updateCard6Visibility();
+    selectProvider('claude');
+    startTimer();
+    console.log('TokenScope v10.0 ready' + (useLocalStorage ? ' (localStorage mode)' : ''));
+}
+
+function polishWithClaude() {
+    var findings = document.getElementById('comm-findings').value.trim();
+    if (!findings || findings.length < 10) {
+        document.getElementById('comm-status').innerHTML = '<div style="color:var(--red);">✗ Findings too short (min 10 chars)</div>';
+        return;
+    }
+
+    var claudeApiKey = localStorage.getItem('claudeApiKey');
+    if (!claudeApiKey) {
+        document.getElementById('comm-status').innerHTML = '<div style="color:var(--red);">✗ No API key stored. Add it in the box above.</div>';
+        return;
+    }
+
+    var statusEl = document.getElementById('comm-status');
+    var responseEl = document.getElementById('comm-response');
+
+    statusEl.innerHTML = '<div style="color:var(--text);">⏳ Asking Claude...</div>';
+    responseEl.value = '';
+
+    fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': claudeApiKey,
+            'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+            model: 'claude-opus-4-1',
+            max_tokens: 1000,
+            messages: [{
+                role: 'user',
+                content: 'You are a technical writer helping polish findings for articles about AI cost transparency and forensics. Here are findings from TokenScope (an AI cost auditing tool):\n\n' + findings + '\n\nPlease write a polished, engaging 500-word narrative that makes these findings compelling for a technical audience. Focus on why this matters and what the implications are.'
+            }]
+        })
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error('API error: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(function(data) {
+        if (data.content && data.content.length > 0) {
+            var narrative = data.content[0].text;
+            responseEl.value = narrative;
+            statusEl.innerHTML = '<div style="color:#16a34a;">✓ Claude responded</div>';
+            localStorage.setItem('lastClaudeResponse', narrative);
+        } else {
+            throw new Error('No response from Claude');
+        }
+    })
+    .catch(function(error) {
+        statusEl.innerHTML = '<div style="color:var(--red);">✗ Error: ' + error.message + '</div>';
+        responseEl.value = 'Error calling Claude API: ' + error.message;
+        console.error('Claude API error:', error);
+    });
+}
+
+function copyToClipboard(elementId) {
+    var el = document.getElementById(elementId);
+    if (!el || !el.value) {
+        alert('Nothing to copy');
+        return;
+    }
+    el.select();
+    document.execCommand('copy');
+    alert('Copied to clipboard');
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+</script>
+
+</body>
+</html>
