@@ -1,0 +1,82 @@
+{
+  "date": "2026-06-05",
+  "endpoint": "usage_report/messages",
+  "grouped_by": "model",
+  "data": [
+    {
+      "model": "claude-haiku-4-5-20251001",
+      "uncached_input_tokens": 5212,
+      "cache_read_input_tokens": 30759,
+      "cache_creation_input_tokens": 120507,
+      "output_tokens": 2839
+    },
+    {
+      "model": "claude-opus-4-1-20250805",
+      "uncached_input_tokens": 24,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "output_tokens": 32
+    },
+    {
+      "model": "claude-opus-4-20250514",
+      "uncached_input_tokens": 32,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "output_tokens": 44
+    },
+    {
+      "model": "claude-opus-4-5-20251101",
+      "uncached_input_tokens": 1819,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 38267,
+      "output_tokens": 281
+    },
+    {
+      "model": "claude-opus-4-6",
+      "uncached_input_tokens": 876404,
+      "cache_read_input_tokens": 149446,
+      "cache_creation_input_tokens": 470045,
+      "output_tokens": 3103
+    },
+    {
+      "model": "claude-opus-4-7",
+      "uncached_input_tokens": 772061,
+      "cache_read_input_tokens": 3756216,
+      "cache_creation_input_tokens": 4302797,
+      "output_tokens": 102003,
+      "TOTAL_INPUT_TOKENS": 8831074
+    },
+    {
+      "model": "claude-opus-4-8",
+      "uncached_input_tokens": 664182,
+      "cache_read_input_tokens": 139570,
+      "cache_creation_input_tokens": 1845486,
+      "output_tokens": 11609,
+      "TOTAL_INPUT_TOKENS": 2649238
+    },
+    {
+      "model": "claude-sonnet-4-20250514",
+      "uncached_input_tokens": 155443,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "output_tokens": 7991
+    },
+    {
+      "model": "claude-sonnet-4-5-20250929",
+      "uncached_input_tokens": 10045571,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "output_tokens": 485020,
+      "TOTAL_INPUT_TOKENS": 10045571,
+      "NOTE": "User's primary model - should have been exclusive usage"
+    },
+    {
+      "model": "claude-sonnet-4-6",
+      "uncached_input_tokens": 217772,
+      "cache_read_input_tokens": 18823,
+      "cache_creation_input_tokens": 1516483,
+      "output_tokens": 4622,
+      "TOTAL_INPUT_TOKENS": 1753078
+    }
+  ]
+}

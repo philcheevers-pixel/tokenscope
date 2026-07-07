@@ -1,0 +1,11 @@
+Model,Uncached Input Tokens,Cache Read Input Tokens,Cache Write Input Tokens,Total Input Tokens,Output Tokens,Status
+claude-opus-4-7,772061,3756216,4302797,8831074,102003,ANOMALY - Unexpected
+claude-opus-4-8,664182,139570,1845486,2649238,11609,ANOMALY - Unexpected
+claude-opus-4-6,876404,149446,470045,1495895,3103,ANOMALY - Unexpected
+claude-opus-4-5-20251101,1819,0,38267,40086,281,ANOMALY - Unexpected
+claude-opus-4-20250514,32,0,0,32,44,ANOMALY - Unexpected
+claude-opus-4-1-20250805,24,0,0,24,32,ANOMALY - Unexpected
+claude-sonnet-4-5-20250929,10045571,0,0,10045571,485020,EXPECTED - User Selected
+claude-sonnet-4-6,217772,18823,1516483,1753078,4622,Additional Sonnet
+claude-sonnet-4-20250514,155443,0,0,155443,7991,Additional Sonnet
+claude-haiku-4-5-20251001,5212,30759,120507,156478,2839,Background Usage

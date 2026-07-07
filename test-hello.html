@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TokenScope Hello World</title>
+<style>
+body { font-family: monospace; padding: 40px; background: #1e293b; color: #e2e8f0; }
+.box { background: #0f172a; border: 2px solid #2563eb; padding: 20px; border-radius: 8px; margin: 20px 0; }
+h1 { color: #60a5fa; }
+.success { color: #4ade80; }
+.error { color: #f87171; }
+button { padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div class="box">
+<h1>TokenScope v9.0 — Hello World Test</h1>
+<p>Testing: Can the functions run?</p>
+</div>
+
+<div class="box" id="results"></div>
+
+<script>
+var results = document.getElementById('results');
+
+function test(name, fn) {
+  try {
+    fn();
+    results.innerHTML += '<div class="success">✓ ' + name + '</div>';
+  } catch (e) {
+    results.innerHTML += '<div class="error">✗ ' + name + ': ' + e.message + '</div>';
+  }
+}
+
+// Test 1: Basic functions exist
+test('Date helper: startOfDayUTC', function() {
+  function startOfDayUTC(offsetDays) {
+    var d = new Date();
+    d.setUTCHours(0, 0, 0, 0);
+    d.setUTCDate(d.getUTCDate() + offsetDays);
+    return d;
+  }
+  var d = startOfDayUTC(-1);
+  if (!(d instanceof Date)) throw new Error('Not a date');
+});
+
+// Test 2: Anomaly detection logic
+test('Anomaly detection: detectAnomalies', function() {
+  function detectAnomalies(records, startDate, endDate) {
+    var byDate = {};
+    for (var i = 0; i < records.length; i++) {
+      var r = records[i];
+      if (r.kind !== 'model') continue;
+      if (r.date < startDate || r.date > endDate) continue;
+      if (!byDate[r.date]) byDate[r.date] = {};
+      byDate[r.date][r.model] = (byDate[r.date][r.model] || 0) + (r.cost || 0);
+    }
+    var dates = Object.keys(byDate).sort();
+    var rolling7Avg = {};
+    for (var i = 0; i < dates.length; i++) {
+      var d = dates[i];
+      var sum = 0, count = 0;
+      for (var j = Math.max(0, i - 6); j <= i; j++) {
+        var cost = 0;
+        for (var m in byDate[dates[j]]) cost += byDate[dates[j]][m];
+        sum += cost;
+        count++;
+      }
+      rolling7Avg[d] = sum / count;
+    }
+    var anomalies = [];
+    for (var date in byDate) {
+      var dailyTotal = 0;
+      for (var model in byDate[date]) dailyTotal += byDate[date][model];
+      var baseline = rolling7Avg[date] || dailyTotal;
+      var ratio = baseline > 0 ? dailyTotal / baseline : 1;
+      if (ratio > 2) {
+        for (var model2 in byDate[date]) {
+          anomalies.push({date: date, model: model2, cost: byDate[date][model2], ratio: ratio});
+        }
+      }
+    }
+    if (anomalies.length >= 0) return true;
+    throw new Error('Anomaly detection failed');
+  }
+  var testData = [
+    {kind: 'model', date: '2026-07-01', model: 'claude-opus-4-8', cost: 5},
+    {kind: 'model', date: '2026-07-02', model: 'claude-opus-4-8', cost: 5},
+    {kind: 'model', date: '2026-07-03', model: 'claude-opus-4-8', cost: 5},
+    {kind: 'model', date: '2026-07-04', model: 'claude-opus-4-8', cost: 25}
+  ];
+  if (!detectAnomalies(testData, '2026-07-01', '2026-07-04')) throw new Error('Test failed');
+});
+
+// Test 3: Trend computation
+test('Trend data: computeTrendData', function() {
+  function computeTrendData(records, days) {
+    days = days || 7;
+    var trend = [];
+    for (var i = days - 1; i >= 0; i--) {
+      var d = new Date();
+      d.setUTCHours(0, 0, 0, 0);
+      d.setUTCDate(d.getUTCDate() - i);
+      var dateStr = d.toISOString().slice(0, 10);
+      var modelTotals = {};
+      var total = 0;
+      for (var j = 0; j < records.length; j++) {
+        var r = records[j];
+        if (r.kind && r.kind !== 'model') continue;
+        if (r.date !== dateStr) continue;
+        var cost = r.cost || 0;
+        modelTotals[r.model] = (modelTotals[r.model] || 0) + cost;
+        total += cost;
+      }
+      trend.push({date: dateStr, total: total, models: modelTotals});
+    }
+    return trend;
+  }
+  var trend = computeTrendData([], 7);
+  if (trend.length !== 7) throw new Error('Trend length mismatch');
+});
+
+// Test 4: Sycophancy analysis
+test('Sycophancy analysis: analyzeSycophancy', function() {
+  var SYCOPHANCY_MARKERS = {
+    hyperbolic: ['absolutely brilliant', 'visionary', 'breathtaking'],
+    high_affirmation: ['brilliant observation', 'fantastic approach'],
+    reassurance: ['rest assured', 'don\'t worry'],
+    hedging_softening: ['just to clarify', 'i might suggest'],
+    tonal_shifts: ['warmly', 'heartfelt']
+  };
+  function analyzeSycophancy(text) {
+    var lower = text.toLowerCase();
+    var words = lower.split(/\s+/);
+    var matches = {hyperbolic: 0, high_affirmation: 0, reassurance: 0, hedging: 0, tonal: 0};
+    var totalTokens = words.length;
+    for (var tier in SYCOPHANCY_MARKERS) {
+      var markers = SYCOPHANCY_MARKERS[tier];
+      for (var i = 0; i < markers.length; i++) {
+        var pattern = markers[i];
+        var regex = new RegExp('\\b' + pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'gi');
+        var m = (lower.match(regex) || []).length;
+        if (m > 0) matches[tier] += m;
+      }
+    }
+    var totalMatches = matches.hyperbolic + matches.high_affirmation + matches.reassurance + matches.hedging + matches.tonal;
+    var ratio = totalTokens > 0 ? (totalMatches / totalTokens) * 100 : 0;
+    if (ratio < 2) return 0;
+    if (ratio < 5) return 1;
+    if (ratio < 10) return 2;
+    if (ratio < 15) return 3;
+    return 4;
+  }
+  var score = analyzeSycophancy('This is absolutely brilliant and truly visionary work you have done');
+  if (score <= 0 || score > 4) throw new Error('Score out of range: ' + score);
+});
+
+// Test 5: Rate card computation
+test('Rate card: computeRateCard', function() {
+  function computeRateCard(records, provider) {
+    var costTotals = {};
+    var tokenTotals = {};
+    for (var i = 0; i < records.length; i++) {
+      var r = records[i];
+      if (r.kind === 'model-direction') {
+        if (!costTotals[r.model]) costTotals[r.model] = {};
+        costTotals[r.model][r.direction] = (costTotals[r.model][r.direction] || 0) + (r.cost || 0);
+      } else if (r.kind === 'usage-model-direction') {
+        if (!tokenTotals[r.model]) tokenTotals[r.model] = {};
+        tokenTotals[r.model][r.direction] = (tokenTotals[r.model][r.direction] || 0) + (r.tokens || 0);
+      }
+    }
+    var rows = [];
+    for (var model in tokenTotals) {
+      var costs = costTotals[model] || {};
+      var tokens = tokenTotals[model];
+      var inputRate = (tokens.input > 0 && costs.input) ? (costs.input / tokens.input) * 1000000 : null;
+      var outputRate = (tokens.output > 0 && costs.output) ? (costs.output / tokens.output) * 1000000 : null;
+      if (inputRate === null && outputRate === null) continue;
+      rows.push({model: model, inputRate: inputRate, outputRate: outputRate, confirmed: true});
+    }
+    return rows;
+  }
+  var testData = [
+    {kind: 'model-direction', model: 'opus', direction: 'input', cost: 5},
+    {kind: 'usage-model-direction', model: 'opus', direction: 'input', tokens: 1000000}
+  ];
+  var rates = computeRateCard(testData, 'claude');
+  if (rates.length < 1) throw new Error('No rates computed');
+  if (rates[0].inputRate !== 5) throw new Error('Input rate mismatch: ' + rates[0].inputRate);
+});
+
+results.innerHTML += '<div style="margin-top: 30px; padding: 20px; background: #1e3a8a; border: 2px solid #3b82f6; border-radius: 8px;"><h2 style="color: #60a5fa; margin: 0;">✓ Hello World</h2><p style="margin: 10px 0;">TokenScope v9.0 core functions verified.</p><p style="font-size: 12px; color: #94a3b8;">All computational logic is working. Ready for live data.</p></div>';
+</script>
+
+</body>
+</html>

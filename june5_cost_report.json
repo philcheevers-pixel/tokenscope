@@ -1,0 +1,74 @@
+{
+  "date": "2026-06-05",
+  "endpoint": "cost_report",
+  "currency": "USD",
+  "note": "User in Canada - convert to CAD (~1.37x multiplier)",
+  "OPUS_TOTALS": {
+    "opus-4-7": 1817.59,
+    "opus-4-8": 489.34,
+    "opus-4-6": 392.05,
+    "TOTAL_OPUS_COST_USD": 2699.00,
+    "TOTAL_OPUS_COST_CAD_APPROX": 3695.64
+  },
+  "SONNET_TOTALS": {
+    "sonnet-4-5-20250929": 3715.42,
+    "sonnet-4-20250514": 19.87,
+    "sonnet-4-6": 582.36,
+    "TOTAL_SONNET_COST_USD": 4317.65,
+    "TOTAL_SONNET_COST_CAD_APPROX": 5913.18
+  },
+  "breakdown_by_model": {
+    "claude-opus-4-7": {
+      "cache_hit_input": 97.00,
+      "cache_write_input": 1099.10,
+      "uncached_input": 386.01,
+      "output": 235.48,
+      "subtotal_usd": 1817.59
+    },
+    "claude-opus-4-8": {
+      "uncached_input": 26.14,
+      "cache_write_input": 445.81,
+      "cache_hit_input": 6.98,
+      "output": 17.39,
+      "subtotal_usd": 489.34
+    },
+    "claude-opus-4-6": {
+      "uncached_input": 92.59,
+      "cache_write_input": 293.78,
+      "cache_hit_input": 7.48,
+      "output": 5.68,
+      "subtotal_usd": 392.05
+    },
+    "claude-sonnet-4-5-20250929": {
+      "uncached_input": 2987.91,
+      "output": 727.51,
+      "subtotal_usd": 3715.42
+    },
+    "claude-sonnet-4-20250514": {
+      "uncached_input": 46.63,
+      "output": 11.99,
+      "subtotal_usd": 19.87
+    },
+    "claude-sonnet-4-6": {
+      "cache_hit_input": 0.56,
+      "cache_write_input": 128.69,
+      "uncached_input": 64.62,
+      "output": 5.56,
+      "subtotal_usd": 582.36
+    }
+  },
+  "anomaly_summary": {
+    "expected_model": "claude-sonnet-4-5-20250929 (user's stated primary model)",
+    "actual_models_charged": [
+      "claude-opus-4-7",
+      "claude-opus-4-8",
+      "claude-opus-4-6",
+      "claude-sonnet-4-5-20250929",
+      "claude-sonnet-4-20250514",
+      "claude-sonnet-4-6"
+    ],
+    "opus_presence": "3 different Opus models charged on June 5",
+    "opus_4_7_anomaly": "8.8M input tokens on single model in 24-hour period (unusually high volume)",
+    "recommendation": "Cross-reference with UI activity log for timestamps showing Opus usage - if all Opus charges clustered in single time window with millisecond precision, indicates platform routing rather than user selection"
+  }
+}

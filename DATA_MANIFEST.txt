@@ -1,0 +1,144 @@
+DATA MANIFEST - July 5, 2026
+============================
+
+WORKING DIRECTORY: C:\Users\philc\CLAUDE BULLSHIT\
+
+HANDOFF/PROJECT FILES (Read These First)
+========================================
+- HANDOFF_PROMPT.txt (THIS FILE - instructions for next chat)
+- PROJECT_STATE.md (Complete project status, key discoveries, known issues)
+- TODO_LIST.md (Comprehensive task list, priority order)
+- DATA_MANIFEST.txt (This file - index of all data)
+
+FORENSIC CASE: ANTHROPIC JUNE 5 BILLING
+========================================
+
+RAW API DATA (from Anthropic Admin API)
+- june5_usage_report.json
+  Status: UNVERIFIED against Console screenshots
+  Content: Token consumption by model, June 5, 2026
+  Source: curl to https://api.anthropic.com/v1/organizations/usage_report/messages
+
+- june5_cost_report.json
+  Status: UNVERIFIED against Console screenshots
+  Content: Cost breakdown by model, June 5, 2026
+  Source: curl to https://api.anthropic.com/v1/organizations/cost_report
+
+PROCESSED DATA (FLAGGED AS SUSPECT - NEEDS REBUILD)
+- june5_usage_by_model.csv
+  Status: WRONG - needs rebuild from verified API data
+  Columns: Model | Uncached Input Tokens | Cache Read Input Tokens | Cache Write Input Tokens | Total Input Tokens | Output Tokens | Status
+  Issue: Unknown calculation error
+
+- june5_billing_by_model.csv
+  Status: WRONG - needs rebuild from verified API data
+  Columns: Model | Input Cost USD | Output Cost USD | Total Cost USD | Total Cost CAD | Status | Notes
+  Issue: Mismatch between values, missing/incorrect headers
+
+- june5_forensic_analysis.md
+  Status: Derived from suspect CSV - unreliable
+  Content: Analysis summary, anomaly classification, case narrative
+
+SCREENSHOTS / VISUAL EVIDENCE (From User)
+- Week view tooltip (June 1-7, 2026)
+  Token counts: Opus 4.7 (8,933,077), Opus 4.8 (2,660,847), Opus 4.6 (1,499,898), Sonnet 4.5 (10,530,591), etc.
+  Status: GROUND TRUTH - use to verify API data
+
+- Day view tooltip (June 5, 2026 at 06:00 UTC)
+  Token counts by model with timestamp detail
+  Status: GROUND TRUTH - use to verify API data
+
+- Hourly views showing spike pattern
+  Status: GROUND TRUTH - use to verify cascading model behavior
+
+CONFIG FILE EVIDENCE
+- Location: UNKNOWN (user found it but didn't document location)
+- Content snippet: "coworkModelAutoFallbackByAccount": { "ddcaac10-8b30-4ce8-9f3c-cbcab30ac360": true }
+- Status: CRITICAL EVIDENCE if verified (proves intentional design)
+- Next step: User must locate and provide full file path
+
+VERIFICATION ANCHOR POINTS (From User Observations)
+- Opus 4.7 tokens: ~8.9M (from Console screenshot)
+- Opus 4.8 tokens: ~2.66M (from Console screenshot)
+- Opus 4.6 tokens: ~1.49M (from Console screenshot)
+- Sonnet 4.5 tokens: ~10.5M (from Console screenshot)
+- Spike pattern: Millisecond-precision model switches (visible in hourly chart)
+- Expected model: Sonnet 4.5 only (user's stated selection)
+
+---
+
+TOKENSCOPE PROJECT FILES
+========================
+
+SOURCE CODE
+- TokenScope-v9.0.html
+  Status: 80% complete, functional
+  Size: ~1351 lines
+  Components:
+    - Cards 1-5 UI framework
+    - Card 1 Tabs 1-3 functional (Overview, Rate Card)
+    - Card 1 Tab 4 outlined but not built
+    - Card 2-4 partial
+    - Card 5 placeholder
+    - IndexedDB storage layer
+    - Sycophancy/verbosity analysis
+    - Rate card computation
+    - Provider sidebar with logos
+
+- server.py
+  Status: Working, relay functional
+  Size: ~157 lines
+  Components:
+    - ThreadingMixIn (fixed - no longer single-threaded)
+    - Routes: /api/claude/cost-report, /api/claude/usage-report
+    - Relay logic for Admin API calls
+    - Comprehensive provider documentation in comments
+    - Ready to extend for additional providers
+
+CONFIG
+- .claude/launch.json
+  Status: Should exist
+  Contains: Server launch configs (port 8723 for static, 8724 for verify)
+
+---
+
+NOTES FOR NEXT CHAT
+===================
+
+1. DATA INTEGRITY IS CRITICAL
+   - Do NOT use june5_billing_by_model.csv or june5_forensic_analysis.md
+   - These are FLAGGED AS WRONG
+   - Must rebuild from verified API data
+
+2. VERIFICATION PROCESS MANDATORY
+   - Compare fresh API data to Console screenshot numbers
+   - If they match: data is clean
+   - If they don't: investigate discrepancy
+   - Only use verified data for report
+
+3. CONFIG FILE IS SMOKING GUN
+   - High priority to locate
+   - If provenance can be established: game-changing evidence
+   - If location/source unclear: still powerful but weaker
+
+4. REPORT WRITING DEPENDS ON DATA VERIFICATION
+   - Don't write report until data is verified
+   - Don't calculate costs until billing CSV is correct
+   - Don't draw conclusions until evidence chain is solid
+
+5. TOKENSCOPE IS PARALLEL, NOT BLOCKED
+   - Can work on both projects simultaneously
+   - Forensic case has urgency (pre-IPO)
+   - TokenScope is long-term build
+   - Allocate time proportionally
+
+---
+
+EXCHANGE RATE REFERENCE (If needed for CAD conversion)
+June 5, 2026: ~1.37 CAD per USD (approximate)
+- Verify exact rate if precision matters
+
+---
+
+File created: July 5, 2026, End of Session
+Next action: Load HANDOFF_PROMPT.txt in new chat

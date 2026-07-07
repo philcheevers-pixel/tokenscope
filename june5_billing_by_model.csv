@@ -1,0 +1,12 @@
+Model,Input Cost USD,Output Cost USD,Total Cost USD,Total Cost CAD,Status,Notes
+claude-opus-4-7,1582.13,235.48,1817.61,2490.13,ANOMALY,8.9M input tokens - largest unexpected charge
+claude-opus-4-8,471.95,17.39,489.34,670.00,ANOMALY,2.66M input tokens
+claude-opus-4-6,386.25,5.68,391.93,536.74,ANOMALY,1.49M input tokens
+claude-opus-4-5-20251101,32.28,4.18,36.46,49.95,ANOMALY,40K input tokens
+claude-opus-4-20250514,0.05,0.02,0.07,0.10,ANOMALY,76 input tokens
+claude-opus-4-1-20250805,0.02,0.01,0.03,0.04,ANOMALY,56 input tokens
+TOTAL OPUS UNEXPECTED,2472.68,262.76,2735.44,3746.96,FRAUD,Unauthorized model substitution with price increase
+claude-sonnet-4-5-20250929,2987.91,727.51,3715.42,5089.52,EXPECTED,User's primary model - as requested
+claude-sonnet-4-6,582.36,5.56,587.92,805.54,ADDITIONAL,Secondary Sonnet usage
+claude-sonnet-4-20250514,46.63,11.99,58.62,80.31,ADDITIONAL,Older Sonnet model
+GRAND TOTAL,6087.59,1008.82,7096.41,9722.33,MIXED,Opus charges unauthorized and at higher rates

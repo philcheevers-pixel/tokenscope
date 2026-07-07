@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TokenScope Test - Synthetic Data</title>
+<style>
+body { font-family: system-ui; padding: 20px; background: #f8f9fa; }
+.section { background: white; padding: 20px; margin: 20px 0; border-radius: 8px; }
+h2 { color: #333; }
+.status { padding: 10px; margin: 10px 0; border-radius: 4px; }
+.success { background: #dcfce7; color: #166534; }
+.info { background: #e0f2fe; color: #0c4a6e; }
+button { padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px 0; }
+button:hover { background: #1d4ed8; }
+</style>
+</head>
+<body>
+
+<div class="section">
+  <h1>TokenScope v9.0 — Synthetic Data Test</h1>
+  <p>This loads IndexedDB with test data for the Rate Card tab.</p>
+</div>
+
+<div class="section">
+  <h2>Test Data Injection</h2>
+  <button onclick="populateSyntheticData()">1. Load Synthetic Data into IndexedDB</button>
+  <button onclick="verifyData()">2. Verify Data was Stored</button>
+  <button onclick="openTokenScope()">3. Open TokenScope v9.0</button>
+  <div id="status"></div>
+</div>
+
+<script>
+function log(msg, type = 'info') {
+  var el = document.getElementById('status');
+  var div = document.createElement('div');
+  div.className = 'status ' + type;
+  div.textContent = msg;
+  el.appendChild(div);
+  console.log(msg);
+}
+
+function openDB() {
+  return new Promise(function(resolve, reject) {
+    var req = indexedDB.open('tokenscope_v9', 1);
+    req.onupgradeneeded = function(e) {
+      var d = e.target.result;
+      if (!d.objectStoreNames.contains('runs')) {
+        var store = d.createObjectStore('runs', {keyPath: 'id'});
+        store.createIndex('provider', 'provider', {unique: false});
+        store.createIndex('date', 'date', {unique: false});
+      }
+    };
+    req.onsuccess = function(e) { resolve(e.target.result); };
+    req.onerror = function() { reject(req.error); };
+  });
+}
+
+function populateSyntheticData() {
+  log('Starting data injection...', 'info');
+
+  openDB().then(function(db) {
+    var tx = db.transaction('runs', 'readwrite');
+    var store = tx.objectStore('runs');
+
+    // Clear existing data
+    store.clear();
+
+    // Dates: last 30 days for testing
+    var today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    // Inject cost data (kind: 'model')
+    for (var i = 0; i < 30; i++) {
+      var d = new Date(today);
+      d.setUTCDate(d.getUTCDate() - i);
+      var dateStr = d.toISOString().slice(0, 10);
+
+      // Cost data for different models
+      store.put({
+        id: 'claude_' + dateStr + '_opus-4-8',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'model',
+        model: 'claude-opus-4-8',
+        cost: 5 + Math.random() * 10
+      });
+
+      store.put({
+        id: 'claude_' + dateStr + '_sonnet-4-5',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'model',
+        model: 'claude-sonnet-4-5',
+        cost: 2 + Math.random() * 5
+      });
+
+      // Token usage data (kind: 'usage-model-direction')
+      store.put({
+        id: 'claude_' + dateStr + '_usage_opus-4-8_input',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'usage-model-direction',
+        model: 'claude-opus-4-8',
+        direction: 'input',
+        tokens: 100000 + Math.floor(Math.random() * 500000)
+      });
+
+      store.put({
+        id: 'claude_' + dateStr + '_usage_opus-4-8_output',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'usage-model-direction',
+        model: 'claude-opus-4-8',
+        direction: 'output',
+        tokens: 50000 + Math.floor(Math.random() * 200000)
+      });
+
+      store.put({
+        id: 'claude_' + dateStr + '_usage_sonnet-4-5_input',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'usage-model-direction',
+        model: 'claude-sonnet-4-5',
+        direction: 'input',
+        tokens: 200000 + Math.floor(Math.random() * 800000)
+      });
+
+      store.put({
+        id: 'claude_' + dateStr + '_usage_sonnet-4-5_output',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'usage-model-direction',
+        model: 'claude-sonnet-4-5',
+        direction: 'output',
+        tokens: 100000 + Math.floor(Math.random() * 400000)
+      });
+
+      // model-direction cost data
+      store.put({
+        id: 'claude_' + dateStr + '_md_opus-4-8_input',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'model-direction',
+        model: 'claude-opus-4-8',
+        direction: 'input',
+        cost: 3 + Math.random() * 5
+      });
+
+      store.put({
+        id: 'claude_' + dateStr + '_md_opus-4-8_output',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'model-direction',
+        model: 'claude-opus-4-8',
+        direction: 'output',
+        cost: 2 + Math.random() * 5
+      });
+
+      store.put({
+        id: 'claude_' + dateStr + '_md_sonnet-4-5_input',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'model-direction',
+        model: 'claude-sonnet-4-5',
+        direction: 'input',
+        cost: 1 + Math.random() * 2
+      });
+
+      store.put({
+        id: 'claude_' + dateStr + '_md_sonnet-4-5_output',
+        provider: 'claude',
+        date: dateStr,
+        kind: 'model-direction',
+        model: 'claude-sonnet-4-5',
+        direction: 'output',
+        cost: 1 + Math.random() * 3
+      });
+    }
+
+    tx.oncomplete = function() {
+      log('✓ Injected 30 days of synthetic data for Opus & Sonnet', 'success');
+    };
+    tx.onerror = function() {
+      log('✗ Failed to inject data: ' + tx.error, 'error');
+    };
+  }).catch(function(err) {
+    log('✗ Database error: ' + err, 'error');
+  });
+}
+
+function verifyData() {
+  openDB().then(function(db) {
+    var tx = db.transaction('runs', 'readonly');
+    var store = tx.objectStore('runs');
+    var idx = store.index('provider');
+    var req = idx.getAll('claude');
+
+    req.onsuccess = function() {
+      var rows = req.result;
+      var byKind = {};
+      for (var i = 0; i < rows.length; i++) {
+        var kind = rows[i].kind || 'undefined';
+        byKind[kind] = (byKind[kind] || 0) + 1;
+      }
+      var msg = 'Total rows: ' + rows.length + ' | Breakdown: ' + Object.keys(byKind).map(function(k) { return k + ': ' + byKind[k]; }).join(', ');
+      log('✓ ' + msg, 'success');
+    };
+    req.onerror = function() {
+      log('✗ Verify failed: ' + req.error, 'error');
+    };
+  });
+}
+
+function openTokenScope() {
+  window.open('TokenScope-v9.0.html', 'tokenscope', 'width=1400,height=800');
+}
+</script>
+
+</body>
+</html>

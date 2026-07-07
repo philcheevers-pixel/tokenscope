@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>TokenScope Pro</title>
+<style>
+body { width: 350px; padding: 12px; font-family: system-ui; background: #0f172a; color: #e2e8f0; margin: 0; }
+h2 { font-size: 14px; margin: 0 0 12px 0; color: #60a5fa; }
+.stat { display: flex; justify-content: space-between; padding: 8px; background: #1e293b; border-radius: 4px; margin: 6px 0; font-size: 13px; }
+.label { color: #94a3b8; }
+.value { font-weight: 600; color: #4ade80; }
+button { width: 100%; padding: 8px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 12px; font-size: 12px; }
+button:hover { background: #1d4ed8; }
+.status { font-size: 11px; color: #94a3b8; margin-top: 8px; text-align: center; }
+</style>
+</head>
+<body>
+
+<h2>TokenScope Pro</h2>
+
+<div class="stat">
+  <span class="label">Calls Logged</span>
+  <span class="value" id="call-count">0</span>
+</div>
+
+<div class="stat">
+  <span class="label">Tokens Tracked</span>
+  <span class="value" id="token-count">0</span>
+</div>
+
+<div class="stat">
+  <span class="label">Last Updated</span>
+  <span class="value" id="last-update">—</span>
+</div>
+
+<button onclick="exportData()">Export to TokenScope</button>
+<button onclick="clearData()">Clear Data</button>
+
+<div class="status">
+  <div>🔵 Active on this tab</div>
+  <div>Data stored locally only</div>
+</div>
+
+<script>
+function updateStats() {
+  chrome.storage.local.get('tokenscope_pro_calls', function(result) {
+    var calls = result.tokenscope_pro_calls || [];
+    document.getElementById('call-count').textContent = calls.length;
+
+    var totalTokens = 0;
+    for (var i = 0; i < calls.length; i++) {
+      if (calls[i].usage && calls[i].usage.output_tokens) {
+        totalTokens += calls[i].usage.output_tokens;
+      }
+    }
+    document.getElementById('token-count').textContent = totalTokens.toLocaleString();
+
+    if (calls.length > 0) {
+      var lastCall = calls[calls.length - 1];
+      var time = new Date(lastCall.timestamp).toLocaleTimeString();
+      document.getElementById('last-update').textContent = time;
+    }
+  });
+}
+
+function exportData() {
+  chrome.storage.local.get('tokenscope_pro_calls', function(result) {
+    var calls = result.tokenscope_pro_calls || [];
+    var csv = 'timestamp,model,max_tokens,output_tokens,stop_reason\n';
+    for (var i = 0; i < calls.length; i++) {
+      var c = calls[i];
+      var row = [
+        c.timestamp,
+        c.model || '—',
+        c.max_tokens || '—',
+        (c.usage && c.usage.output_tokens) || '—',
+        c.stop_reason || '—'
+      ].join(',');
+      csv += row + '\n';
+    }
+    var blob = new Blob([csv], {type: 'text/csv'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'tokenscope-pro-' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+  });
+}
+
+function clearData() {
+  if (confirm('Clear all tracked data?')) {
+    chrome.storage.local.set({tokenscope_pro_calls: []});
+    updateStats();
+  }
+}
+
+// Update stats every 2 seconds
+setInterval(updateStats, 2000);
+updateStats();
+</script>
+
+</body>
+</html>
