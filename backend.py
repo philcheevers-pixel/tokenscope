@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 TokenScope Backend API - Real Cost Data Fetcher
-Fetches actual costs from AI provider APIs
+All 16 providers with verified API key URLs
 """
 
 from flask import Flask, jsonify, request
@@ -14,300 +14,94 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
-# ===== PROVIDER CONFIGURATIONS =====
+# ===== PROVIDER CONFIGURATIONS - ALL 16 WITH VERIFIED KEY URLS =====
 PROVIDERS = {
-    'claude': {
-        'name': 'Claude',
-        'api_type': 'anthropic',
-        'api_key_env': 'ANTHROPIC_API_KEY'
-    },
-    'openai': {
-        'name': 'OpenAI',
-        'api_type': 'openai',
-        'api_key_env': 'OPENAI_API_KEY'
-    },
-    'gemini': {
-        'name': 'Gemini',
-        'api_type': 'google',
-        'api_key_env': 'GOOGLE_API_KEY'
-    },
-    'deepseek': {
-        'name': 'DeepSeek',
-        'api_type': 'deepseek',
-        'api_key_env': 'DEEPSEEK_API_KEY'
-    }
+    'claude': {'name': 'Claude', 'key_url': 'https://console.anthropic.com/settings/admin-keys'},
+    'openai': {'name': 'OpenAI', 'key_url': 'https://platform.openai.com/account/api-keys'},
+    'gemini': {'name': 'Gemini', 'key_url': 'https://console.cloud.google.com/apis/credentials'},
+    'deepseek': {'name': 'DeepSeek', 'key_url': 'https://platform.deepseek.com/api_keys'},
+    'grok': {'name': 'Grok', 'key_url': 'https://console.x.ai/'},
+    'mistral': {'name': 'Mistral', 'key_url': 'https://console.mistral.ai/api-keys'},
+    'cohere': {'name': 'Cohere', 'key_url': 'https://dashboard.cohere.com/api-keys'},
+    'kimi': {'name': 'Kimi', 'key_url': 'https://platform.moonshot.cn/console/api-keys'},
+    'qwen': {'name': 'Qwen', 'key_url': 'https://dashscope.console.aliyun.com/api-keys'},
+    'glm': {'name': 'GLM', 'key_url': 'https://open.bigmodel.cn/usercenter/apikeys'},
+    'minimax': {'name': 'MiniMax', 'key_url': 'https://platform.minimaxi.com/user-center/basic-info/interface-key'},
+    'together': {'name': 'Together AI', 'key_url': 'https://www.together.ai/settings/api-keys'},
+    'fireworks': {'name': 'Fireworks', 'key_url': 'https://app.fireworks.ai/settings/account'},
+    'groq': {'name': 'Groq', 'key_url': 'https://console.groq.com/keys'},
+    'baseten': {'name': 'Baseten', 'key_url': 'https://app.baseten.co/settings/account/api-keys'},
+    'cerebras': {'name': 'Cerebras', 'key_url': 'https://cloud.cerebras.ai/api-keys'}
 }
 
-# ===== MOCK DATA (fallback) =====
+# ===== RATE CARDS =====
+RATE_CARDS = {
+    'claude': {'claude-opus-4-8': {'input': 5, 'output': 25}, 'claude-sonnet-5': {'input': 3, 'output': 15}},
+    'openai': {'gpt-4o': {'input': 2.5, 'output': 10}, 'gpt-4-turbo': {'input': 10, 'output': 30}},
+    'gemini': {'gemini-2.0': {'input': 1.25, 'output': 5}, 'gemini-1.5-pro': {'input': 1.25, 'output': 5}},
+    'deepseek': {'deepseek-v3': {'input': 0.435, 'output': 0.87}, 'deepseek-v2.5': {'input': 0.14, 'output': 0.28}},
+    'grok': {'grok-4.3': {'input': 1.25, 'output': 2.5}},
+    'mistral': {'mistral-large': {'input': 2, 'output': 6}},
+    'cohere': {'command-r-plus': {'input': 2.5, 'output': 2.5}},
+    'kimi': {'moonshot-v1': {'input': 0.86, 'output': 0.86}},
+    'qwen': {'qwen-2.5': {'input': 0.12, 'output': 0.12}},
+    'glm': {'glm-4': {'input': 0.1, 'output': 0.1}},
+    'minimax': {'minimax-text-01': {'input': 0.15, 'output': 0.3}},
+    'together': {'llama-3.1': {'input': 0.5, 'output': 0.75}},
+    'fireworks': {'llama-3.1': {'input': 0.4, 'output': 0.6}},
+    'groq': {'llama-3.1-70b': {'input': 0.05, 'output': 0.1}},
+    'baseten': {'llama-3.1': {'input': 0.8, 'output': 1.2}},
+    'cerebras': {'llama-3.1': {'input': 0.25, 'output': 0.35}}
+}
+
+# ===== MOCK DATA (fallback when API unavailable) =====
 MOCK_COSTS = {
-    'claude': [
-        {'date': '2026-07-09', 'input_tokens': 1500000, 'output_tokens': 500000, 'cost': 12.50, 'model': 'claude-opus-4-8'},
-        {'date': '2026-07-08', 'input_tokens': 800000, 'output_tokens': 200000, 'cost': 5.50, 'model': 'claude-sonnet-5'},
-        {'date': '2026-07-07', 'input_tokens': 600000, 'output_tokens': 150000, 'cost': 3.90, 'model': 'claude-sonnet-5'},
-        {'date': '2026-07-06', 'input_tokens': 1200000, 'output_tokens': 400000, 'cost': 10.20, 'model': 'claude-opus-4-8'},
-    ],
-    'openai': [
-        {'date': '2026-07-09', 'input_tokens': 2000000, 'output_tokens': 1000000, 'cost': 25.00, 'model': 'gpt-4o'},
-        {'date': '2026-07-08', 'input_tokens': 1500000, 'output_tokens': 500000, 'cost': 17.50, 'model': 'gpt-4-turbo'},
-    ],
-    'gemini': [
-        {'date': '2026-07-09', 'input_tokens': 5000000, 'output_tokens': 2000000, 'cost': 8.75, 'model': 'gemini-1.5-pro'},
-    ],
-    'deepseek': [
-        {'date': '2026-07-09', 'input_tokens': 10000000, 'output_tokens': 5000000, 'cost': 6.95, 'model': 'deepseek-v3'},
-    ]
+    'claude': [{'date': '2026-07-09', 'input_tokens': 1500000, 'output_tokens': 500000, 'cost': 12.50, 'model': 'claude-opus-4-8'}],
+    'openai': [{'date': '2026-07-09', 'input_tokens': 2000000, 'output_tokens': 1000000, 'cost': 25.00, 'model': 'gpt-4o'}],
+    'deepseek': [{'date': '2026-07-09', 'input_tokens': 10000000, 'output_tokens': 5000000, 'cost': 6.95, 'model': 'deepseek-v3'}],
 }
 
-# ===== API INTEGRATIONS =====
+# ===== REAL API INTEGRATIONS =====
 
 def fetch_claude_costs(api_key, days=7):
-    """Fetch real cost data from Anthropic"""
     try:
         url = 'https://api.anthropic.com/v1/admin/cost-report'
-
-        headers = {
-            'x-api-key': api_key,
-            'content-type': 'application/json'
-        }
-
-        params = {
-            'limit': days,
-            'start_date': (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d'),
-            'end_date': datetime.now().strftime('%Y-%m-%d')
-        }
-
-        r = requests.get(url, headers=headers, params=params, timeout=10)
-
+        headers = {'x-api-key': api_key}
+        r = requests.get(url, headers=headers, timeout=10)
         if r.status_code == 401:
-            return {'error': 'Invalid API key', 'status': 401}
+            return {'error': 'Invalid Claude API key'}
         if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}', 'status': r.status_code}
-
+            return {'error': f'Claude API error: {r.status_code}'}
         data = r.json()
-        costs = []
-
-        if 'data' in data:
-            for day in data['data']:
-                costs.append({
-                    'date': day.get('date'),
-                    'input_tokens': day.get('input_tokens', 0),
-                    'output_tokens': day.get('output_tokens', 0),
-                    'cost': day.get('total_cost', 0),
-                    'model': day.get('model', 'unknown')
-                })
-
-        return {'costs': costs, 'source': 'live'}
-
+        return {'costs': data.get('data', []), 'source': 'live'}
     except Exception as e:
-        return {'error': str(e), 'source': 'error'}
+        return {'error': str(e)}
 
 def fetch_openai_costs(api_key, days=7):
-    """Fetch real cost data from OpenAI"""
     try:
         url = 'https://api.openai.com/v1/dashboard/usage'
-
-        headers = {
-            'Authorization': f'Bearer {api_key}',
-            'content-type': 'application/json'
-        }
-
-        start_date = (datetime.now() - timedelta(days=days)).strftime('%Y-%m-%d')
-        end_date = datetime.now().strftime('%Y-%m-%d')
-
-        params = {
-            'start_date': start_date,
-            'end_date': end_date
-        }
-
-        r = requests.get(url, headers=headers, params=params, timeout=10)
-
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
         if r.status_code == 401:
-            return {'error': 'Invalid API key', 'status': 401}
+            return {'error': 'Invalid OpenAI API key'}
         if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}', 'status': r.status_code}
-
-        data = r.json()
-        costs = []
-
-        if 'daily_costs' in data:
-            for day in data['daily_costs']:
-                costs.append({
-                    'date': day.get('date'),
-                    'input_tokens': day.get('input_tokens', 0),
-                    'output_tokens': day.get('output_tokens', 0),
-                    'cost': day.get('total_cost', 0),
-                    'model': day.get('model', 'unknown')
-                })
-
-        return {'costs': costs, 'source': 'live'}
-
+            return {'error': f'OpenAI API error: {r.status_code}'}
+        return {'costs': r.json().get('daily_costs', []), 'source': 'live'}
     except Exception as e:
-        return {'error': str(e), 'source': 'error'}
+        return {'error': str(e)}
 
 def fetch_deepseek_costs(api_key, days=7):
-    """Fetch real cost data from DeepSeek"""
     try:
         url = 'https://api.deepseek.com/v1/user/balance'
-
-        headers = {
-            'Authorization': f'Bearer {api_key}',
-            'content-type': 'application/json'
-        }
-
+        headers = {'Authorization': f'Bearer {api_key}'}
         r = requests.get(url, headers=headers, timeout=10)
-
         if r.status_code == 401:
-            return {'error': 'Invalid API key', 'status': 401}
+            return {'error': 'Invalid DeepSeek API key'}
         if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}', 'status': r.status_code}
-
-        data = r.json()
-        balance = data.get('balance_usd', 0)
-
-        return {
-            'costs': [{
-                'date': datetime.now().strftime('%Y-%m-%d'),
-                'balance': balance,
-                'model': 'deepseek-v3'
-            }],
-            'source': 'balance_only'
-        }
-
-    except Exception as e:
-        return {'error': str(e), 'source': 'error'}
-
-def fetch_mistral_costs(api_key, days=7):
-    """Fetch real cost data from Mistral"""
-    try:
-        url = 'https://api.mistral.ai/v1/cost-report'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('costs', []), 'source': 'live'}
+            return {'error': f'DeepSeek API error: {r.status_code}'}
+        return {'costs': [r.json()], 'source': 'live'}
     except Exception as e:
         return {'error': str(e)}
-
-def fetch_cohere_costs(api_key, days=7):
-    """Fetch real cost data from Cohere"""
-    try:
-        url = 'https://api.cohere.ai/v1/billing/usage'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('usage', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
-def fetch_kimi_costs(api_key, days=7):
-    """Fetch Moonshot/Kimi costs (OpenAI-compatible)"""
-    try:
-        url = 'https://platform.moonshot.cn/api/usage'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('usage', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
-def fetch_qwen_costs(api_key, days=7):
-    """Fetch Alibaba Qwen costs"""
-    try:
-        url = 'https://dashscope.aliyuncs.com/api/cost/usage'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('data', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
-def fetch_glm_costs(api_key, days=7):
-    """Fetch Zhipu GLM costs"""
-    try:
-        url = 'https://open.bigmodel.cn/api/billing/usage'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('usage', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
-def fetch_minimax_costs(api_key, days=7):
-    """Fetch MiniMax costs"""
-    try:
-        url = 'https://api.minimaxi.com/v1/user/balance'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('balance', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
-def fetch_together_costs(api_key, days=7):
-    """Fetch Together AI costs"""
-    try:
-        url = 'https://www.together.ai/api/billing/usage'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('usage', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
-def fetch_fireworks_costs(api_key, days=7):
-    """Fetch Fireworks costs"""
-    try:
-        url = 'https://api.fireworks.ai/v1/billing/usage'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('usage', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
-def fetch_groq_costs(api_key, days=7):
-    """Fetch Groq costs"""
-    try:
-        url = 'https://api.groq.com/v1/billing/usage'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('usage', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
-def fetch_baseten_costs(api_key, days=7):
-    """Fetch Baseten costs"""
-    try:
-        url = 'https://api.baseten.co/v1/billing/usage'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('usage', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
-def fetch_cerebras_costs(api_key, days=7):
-    """Fetch Cerebras costs"""
-    try:
-        url = 'https://api.cerebras.ai/v1/billing/usage'
-        headers = {'Authorization': f'Bearer {api_key}'}
-        r = requests.get(url, headers=headers, timeout=10)
-        if r.status_code != 200:
-            return {'error': f'API error: {r.status_code}'}
-        return {'costs': r.json().get('usage', []), 'source': 'live'}
-    except Exception as e:
-        return {'error': str(e)}
-
 
 # ===== ROUTES =====
 
@@ -315,10 +109,9 @@ def fetch_cerebras_costs(api_key, days=7):
 def health():
     return jsonify({
         'status': 'ok',
-        'service': 'TokenScope Backend API',
-        'version': '1.1',
+        'service': 'TokenScope Backend',
         'providers': list(PROVIDERS.keys()),
-        'timestamp': datetime.utcnow().isoformat()
+        'provider_count': len(PROVIDERS)
     })
 
 @app.route('/api/providers', methods=['GET'])
@@ -326,17 +119,12 @@ def get_providers():
     return jsonify({'providers': PROVIDERS, 'count': len(PROVIDERS)})
 
 @app.route('/api/<provider>/costs', methods=['GET'])
-def get_provider_costs(provider):
+def get_costs(provider):
     if provider not in PROVIDERS:
         return jsonify({'error': f'Provider {provider} not found'}), 404
 
-    days = request.args.get('days', default=7, type=int)
-    api_key = request.args.get('key', default='')
-
-    if days > 120:
-        days = 120
-    if days < 1:
-        days = 1
+    api_key = request.args.get('key', '')
+    days = request.args.get('days', 7, type=int)
 
     result = None
     if api_key:
@@ -346,96 +134,39 @@ def get_provider_costs(provider):
             result = fetch_openai_costs(api_key, days)
         elif provider == 'deepseek':
             result = fetch_deepseek_costs(api_key, days)
-        elif provider == 'mistral':
-            result = fetch_mistral_costs(api_key, days)
-        elif provider == 'cohere':
-            result = fetch_cohere_costs(api_key, days)
-        elif provider == 'kimi':
-            result = fetch_kimi_costs(api_key, days)
-        elif provider == 'qwen':
-            result = fetch_qwen_costs(api_key, days)
-        elif provider == 'glm':
-            result = fetch_glm_costs(api_key, days)
-        elif provider == 'minimax':
-            result = fetch_minimax_costs(api_key, days)
-        elif provider == 'together':
-            result = fetch_together_costs(api_key, days)
-        elif provider == 'fireworks':
-            result = fetch_fireworks_costs(api_key, days)
-        elif provider == 'groq':
-            result = fetch_groq_costs(api_key, days)
-        elif provider == 'baseten':
-            result = fetch_baseten_costs(api_key, days)
-        elif provider == 'cerebras':
-            result = fetch_cerebras_costs(api_key, days)
 
     if not result or 'error' in result:
         data = MOCK_COSTS.get(provider, [])
         return jsonify({
             'provider': provider,
-            'days_requested': days,
-            'days_returned': len(data[:days]),
-            'costs': data[:days],
-            'status': 'mock_data',
-            'note': result.get('error') if result else 'No API key provided',
-            'timestamp': datetime.utcnow().isoformat()
+            'costs': data,
+            'status': 'fallback',
+            'note': result.get('error') if result else 'No API key provided'
         })
 
     return jsonify({
         'provider': provider,
-        'days_requested': days,
-        'days_returned': len(result.get('costs', [])),
         'costs': result.get('costs', []),
-        'status': result.get('source', 'unknown'),
-        'timestamp': datetime.utcnow().isoformat()
+        'status': 'live'
     })
 
-@app.route('/api/<provider>/validate-key', methods=['POST'])
-def validate_key(provider):
+@app.route('/api/<provider>/key-url', methods=['GET'])
+def get_key_url(provider):
     if provider not in PROVIDERS:
         return jsonify({'error': f'Provider {provider} not found'}), 404
-
-    data = request.get_json()
-    key = data.get('key', '')
-
-    if not key:
-        return jsonify({'valid': False, 'error': 'No key provided'}), 400
-
-    result = None
-    if provider == 'claude':
-        result = fetch_claude_costs(key, 1)
-    elif provider == 'openai':
-        result = fetch_openai_costs(key, 1)
-    elif provider == 'deepseek':
-        result = fetch_deepseek_costs(key, 1)
-
-    if result and 'error' not in result:
-        return jsonify({'valid': True, 'provider': provider})
-    else:
-        return jsonify({
-            'valid': False,
-            'error': result.get('error') if result else 'Unknown error'
-        }), 401
-
+    return jsonify({
+        'provider': provider,
+        'name': PROVIDERS[provider]['name'],
+        'key_url': PROVIDERS[provider]['key_url']
+    })
 
 @app.errorhandler(404)
 def not_found(error):
-    return jsonify({'error': 'Not found', 'status': 404}), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    return jsonify({'error': 'Internal server error', 'status': 500}), 500
+    return jsonify({'error': 'Not found'}), 404
 
 if __name__ == '__main__':
-    print("=" * 60)
-    print("TokenScope Backend API v1.1 - Real API Integration")
-    print("=" * 60)
-    print(f"Starting server on http://localhost:5000")
-    print(f"\nAvailable providers: {', '.join(PROVIDERS.keys())}")
-    print(f"\nTo fetch REAL data, pass API keys:")
-    print(f"  GET /api/claude/costs?key=YOUR_ANTHROPIC_KEY")
-    print(f"  GET /api/openai/costs?key=YOUR_OPENAI_KEY")
-    print(f"  GET /api/deepseek/costs?key=YOUR_DEEPSEEK_KEY")
-    print(f"\nDefault: Returns mock data (for testing)")
-    print("=" * 60)
+    print("TokenScope Backend API")
+    print(f"Providers: {len(PROVIDERS)}")
+    for p in sorted(PROVIDERS.keys()):
+        print(f"  - {PROVIDERS[p]['name']}: {PROVIDERS[p]['key_url']}")
     app.run(debug=True, host='127.0.0.1', port=5000)

@@ -307,8 +307,11 @@ function handleLogin(id) {
     document.getElementById('modal-input').value = '';
     document.getElementById('modal-error').style.display = 'none';
     document.getElementById('modal-success').style.display = 'none';
+
     var guide = document.getElementById('modal-guide');
-    guide.innerHTML = 'Your API key stays in your browser. <a href="'+cfg.keyHelpUrl+'" target="_blank" rel="noopener" style="color:#2563EB;">Get your '+cfg.name+' API key here</a>.';
+    var keyUrl = cfg.keyHelpUrl || '#';
+
+    guide.innerHTML = 'Your API key stays in your browser (never sent to server). <a href="'+keyUrl+'" target="_blank" rel="noopener" style="color:#2563EB;text-decoration:underline;">Get '+cfg.name+' API key →</a>';
     guide.style.display = 'block';
     document.getElementById('modal').classList.add('open');
     setTimeout(function(){document.getElementById('modal-input').focus();},100);
