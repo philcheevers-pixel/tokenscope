@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- TokenScope v11.0 - Expanded to 17 providers + 5 inference hosts -->
 <title>TokenScope v11.0</title>
+<script src="indexeddb-schema.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F8F9FA;color:#1E293B;display:flex;flex-direction:column;height:100vh;overflow:hidden;font-size:24px;line-height:1.5}
@@ -175,6 +176,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 
         <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
             <button class="modal-btn" style="font-size:12px;" onclick="saveAllKeys()">Save All Keys</button>
+            <button class="modal-btn" style="font-size:12px;background:#10B981;" onclick="triggerBackfillAll()">⏱️ Backfill 120 Days</button>
             <button class="modal-btn" style="font-size:12px;" onclick="loadWithRealKeys()">Reload with Real Data</button>
             <span class="modal-cancel" onclick="closeSettingsModal()">Close</span>
         </div>
@@ -230,6 +232,7 @@ var currentModalProvider = null;
 var costData = {};
 var API_BASE = 'http://localhost:5000/api';
 var dataLoaded = false;
+var tsdb = null;
 
 function vaultGet(k) {try{return localStorage.getItem('ts_'+k)||'';}catch(e){return '';}}
 function vaultSet(k,v) {try{localStorage.setItem('ts_'+k,v);}catch(e){}}
@@ -265,6 +268,37 @@ function fetchProviderCosts(provider) {
         });
 }
 
+function backfillProvider(provider) {
+    var url = API_BASE+'/'+provider+'/backfill';
+    return fetch(url, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({days: 120})
+    })
+    .then(function(r) {
+        if (!r.ok) throw new Error('Backfill error: '+r.status);
+        return r.json();
+    })
+    .then(function(data) {
+        if (!data.costs) return [];
+        var costs = data.costs;
+
+        // Store in IndexedDB
+        if (tsdb) {
+            costs.forEach(function(c) {
+                tsdb.addCost(provider, c.date, c.model, c.input_tokens, c.output_tokens, c.cost);
+            });
+        }
+
+        costData[provider] = costs;
+        return costs;
+    })
+    .catch(function(e) {
+        console.error('Backfill failed for '+provider+':', e);
+        return [];
+    });
+}
+
 function loadAllProviderCosts() {
     var providers = ['claude','openai','gemini','deepseek','mistral','cohere','kimi','qwen','glm','minimax','together','fireworks','groq','baseten','cerebras','grok'];
     var promises = providers.map(fetchProviderCosts);
@@ -273,6 +307,24 @@ function loadAllProviderCosts() {
         updateCardValues();
         console.log('All 16 provider costs loaded');
         return true;
+    });
+}
+
+function triggerBackfillAll() {
+    var providers = ['claude','openai','deepseek'];
+    var status = document.getElementById('connCount');
+    status.textContent = 'Backfilling 120 days...';
+
+    var promises = providers.map(backfillProvider);
+    return Promise.all(promises).then(function() {
+        status.textContent = '3 providers backfilled (120 days)';
+        dataLoaded = true;
+        updateCardValues();
+        console.log('120-day backfill complete');
+        return true;
+    }).catch(function(e) {
+        console.error('Backfill error:', e);
+        status.textContent = 'Backfill error - see console';
     });
 }
 
@@ -460,15 +512,34 @@ function init() {
     startTimer();
 
     var statusEl = document.getElementById('connCount');
-    statusEl.textContent = 'Loading cost data...';
+    statusEl.textContent = 'Initializing database...';
 
-    loadAllProviderCosts().then(function() {
-        statusEl.textContent = '4 of 22 providers loaded (real data)';
-        console.log('TokenScope v11.0 ready - real data from backend');
-    }).catch(function(e) {
-        console.error('Failed to load data:', e);
-        statusEl.textContent = 'Backend offline - mock data only';
-    });
+    // Initialize IndexedDB
+    if (typeof TokenScopeDB !== 'undefined') {
+        tsdb = new TokenScopeDB();
+        tsdb.init().then(function() {
+            console.log('IndexedDB initialized');
+            statusEl.textContent = 'Backfilling data (120 days)...';
+
+            // Auto-backfill on startup
+            return triggerBackfillAll();
+        }).then(function() {
+            statusEl.textContent = '✓ 120-day backfill complete';
+            console.log('TokenScope v11.0 ready - data layer active');
+        }).catch(function(e) {
+            console.error('Init error:', e);
+            statusEl.textContent = 'Loading mock data...';
+            return loadAllProviderCosts();
+        });
+    } else {
+        statusEl.textContent = 'Loading cost data...';
+        loadAllProviderCosts().then(function() {
+            statusEl.textContent = '✓ Data loaded';
+        }).catch(function(e) {
+            console.error('Failed to load data:', e);
+            statusEl.textContent = 'Offline - using mock data';
+        });
+    }
 }
 
 if (document.readyState === 'loading') {
