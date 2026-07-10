@@ -190,17 +190,48 @@ var RATE_CARDS = {
 var state = {provider:'claude',card:1};
 var db = null;
 var currentModalProvider = null;
-var mockData = {
-    claude: [{date:'2026-07-09',input:1500000,output:500000,cost:12.5,model:'claude-opus-4-8'},{date:'2026-07-08',input:800000,output:200000,cost:5.5,model:'claude-sonnet-5'}],
-    openai: [{date:'2026-07-09',input:2000000,output:1000000,cost:25,model:'gpt-4o'},{date:'2026-07-08',input:1500000,output:500000,cost:17.5,model:'gpt-4-turbo'}],
-    gemini: [{date:'2026-07-09',input:5000000,output:2000000,cost:8.75,model:'gemini-1.5-pro'},{date:'2026-07-08',input:3000000,output:1000000,cost:5,model:'gemini-1.5-flash'}],
-    deepseek: [{date:'2026-07-09',input:10000000,output:5000000,cost:6.95,model:'deepseek-v3'},{date:'2026-07-08',input:5000000,output:2000000,cost:3.48,model:'deepseek-v2.5'}]
-};
+var costData = {};
+var API_BASE = 'http://localhost:5000/api';
+var dataLoaded = false;
 
 function vaultGet(k) {try{return localStorage.getItem('ts_'+k)||'';}catch(e){return '';}}
 function vaultSet(k,v) {try{localStorage.setItem('ts_'+k,v);}catch(e){}}
 function dataGet(provider,key) {try{var d=localStorage.getItem('ts_data_'+provider+'_'+key); return d?JSON.parse(d):null;}catch(e){return null;}}
 function dataSet(provider,key,val) {try{localStorage.setItem('ts_data_'+provider+'_'+key,JSON.stringify(val));}catch(e){}}
+
+function fetchProviderCosts(provider) {
+    var url = API_BASE+'/'+provider+'/costs?days=7';
+    return fetch(url)
+        .then(function(r) {
+            if (!r.ok) throw new Error('API error: '+r.status);
+            return r.json();
+        })
+        .then(function(data) {
+            costData[provider] = data.costs||[];
+            dataSet(provider, 'costs', costData[provider]);
+            return costData[provider];
+        })
+        .catch(function(e) {
+            console.error('Failed to fetch '+provider+' costs:', e);
+            var cached = dataGet(provider, 'costs');
+            if (cached) {
+                costData[provider] = cached;
+                return cached;
+            }
+            return [];
+        });
+}
+
+function loadAllProviderCosts() {
+    var providers = ['claude','openai','gemini','deepseek'];
+    var promises = providers.map(fetchProviderCosts);
+    return Promise.all(promises).then(function() {
+        dataLoaded = true;
+        updateCardValues();
+        console.log('All provider costs loaded');
+        return true;
+    });
+}
 
 function renderSidebar() {
     var html = '';
@@ -279,7 +310,7 @@ function showCard(num) {
 
     var centre = document.getElementById('centre');
     var p = PROVIDERS[state.provider];
-    var data = mockData[state.provider]||[];
+    var data = costData[state.provider]||[];
 
     if (num === 1) {
         var yesterday = data[0]||{};
@@ -337,11 +368,21 @@ function updateCardValues() {
 }
 
 function init() {
+    console.log('TokenScope v11.0 initializing...');
     renderSidebar();
     selectProvider('claude');
-    updateCardValues();
     startTimer();
-    console.log('TokenScope v11.0 ready - 22 providers loaded, data flow active');
+
+    var statusEl = document.getElementById('connCount');
+    statusEl.textContent = 'Loading cost data...';
+
+    loadAllProviderCosts().then(function() {
+        statusEl.textContent = '4 of 22 providers loaded (real data)';
+        console.log('TokenScope v11.0 ready - real data from backend');
+    }).catch(function(e) {
+        console.error('Failed to load data:', e);
+        statusEl.textContent = 'Backend offline - mock data only';
+    });
 }
 
 if (document.readyState === 'loading') {
