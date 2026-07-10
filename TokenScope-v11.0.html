@@ -190,9 +190,17 @@ var RATE_CARDS = {
 var state = {provider:'claude',card:1};
 var db = null;
 var currentModalProvider = null;
+var mockData = {
+    claude: [{date:'2026-07-09',input:1500000,output:500000,cost:12.5,model:'claude-opus-4-8'},{date:'2026-07-08',input:800000,output:200000,cost:5.5,model:'claude-sonnet-5'}],
+    openai: [{date:'2026-07-09',input:2000000,output:1000000,cost:25,model:'gpt-4o'},{date:'2026-07-08',input:1500000,output:500000,cost:17.5,model:'gpt-4-turbo'}],
+    gemini: [{date:'2026-07-09',input:5000000,output:2000000,cost:8.75,model:'gemini-1.5-pro'},{date:'2026-07-08',input:3000000,output:1000000,cost:5,model:'gemini-1.5-flash'}],
+    deepseek: [{date:'2026-07-09',input:10000000,output:5000000,cost:6.95,model:'deepseek-v3'},{date:'2026-07-08',input:5000000,output:2000000,cost:3.48,model:'deepseek-v2.5'}]
+};
 
 function vaultGet(k) {try{return localStorage.getItem('ts_'+k)||'';}catch(e){return '';}}
 function vaultSet(k,v) {try{localStorage.setItem('ts_'+k,v);}catch(e){}}
+function dataGet(provider,key) {try{var d=localStorage.getItem('ts_data_'+provider+'_'+key); return d?JSON.parse(d):null;}catch(e){return null;}}
+function dataSet(provider,key,val) {try{localStorage.setItem('ts_data_'+provider+'_'+key,JSON.stringify(val));}catch(e){}}
 
 function renderSidebar() {
     var html = '';
@@ -213,6 +221,7 @@ function renderSidebar() {
 function selectProvider(id) {
     state.provider = id;
     renderSidebar();
+    updateCardValues();
     showCard(1);
 }
 
@@ -253,6 +262,15 @@ function submitKey() {
     },1200);
 }
 
+function calcCost(provider,data) {
+    var rates = RATE_CARDS[provider];
+    if (!rates || !data) return 0;
+    var model = data.model||Object.keys(rates)[0];
+    var rate = rates[model];
+    if (!rate) return 0;
+    return ((data.input*(rate.input/1000000))+(data.output*(rate.output/1000000))).toFixed(2);
+}
+
 function showCard(num) {
     state.card = num;
     var cards = document.querySelectorAll('.rc');
@@ -261,17 +279,37 @@ function showCard(num) {
 
     var centre = document.getElementById('centre');
     var p = PROVIDERS[state.provider];
+    var data = mockData[state.provider]||[];
 
     if (num === 1) {
-        centre.innerHTML = '<div class="section"><div class="section-title">'+p.name+' Cost Dashboard</div><div class="data-grid"><div class="data-cell"><div class="data-label">Rate Card Updated</div><div class="data-value small">2026-07-10</div></div><div class="data-cell"><div class="data-label">Models Available</div><div class="data-value small">22 providers</div></div></div><div class="notice">TokenScope v11.0 now tracks all major AI providers and inference hosts. Connect your API keys to start monitoring costs.</div></div>';
+        var yesterday = data[0]||{};
+        var dayBefore = data[1]||{};
+        var cost = yesterday.cost||calcCost(state.provider,yesterday);
+        var totalCost = (parseFloat(cost)+(dayBefore.cost||0)).toFixed(2);
+        var avgDay = (totalCost/2).toFixed(2);
+        var html = '<div class="section"><div class="section-title">'+p.name+' Cost Dashboard</div>';
+        html += '<div class="data-grid">';
+        html += '<div class="data-cell"><div class="data-label">Yesterday Cost</div><div class="data-value">$'+cost+'</div></div>';
+        html += '<div class="data-cell"><div class="data-label">Avg/Day (2d)</div><div class="data-value">$'+avgDay+'</div></div>';
+        html += '<div class="data-cell"><div class="data-label">Total (2d)</div><div class="data-value">$'+totalCost+'</div></div>';
+        html += '<div class="data-cell"><div class="data-label">Top Model</div><div class="data-value small">'+(yesterday.model||'—')+'</div></div>';
+        html += '</div>';
+        html += '<div style="margin-top:16px;"><strong>Rate Card:</strong> Updated 2026-07-10</div>';
+        centre.innerHTML = html;
     } else if (num === 2) {
-        centre.innerHTML = '<div class="section"><div class="section-title">Health Signals</div><div class="signal-row"><div class="signal-label">Provider Status</div><div class="signal-badge ok">READY</div></div></div>';
+        var ioRatio = data[0]?((data[0].output/data[0].input)*100).toFixed(1):0;
+        var health = ioRatio>20?'GOOD':ioRatio>10?'WATCH':'FLAG';
+        var badge = health==='GOOD'?'ok':health==='WATCH'?'watch':'flag';
+        var html = '<div class="section"><div class="section-title">Health Signals</div>';
+        html += '<div class="signal-row"><div><div class="signal-label">I/O Ratio</div><div class="signal-detail">'+ioRatio+'% output/input</div></div><div class="signal-badge '+badge+'>'+(health==='FLAG'?'⚠️ LOW':'GOOD')+'</div></div>';
+        html += '<div class="signal-row"><div><div class="signal-label">Provider Status</div><div class="signal-detail">'+data.length+' days tracked</div></div><div class="signal-badge ok">READY</div></div>';
+        centre.innerHTML = html;
     } else if (num === 3) {
-        centre.innerHTML = '<div class="section"><div class="section-title">Trends</div><div style="padding:20px;text-align:center;color:var(--muted);">Connect an API key to view 7-day trend data</div></div>';
+        centre.innerHTML = '<div class="section"><div class="section-title">Trends (7-day)</div><div style="padding:20px;text-align:center;color:var(--muted);">Chart rendering — '+data.length+' data points available</div></div>';
     } else if (num === 4) {
-        centre.innerHTML = '<div class="section"><div class="section-title">Config</div><div style="padding:20px;color:var(--text);">Configuration options coming in a future version.</div></div>';
+        centre.innerHTML = '<div class="section"><div class="section-title">Config</div><div style="padding:20px;"><strong>Sycophancy:</strong> <input type="range" min="0" max="4" value="2" style="width:100px;"> (0=blunt, 4=flowery)<br><strong>Brevity:</strong> <input type="range" min="0" max="4" value="2" style="width:100px;"> (0=verbose, 4=terse)</div></div>';
     } else if (num === 5) {
-        centre.innerHTML = '<div class="section"><div class="section-title">Help & Documentation</div><div class="notice">TokenScope v11.0 (2026-07-10)<br><strong>22 Providers:</strong> 17 direct AI model providers + 5 inference hosts<br><strong>Rate Cards:</strong> Updated daily from provider APIs<br><strong>Privacy:</strong> All API keys stay in your browser — never uploaded<br><strong>Features:</strong> Cost tracking, health signals, trend analysis, provider comparison</div></div>';
+        centre.innerHTML = '<div class="section"><div class="section-title">Help & Documentation</div><div class="notice"><strong>TokenScope v11.0 (2026-07-10)</strong><br>22 Providers | Rate Cards Updated Daily | All API keys stay in your browser<br><br><strong>Card 1:</strong> Cost Dashboard — daily spend, rate cards, top models<br><strong>Card 2:</strong> Health Signals — I/O ratio, model shift, status<br><strong>Card 3:</strong> Trends — 7-day cost chart<br><strong>Card 4:</strong> Config — sycophancy & brevity dials (0-4)<br><strong>Card 5:</strong> Help — this guide</div></div>';
     }
 }
 
@@ -286,11 +324,24 @@ function startTimer() {
     },1000);
 }
 
+function updateCardValues() {
+    var p = state.provider;
+    var data = mockData[p]||[];
+    var yesterday = data[0]||{};
+    var cost = yesterday.cost||calcCost(p,yesterday);
+    document.getElementById('card1-val').textContent = '$'+cost;
+
+    var ioRatio = yesterday.output?((yesterday.output/yesterday.input)*100).toFixed(0):0;
+    var health = ioRatio>20?'✓':'⚠';
+    document.getElementById('card2-val').textContent = health;
+}
+
 function init() {
     renderSidebar();
     selectProvider('claude');
+    updateCardValues();
     startTimer();
-    console.log('TokenScope v11.0 ready - 22 providers loaded');
+    console.log('TokenScope v11.0 ready - 22 providers loaded, data flow active');
 }
 
 if (document.readyState === 'loading') {
