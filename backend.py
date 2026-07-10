@@ -308,48 +308,6 @@ def fetch_cerebras_costs(api_key, days=7):
     except Exception as e:
         return {'error': str(e)}
 
-# ===== BACKFILL ENGINE =====
-
-def generate_date_range(days=120):
-    """Generate list of dates for backfill (120 days ago to today)"""
-    end_date = datetime.now()
-    dates = []
-    for i in range(days):
-        date = end_date - timedelta(days=i)
-        dates.append(date.strftime('%Y-%m-%d'))
-    return sorted(dates)
-
-def simulate_backfill_data(provider, days=120):
-    """
-    Simulate 120-day backfill data for testing
-    Real implementation would call actual provider APIs
-    """
-    base_rates = RATE_CARDS.get(provider, {})
-    if not base_rates:
-        return []
-
-    costs = []
-    base_model = list(base_rates.keys())[0]
-    base_rate = base_rates[base_model]
-
-    end_date = datetime.now()
-    for i in range(days):
-        date = (end_date - timedelta(days=i)).strftime('%Y-%m-%d')
-
-        # Simulate varying usage (random per day)
-        daily_input = 500000 + (i * 1000) + (i % 7) * 100000
-        daily_output = 200000 + (i * 500) + (i % 7) * 50000
-        daily_cost = (daily_input * base_rate['input'] / 1000000) + (daily_output * base_rate['output'] / 1000000)
-
-        costs.append({
-            'date': date,
-            'input_tokens': daily_input,
-            'output_tokens': daily_output,
-            'cost': round(daily_cost, 2),
-            'model': base_model
-        })
-
-    return sorted(costs, key=lambda x: x['date'])
 
 # ===== ROUTES =====
 
@@ -459,52 +417,6 @@ def validate_key(provider):
             'error': result.get('error') if result else 'Unknown error'
         }), 401
 
-@app.route('/api/<provider>/backfill', methods=['POST'])
-def backfill_history(provider):
-    """
-    Backfill 120 days of historical cost data for a provider
-    Returns simulated data (TODO: wire to real provider APIs)
-    """
-
-    if provider not in PROVIDERS:
-        return jsonify({'error': f'Provider {provider} not found'}), 404
-
-    data = request.get_json() or {}
-    days = data.get('days', 120)
-    if days > 120:
-        days = 120
-    if days < 1:
-        days = 1
-
-    # Generate backfill data (currently simulated)
-    costs = simulate_backfill_data(provider, days)
-
-    return jsonify({
-        'provider': provider,
-        'days_backfilled': len(costs),
-        'start_date': costs[0]['date'] if costs else None,
-        'end_date': costs[-1]['date'] if costs else None,
-        'costs': costs,
-        'status': 'simulated',
-        'note': 'Using simulated backfill data (real APIs coming soon)',
-        'timestamp': datetime.utcnow().isoformat()
-    }), 202
-
-@app.route('/api/<provider>/backfill/status', methods=['GET'])
-def backfill_status(provider):
-    """Check backfill status for a provider"""
-
-    if provider not in PROVIDERS:
-        return jsonify({'error': f'Provider {provider} not found'}), 404
-
-    # TODO: Track actual backfill progress in database
-    return jsonify({
-        'provider': provider,
-        'status': 'ready',
-        'days_available': 120,
-        'last_backfill': None,
-        'next_backfill': 'on_demand'
-    })
 
 @app.errorhandler(404)
 def not_found(error):
