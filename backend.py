@@ -176,6 +176,138 @@ def fetch_deepseek_costs(api_key, days=7):
     except Exception as e:
         return {'error': str(e), 'source': 'error'}
 
+def fetch_mistral_costs(api_key, days=7):
+    """Fetch real cost data from Mistral"""
+    try:
+        url = 'https://api.mistral.ai/v1/cost-report'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('costs', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_cohere_costs(api_key, days=7):
+    """Fetch real cost data from Cohere"""
+    try:
+        url = 'https://api.cohere.ai/v1/billing/usage'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('usage', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_kimi_costs(api_key, days=7):
+    """Fetch Moonshot/Kimi costs (OpenAI-compatible)"""
+    try:
+        url = 'https://platform.moonshot.cn/api/usage'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('usage', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_qwen_costs(api_key, days=7):
+    """Fetch Alibaba Qwen costs"""
+    try:
+        url = 'https://dashscope.aliyuncs.com/api/cost/usage'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('data', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_glm_costs(api_key, days=7):
+    """Fetch Zhipu GLM costs"""
+    try:
+        url = 'https://open.bigmodel.cn/api/billing/usage'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('usage', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_minimax_costs(api_key, days=7):
+    """Fetch MiniMax costs"""
+    try:
+        url = 'https://api.minimaxi.com/v1/user/balance'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('balance', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_together_costs(api_key, days=7):
+    """Fetch Together AI costs"""
+    try:
+        url = 'https://www.together.ai/api/billing/usage'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('usage', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_fireworks_costs(api_key, days=7):
+    """Fetch Fireworks costs"""
+    try:
+        url = 'https://api.fireworks.ai/v1/billing/usage'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('usage', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_groq_costs(api_key, days=7):
+    """Fetch Groq costs"""
+    try:
+        url = 'https://api.groq.com/v1/billing/usage'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('usage', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_baseten_costs(api_key, days=7):
+    """Fetch Baseten costs"""
+    try:
+        url = 'https://api.baseten.co/v1/billing/usage'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('usage', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
+def fetch_cerebras_costs(api_key, days=7):
+    """Fetch Cerebras costs"""
+    try:
+        url = 'https://api.cerebras.ai/v1/billing/usage'
+        headers = {'Authorization': f'Bearer {api_key}'}
+        r = requests.get(url, headers=headers, timeout=10)
+        if r.status_code != 200:
+            return {'error': f'API error: {r.status_code}'}
+        return {'costs': r.json().get('usage', []), 'source': 'live'}
+    except Exception as e:
+        return {'error': str(e)}
+
 # ===== ROUTES =====
 
 @app.route('/', methods=['GET'])
@@ -213,6 +345,28 @@ def get_provider_costs(provider):
             result = fetch_openai_costs(api_key, days)
         elif provider == 'deepseek':
             result = fetch_deepseek_costs(api_key, days)
+        elif provider == 'mistral':
+            result = fetch_mistral_costs(api_key, days)
+        elif provider == 'cohere':
+            result = fetch_cohere_costs(api_key, days)
+        elif provider == 'kimi':
+            result = fetch_kimi_costs(api_key, days)
+        elif provider == 'qwen':
+            result = fetch_qwen_costs(api_key, days)
+        elif provider == 'glm':
+            result = fetch_glm_costs(api_key, days)
+        elif provider == 'minimax':
+            result = fetch_minimax_costs(api_key, days)
+        elif provider == 'together':
+            result = fetch_together_costs(api_key, days)
+        elif provider == 'fireworks':
+            result = fetch_fireworks_costs(api_key, days)
+        elif provider == 'groq':
+            result = fetch_groq_costs(api_key, days)
+        elif provider == 'baseten':
+            result = fetch_baseten_costs(api_key, days)
+        elif provider == 'cerebras':
+            result = fetch_cerebras_costs(api_key, days)
 
     if not result or 'error' in result:
         data = MOCK_COSTS.get(provider, [])

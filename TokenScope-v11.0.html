@@ -151,27 +151,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
 </div>
 
-<div class="modal" id="settings-modal">
-    <div class="modal-content" style="width:500px;">
-        <h3>API Key Settings</h3>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Store your provider API keys here. They stay in your browser only.</div>
-        <div style="margin-bottom:16px;">
-            <div style="font-weight:600;margin-bottom:4px;">Claude</div>
-            <input type="password" class="modal-input" id="key-claude" placeholder="sk-ant-admin01-...">
-            <button class="modal-btn" style="font-size:12px;padding:6px;" onclick="saveApiKey('claude')">Save Claude Key</button>
+<div class="modal" id="settings-modal" style="overflow:auto;">
+    <div class="modal-content" style="width:500px;max-height:90vh;overflow-y:auto;">
+        <h3>API Key Settings (22 Providers)</h3>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Store your provider API keys. They stay in your browser only.</div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Claude</div><input type="password" class="modal-input" id="key-claude" placeholder="sk-ant-..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">OpenAI</div><input type="password" class="modal-input" id="key-openai" placeholder="sk-..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">DeepSeek</div><input type="password" class="modal-input" id="key-deepseek" placeholder="sk-..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Mistral</div><input type="password" class="modal-input" id="key-mistral" placeholder="sk-..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Cohere</div><input type="password" class="modal-input" id="key-cohere" placeholder="key..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Kimi</div><input type="password" class="modal-input" id="key-kimi" placeholder="sk-..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Qwen</div><input type="password" class="modal-input" id="key-qwen" placeholder="key..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">GLM</div><input type="password" class="modal-input" id="key-glm" placeholder="key..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">MiniMax</div><input type="password" class="modal-input" id="key-minimax" placeholder="key..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Together</div><input type="password" class="modal-input" id="key-together" placeholder="key..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Fireworks</div><input type="password" class="modal-input" id="key-fireworks" placeholder="key..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Groq</div><input type="password" class="modal-input" id="key-groq" placeholder="gsk_..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Baseten</div><input type="password" class="modal-input" id="key-baseten" placeholder="key..." style="font-size:11px;"></div>
+            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Cerebras</div><input type="password" class="modal-input" id="key-cerebras" placeholder="csk_..." style="font-size:11px;"></div>
         </div>
-        <div style="margin-bottom:16px;">
-            <div style="font-weight:600;margin-bottom:4px;">OpenAI</div>
-            <input type="password" class="modal-input" id="key-openai" placeholder="sk-...">
-            <button class="modal-btn" style="font-size:12px;padding:6px;" onclick="saveApiKey('openai')">Save OpenAI Key</button>
-        </div>
-        <div style="margin-bottom:16px;">
-            <div style="font-weight:600;margin-bottom:4px;">DeepSeek</div>
-            <input type="password" class="modal-input" id="key-deepseek" placeholder="sk-...">
-            <button class="modal-btn" style="font-size:12px;padding:6px;" onclick="saveApiKey('deepseek')">Save DeepSeek Key</button>
-        </div>
+
         <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
-            <button class="modal-btn" onclick="loadWithRealKeys()">Reload with Real Data</button>
+            <button class="modal-btn" style="font-size:12px;" onclick="saveAllKeys()">Save All Keys</button>
+            <button class="modal-btn" style="font-size:12px;" onclick="loadWithRealKeys()">Reload with Real Data</button>
             <span class="modal-cancel" onclick="closeSettingsModal()">Close</span>
         </div>
     </div>
@@ -262,12 +266,12 @@ function fetchProviderCosts(provider) {
 }
 
 function loadAllProviderCosts() {
-    var providers = ['claude','openai','gemini','deepseek'];
+    var providers = ['claude','openai','gemini','deepseek','mistral','cohere','kimi','qwen','glm','minimax','together','fireworks','groq','baseten','cerebras','grok'];
     var promises = providers.map(fetchProviderCosts);
     return Promise.all(promises).then(function() {
         dataLoaded = true;
         updateCardValues();
-        console.log('All provider costs loaded');
+        console.log('All 16 provider costs loaded');
         return true;
     });
 }
@@ -315,9 +319,11 @@ function closeModal() {
 }
 
 function openSettingsModal() {
-    document.getElementById('key-claude').value = vaultGet('claude_api_key');
-    document.getElementById('key-openai').value = vaultGet('openai_api_key');
-    document.getElementById('key-deepseek').value = vaultGet('deepseek_api_key');
+    var providers = ['claude','openai','deepseek','mistral','cohere','kimi','qwen','glm','minimax','together','fireworks','groq','baseten','cerebras'];
+    providers.forEach(function(p) {
+        var el = document.getElementById('key-'+p);
+        if (el) el.value = vaultGet(p+'_api_key');
+    });
     document.getElementById('settings-modal').classList.add('open');
 }
 
@@ -325,14 +331,17 @@ function closeSettingsModal() {
     document.getElementById('settings-modal').classList.remove('open');
 }
 
-function saveApiKey(provider) {
-    var key = document.getElementById('key-'+provider).value.trim();
-    if (!key || key.length < 5) {
-        alert('Invalid key');
-        return;
-    }
-    vaultSet(provider+'_api_key', key);
-    alert('Key saved for '+provider);
+function saveAllKeys() {
+    var providers = ['claude','openai','deepseek','mistral','cohere','kimi','qwen','glm','minimax','together','fireworks','groq','baseten','cerebras'];
+    var saved = 0;
+    providers.forEach(function(p) {
+        var el = document.getElementById('key-'+p);
+        if (el && el.value.trim()) {
+            vaultSet(p+'_api_key', el.value.trim());
+            saved++;
+        }
+    });
+    alert('Saved '+saved+' API keys');
 }
 
 function loadWithRealKeys() {
