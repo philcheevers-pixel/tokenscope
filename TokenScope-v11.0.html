@@ -93,6 +93,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     </div>
 
     <div class="rightbar">
+        <div class="rc" onclick="showCard(0)" style="background:#F0F0F0;">
+            <div>
+                <div class="rc-title">⚙️ Settings</div>
+                <div class="rc-val" style="font-size:14px;color:#666;">API Keys</div>
+            </div>
+            <div class="rc-sub">Configure</div>
+        </div>
         <div class="rc active-card" onclick="showCard(1)">
             <div>
                 <div class="rc-title">1. Cost</div>
@@ -141,6 +148,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <input type="password" class="modal-input" id="modal-input" placeholder="Paste API key here">
         <button class="modal-btn" onclick="submitKey()">Save Key</button>
         <span class="modal-cancel" onclick="closeModal()">Cancel</span>
+    </div>
+</div>
+
+<div class="modal" id="settings-modal">
+    <div class="modal-content" style="width:500px;">
+        <h3>API Key Settings</h3>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Store your provider API keys here. They stay in your browser only.</div>
+        <div style="margin-bottom:16px;">
+            <div style="font-weight:600;margin-bottom:4px;">Claude</div>
+            <input type="password" class="modal-input" id="key-claude" placeholder="sk-ant-admin01-...">
+            <button class="modal-btn" style="font-size:12px;padding:6px;" onclick="saveApiKey('claude')">Save Claude Key</button>
+        </div>
+        <div style="margin-bottom:16px;">
+            <div style="font-weight:600;margin-bottom:4px;">OpenAI</div>
+            <input type="password" class="modal-input" id="key-openai" placeholder="sk-...">
+            <button class="modal-btn" style="font-size:12px;padding:6px;" onclick="saveApiKey('openai')">Save OpenAI Key</button>
+        </div>
+        <div style="margin-bottom:16px;">
+            <div style="font-weight:600;margin-bottom:4px;">DeepSeek</div>
+            <input type="password" class="modal-input" id="key-deepseek" placeholder="sk-...">
+            <button class="modal-btn" style="font-size:12px;padding:6px;" onclick="saveApiKey('deepseek')">Save DeepSeek Key</button>
+        </div>
+        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+            <button class="modal-btn" onclick="loadWithRealKeys()">Reload with Real Data</button>
+            <span class="modal-cancel" onclick="closeSettingsModal()">Close</span>
+        </div>
     </div>
 </div>
 
@@ -201,6 +234,12 @@ function dataSet(provider,key,val) {try{localStorage.setItem('ts_data_'+provider
 
 function fetchProviderCosts(provider) {
     var url = API_BASE+'/'+provider+'/costs?days=7';
+    var apiKey = vaultGet(provider+'_api_key');
+
+    if (apiKey) {
+        url += '&key='+encodeURIComponent(apiKey);
+    }
+
     return fetch(url)
         .then(function(r) {
             if (!r.ok) throw new Error('API error: '+r.status);
@@ -275,6 +314,39 @@ function closeModal() {
     currentModalProvider = null;
 }
 
+function openSettingsModal() {
+    document.getElementById('key-claude').value = vaultGet('claude_api_key');
+    document.getElementById('key-openai').value = vaultGet('openai_api_key');
+    document.getElementById('key-deepseek').value = vaultGet('deepseek_api_key');
+    document.getElementById('settings-modal').classList.add('open');
+}
+
+function closeSettingsModal() {
+    document.getElementById('settings-modal').classList.remove('open');
+}
+
+function saveApiKey(provider) {
+    var key = document.getElementById('key-'+provider).value.trim();
+    if (!key || key.length < 5) {
+        alert('Invalid key');
+        return;
+    }
+    vaultSet(provider+'_api_key', key);
+    alert('Key saved for '+provider);
+}
+
+function loadWithRealKeys() {
+    closeSettingsModal();
+    document.getElementById('connCount').textContent = 'Reloading with real keys...';
+    loadAllProviderCosts().then(function() {
+        document.getElementById('connCount').textContent = 'Real data loaded!';
+        showCard(1);
+    }).catch(function(e) {
+        alert('Error loading real data: '+e);
+        document.getElementById('connCount').textContent = 'Error loading real data';
+    });
+}
+
 function submitKey() {
     var key = document.getElementById('modal-input').value.trim();
     if (!key || key.length < 8) {
@@ -306,7 +378,12 @@ function showCard(num) {
     state.card = num;
     var cards = document.querySelectorAll('.rc');
     for (var i=0; i<cards.length; i++) cards[i].classList.remove('active-card');
-    cards[num-1].classList.add('active-card');
+    if (num === 0) {
+        cards[0].classList.add('active-card');
+        openSettingsModal();
+        return;
+    }
+    cards[num].classList.add('active-card');
 
     var centre = document.getElementById('centre');
     var p = PROVIDERS[state.provider];
