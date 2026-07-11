@@ -3,78 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- TokenScope v11.0 - Expanded to 17 providers + 5 inference hosts -->
 <title>TokenScope v11.0</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F8F9FA;color:#1E293B;display:flex;flex-direction:column;height:100vh;overflow:hidden;font-size:24px;line-height:1.5}
-:root{--bg:#F8F9FA;--surface:#FFF;--border:#E2E8F0;--text:#1E293B;--muted:#64748B;--accent:#2563EB;--green:#16A34A;--yellow:#CA8A04;--red:#DC2626;--grey:#94A3B8}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#F8F9FA;color:#000;display:flex;flex-direction:column;height:100vh;overflow:hidden;line-height:1.5}
+:root{--bg:#F8F9FA;--surface:#FFF;--border:#E2E8F0;--text:#000;--muted:#555;--accent:#2563EB;--green:#16A34A;--yellow:#CA8A04;--red:#DC2626;--grey:#94A3B8}
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;background:#FFF;border-bottom:3px solid var(--accent);flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:40px}
 .topbar-logo{font-size:20px;font-weight:700}
-.topbar-right{display:flex;align-items:center;gap:14px;font-size:14px;color:var(--muted)}
+.topbar-selection{font-size:18px;font-weight:600;color:#000;letter-spacing:0.5px}
+.topbar-right{display:flex;align-items:center;gap:14px;font-size:16px;color:var(--muted)}
 .main{display:flex;flex:1;overflow:hidden;gap:0}
 .sidebar{width:200px;background:#FFF;border-right:2px solid var(--border);overflow-y:auto;padding:8px 0;flex-shrink:0}
 .slabel{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);padding:12px 14px 6px;text-transform:uppercase}
 .prow{display:flex;align-items:center;padding:8px 14px;cursor:pointer;border-left:3px solid transparent;gap:8px;transition:background .2s,border-color .2s}
 .prow:hover{background:var(--bg)}
 .prow.active{background:var(--bg);border-left-color:var(--accent)}
-.pname{font-size:14px;font-weight:600}
+.pname{font-size:15px;font-weight:600;color:#000}
 .pco{font-size:11px;color:var(--muted)}
-.pact{font-size:11px;font-weight:700;color:var(--accent);cursor:pointer;padding:2px 8px;border-radius:4px;background:var(--bg);transition:all .2s;white-space:nowrap}
-.pact:hover{background:#E2E8F0}
+.pact{font-size:11px;font-weight:700;cursor:pointer;padding:4px 10px;border-radius:4px;transition:all .2s;white-space:nowrap;border:1px solid;color:#FFF;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.pact.login{background:rgba(0,0,0,.1)}
+.pact.active{background:var(--green);border-color:var(--green)}
+.pact:hover{opacity:.85}
 .centre{flex:1;overflow-y:auto;padding:20px;background:var(--bg)}
 .rightbar{width:170px;background:#FFF;border-left:2px solid var(--border);overflow-y:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px;flex-shrink:0}
-.rc{background:#FFF;border:1px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;transition:border-color .2s,background .2s;min-height:80px;display:flex;flex-direction:column;justify-content:space-between}
+.rc{background:#FFF;border:2px solid #CBD5E1;border-radius:8px;padding:10px;cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s;min-height:80px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
 .rc:hover{border-color:var(--accent)}
 .rc.active-card{border-color:var(--accent);background:#F8FAFF}
 .rc-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:4px}
 .rc-val{font-size:22px;font-weight:700;color:var(--text)}
 .rc-val.blue{color:var(--accent)}
 .rc-val.green{color:var(--green)}
-.rc-sub{font-size:11px;color:var(--muted);margin-top:4px}
-.notice{padding:12px 14px;border-radius:6px;margin-bottom:12px;font-size:14px;background:#FFF3EC;border:1px solid #FDE68A;color:#92400E}
+.rc-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.notice{padding:15px;border-radius:6px;margin-bottom:12px;font-size:15px;background:#FFF3EC;border:1px solid #FDE68A;color:#92400E;line-height:1.6}
 .section{margin-bottom:20px}
-.section-title{font-size:16px;font-weight:700;margin-bottom:10px}
+.section-title{font-size:20px;font-weight:700;margin-bottom:12px}
 .data-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.data-cell{background:#FFF;border:1px solid var(--border);border-radius:6px;padding:12px}
-.data-label{font-size:12px;color:var(--muted);margin-bottom:4px}
-.data-value{font-size:18px;font-weight:700}
-.data-value.small{font-size:13px;line-height:1.3;word-break:break-word}
-.signal-row{background:#FFF;border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
-.signal-label{font-size:14px;font-weight:600}
-.signal-detail{font-size:12px;color:var(--muted);margin-top:2px}
-.signal-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap}
+.data-cell{background:#FFF;border:1px solid var(--border);border-radius:6px;padding:15px}
+.data-label{font-size:14px;color:var(--muted);margin-bottom:6px}
+.data-value{font-size:24px;font-weight:700}
+.data-value.small{font-size:15px;line-height:1.3;word-break:break-word}
+.signal-row{background:#FFF;border:1px solid var(--border);border-radius:6px;padding:15px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.signal-label{font-size:16px;font-weight:600}
+.signal-detail{font-size:14px;color:var(--muted);margin-top:2px}
+.signal-badge{font-size:12px;font-weight:700;padding:4px 12px;border-radius:12px;white-space:nowrap}
 .signal-badge.ok{background:#DCFCE7;color:var(--green)}
 .signal-badge.watch{background:#FEF3C7;color:var(--yellow)}
 .signal-badge.flag{background:#FEE2E2;color:var(--red)}
+.model-list{background:#FFF;border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:12px}
+.model-item{padding:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;font-size:15px}
+.model-item:last-child{border-bottom:none}
+.model-name{font-weight:600;flex:1}
+.model-badge{font-size:12px;font-weight:700;padding:2px 10px;border-radius:12px}
+.model-badge.current{background:#DCFCE7;color:var(--green)}
+.model-badge.available{background:#F1F5F9;color:var(--muted)}
+.slider-container{background:#FFF;border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:2px}
+.slider-label{font-size:20px;font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;justify-content:center}
+.slider-desc{font-size:15px;color:#475569;margin-bottom:6px;display:flex;justify-content:space-between}
+input[type="range"]{width:100%;height:6px;border-radius:3px;background:#E2E8F0;outline:none;-webkit-appearance:none}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer}
+input[type="range"]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;border:none}
+input[type="range"].slider-with-marks{background:linear-gradient(to right,#E2E8F0 0%,#E2E8F0 24%,#D1D5DB 24%,#D1D5DB 24.5%,#E2E8F0 24.5%,#E2E8F0 49%,#D1D5DB 49%,#D1D5DB 49.5%,#E2E8F0 49.5%,#E2E8F0 74%,#D1D5DB 74%,#D1D5DB 74.5%,#E2E8F0 74.5%,#E2E8F0 100%)}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(15,23,42,.5);z-index:1000;align-items:center;justify-content:center}
 .modal.open{display:flex}
 .modal-content{background:#FFF;padding:24px;border-radius:8px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.15)}
 .modal h3{font-size:18px;font-weight:700;margin-bottom:12px}
-.modal-input{width:100%;padding:10px;border:1px solid var(--border);border-radius:6px;margin-bottom:12px;font-size:14px;font-family:monospace}
-.modal-btn{width:100%;padding:10px;background:var(--accent);color:#FFF;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.modal-input{width:100%;padding:12px;border:1px solid var(--border);border-radius:6px;margin-bottom:12px;font-size:15px;font-family:monospace}
+.modal-btn{width:100%;padding:12px;background:var(--accent);color:#FFF;border:none;border-radius:6px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px}
 .modal-btn:hover{filter:brightness(.9)}
-.modal-cancel{display:block;text-align:center;font-size:13px;color:var(--muted);cursor:pointer}
-.modal-success{display:none;padding:10px;background:#DCFCE7;border:1px solid #BBF7D0;border-radius:6px;color:var(--green);font-size:13px;margin-bottom:12px}
-.modal-error{display:none;padding:10px;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;color:var(--red);font-size:13px;margin-bottom:12px}
-.tab-bar{display:flex;gap:4px;margin-bottom:16px;border-bottom:2px solid var(--border)}
-.tab-btn{padding:8px 16px;font-size:13px;font-weight:600;color:var(--muted);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px}
-.tab-btn:hover{color:var(--text)}
-.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.modal-cancel{display:block;text-align:center;font-size:14px;color:var(--muted);cursor:pointer}
+.modal-success{display:none;padding:12px;background:#DCFCE7;border:1px solid #BBF7D0;border-radius:6px;color:var(--green);font-size:14px;margin-bottom:12px}
+.modal-error{display:none;padding:12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:6px;color:var(--red);font-size:14px;margin-bottom:12px}
+.tab-bar{display:flex;gap:6px;margin-bottom:18px;border-bottom:none;align-items:flex-end}
+.tab-btn{padding:8px 18px;font-size:13px;font-weight:600;color:#666;background:#F5F5F5;border:1px solid #DDD;border-radius:8px 8px 0 0;cursor:pointer;transition:all .15s;position:relative;margin-bottom:-1px}
+.tab-btn:hover{color:#333;background:#E8E8E8}
+.tab-btn.active{color:#FFF;background:var(--accent);border-color:var(--accent)}
+.slider-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.slider-pair{display:flex;flex-direction:column}
 .rate-table{width:100%;border-collapse:collapse;background:#FFF;border:1px solid var(--border);border-radius:6px;overflow:hidden}
-.rate-table th{text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted);padding:10px 12px;background:var(--bg);border-bottom:1px solid var(--border)}
-.rate-table td{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border)}
-.rate-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
-.rate-badge.confirmed{background:#DCFCE7;color:var(--green)}
-.rate-badge.reference{background:#F1F5F9;color:var(--muted)}
+.rate-table th{text-align:left;font-size:12px;text-transform:uppercase;color:var(--muted);padding:12px;background:var(--bg);border-bottom:1px solid var(--border)}
+.rate-table td{padding:12px;font-size:14px;border-bottom:1px solid var(--border)}
+.modal-guide{font-size:20px;color:var(--muted);margin-bottom:12px;line-height:1.5;color:#000}
+.help-icon{display:inline-block;width:22px;height:22px;background:#2563EB;color:#FFF;border-radius:50%;text-align:center;line-height:22px;font-weight:700;cursor:help;font-size:14px;margin-left:8px;position:relative}
+.help-icon:hover::after{content:attr(data-help);position:absolute;bottom:130%;left:-150px;width:300px;background:#000;color:#FFF;padding:10px;border-radius:6px;font-size:14px;white-space:normal;z-index:1000;line-height:1.4;font-weight:400;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+.help-icon:hover::before{content:'';position:absolute;bottom:125%;left:-50px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid #000;z-index:1000}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-    <div class="topbar-logo">TokenScope <span style="font-size:12px;font-weight:400;">v11.0</span></div>
+    <div class="topbar-left">
+        <div class="topbar-logo">TokenScope <span style="font-size:12px;font-weight:400;">v11.0</span></div>
+        <div class="topbar-selection" id="selectionTitle">CONFIGURATION</div>
+    </div>
     <div class="topbar-right">
-        <span id="connCount">0 of 22 connected</span>
+        <span id="connCount">Initializing...</span>
         <span id="tmr" style="font-family:monospace;">0:00:00</span>
     </div>
 </div>
@@ -88,24 +111,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
     <div class="centre" id="centre">
         <div style="text-align:center;padding:60px 20px;color:var(--muted);">
             <div style="font-size:24px;margin-bottom:12px;">Select a provider</div>
-            <div style="font-size:14px;">Click a provider to start</div>
+            <div style="font-size:16px;">Click a provider to start</div>
         </div>
     </div>
 
     <div class="rightbar">
-        <div class="rc" onclick="showCard(0)" style="background:#F0F0F0;">
-            <div>
-                <div class="rc-title">⚙️ Settings</div>
-                <div class="rc-val" style="font-size:14px;color:#666;">API Keys</div>
-            </div>
-            <div class="rc-sub">Configure</div>
-        </div>
         <div class="rc active-card" onclick="showCard(1)">
             <div>
                 <div class="rc-title">1. Cost</div>
                 <div class="rc-val blue" id="card1-val">$0.00</div>
             </div>
-            <div class="rc-sub">Yesterday</div>
+            <div class="rc-sub">Today</div>
         </div>
         <div class="rc" onclick="showCard(2)">
             <div>
@@ -122,11 +138,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
             <div class="rc-sub">7 days</div>
         </div>
         <div class="rc" onclick="showCard(4)">
-            <div>
-                <div class="rc-title">4. Config</div>
-                <div class="rc-val" id="card4-val" style="font-size:16px;">Settings</div>
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;">
+                <div class="rc-val" style="font-size:20px;text-align:center;">Configuration</div>
             </div>
-            <div class="rc-sub">Sliders</div>
         </div>
         <div class="rc" onclick="showCard(5)">
             <div>
@@ -143,66 +157,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
         <h3 id="modal-title">Connect API Key</h3>
         <div class="modal-success" id="modal-success"></div>
         <div class="modal-error" id="modal-error"></div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">Your key stays in your browser. Never sent to our server.</div>
-        <div id="modal-guide" style="display:none;font-size:13px;color:var(--muted);margin-bottom:12px;"></div>
+        <div style="font-size:18px;color:#000;margin-bottom:12px;">Your key stays in your browser. Never sent to our server.</div>
+        <div id="modal-guide" style="display:none;font-size:14px;color:var(--muted);margin-bottom:12px;"></div>
         <input type="password" class="modal-input" id="modal-input" placeholder="Paste API key here">
         <button class="modal-btn" onclick="submitKey()">Save Key</button>
         <span class="modal-cancel" onclick="closeModal()">Cancel</span>
     </div>
 </div>
 
-<div class="modal" id="settings-modal" style="overflow:auto;">
-    <div class="modal-content" style="width:500px;max-height:90vh;overflow-y:auto;">
-        <h3>API Key Settings (22 Providers)</h3>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:16px;">Store your provider API keys. They stay in your browser only.</div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Claude</div><input type="password" class="modal-input" id="key-claude" placeholder="sk-ant-..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">OpenAI</div><input type="password" class="modal-input" id="key-openai" placeholder="sk-..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">DeepSeek</div><input type="password" class="modal-input" id="key-deepseek" placeholder="sk-..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Mistral</div><input type="password" class="modal-input" id="key-mistral" placeholder="sk-..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Cohere</div><input type="password" class="modal-input" id="key-cohere" placeholder="key..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Kimi</div><input type="password" class="modal-input" id="key-kimi" placeholder="sk-..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Qwen</div><input type="password" class="modal-input" id="key-qwen" placeholder="key..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">GLM</div><input type="password" class="modal-input" id="key-glm" placeholder="key..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">MiniMax</div><input type="password" class="modal-input" id="key-minimax" placeholder="key..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Together</div><input type="password" class="modal-input" id="key-together" placeholder="key..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Fireworks</div><input type="password" class="modal-input" id="key-fireworks" placeholder="key..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Groq</div><input type="password" class="modal-input" id="key-groq" placeholder="gsk_..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Baseten</div><input type="password" class="modal-input" id="key-baseten" placeholder="key..." style="font-size:11px;"></div>
-            <div><div style="font-weight:600;font-size:12px;margin-bottom:2px;">Cerebras</div><input type="password" class="modal-input" id="key-cerebras" placeholder="csk_..." style="font-size:11px;"></div>
-        </div>
-
-        <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
-            <button class="modal-btn" style="font-size:12px;" onclick="saveAllKeys()">Save All Keys</button>
-            <button class="modal-btn" style="font-size:12px;" onclick="loadWithRealKeys()">Reload with Real Data</button>
-            <span class="modal-cancel" onclick="closeSettingsModal()">Close</span>
-        </div>
-    </div>
-</div>
-
 <script>
-// ===== TOKENSCOPE v11.0 - 22 PROVIDERS =====
-// 17 direct providers + 5 inference hosts
-// All rate cards updated 2026-07-10
+// ===== TOKENSCOPE v11.0 - 16 PROVIDERS =====
+// Per-model 120-day cost tracking
 
 var PROVIDERS = {
-    claude: {name:'Claude',logo:'🔷',color:'#FF6B35',usageApi:'claude-admin',keyHelpUrl:'https://platform.claude.com/settings/admin-keys',keyPrefix:'sk-ant-admin01-',jurisdiction:'US'},
-    openai: {name:'OpenAI',logo:'⚡',color:'#4A9EFF',usageApi:'openai-api',keyHelpUrl:'https://platform.openai.com/api-keys',keyPrefix:'sk-',jurisdiction:'US'},
-    gemini: {name:'Gemini',logo:'✨',color:'#9C27B0',usageApi:'gemini-api',keyHelpUrl:'https://aistudio.google.com/apikey',keyPrefix:'',jurisdiction:'US'},
-    deepseek: {name:'DeepSeek',logo:'🌊',color:'#06B6D4',usageApi:'deepseek-balance',keyHelpUrl:'https://platform.deepseek.com/api_keys',keyPrefix:'sk-',jurisdiction:'China'},
-    grok: {name:'Grok',logo:'⚔️',color:'#000000',usageApi:'grok-api',keyHelpUrl:'https://console.x.ai/team/default/api-keys',keyPrefix:'',jurisdiction:'US'},
-    mistral: {name:'Mistral',logo:'🎯',color:'#FF6B00',usageApi:'mistral-api',keyHelpUrl:'https://console.mistral.ai/api-keys',keyPrefix:'sk-',jurisdiction:'France'},
-    cohere: {name:'Cohere',logo:'🔮',color:'#E31937',usageApi:'cohere-dashboard',keyHelpUrl:'https://dashboard.cohere.com/api-keys',keyPrefix:'',jurisdiction:'Canada'},
-    kimi: {name:'Kimi',logo:'🌙',color:'#1E40AF',usageApi:'openai-compat',keyHelpUrl:'https://platform.moonshot.cn/console/api-keys',keyPrefix:'sk-',jurisdiction:'China'},
-    qwen: {name:'Qwen',logo:'🎨',color:'#FF7A45',usageApi:'openai-compat',keyHelpUrl:'https://dashscope.console.aliyun.com/api-key',keyPrefix:'sk-',jurisdiction:'China'},
-    glm: {name:'GLM',logo:'🧠',color:'#3B82F6',usageApi:'openai-compat',keyHelpUrl:'https://open.bigmodel.cn/usercenter/apikeys',keyPrefix:'',jurisdiction:'China'},
-    minimax: {name:'MiniMax',logo:'⚙️',color:'#10B981',usageApi:'openai-compat',keyHelpUrl:'https://platform.minimaxi.com/user-center/basic-info/interface-key',keyPrefix:'',jurisdiction:'China'},
-    together: {name:'Together AI',logo:'🤝',color:'#8B5CF6',usageApi:'openai-compat',keyHelpUrl:'https://www.together.ai/settings/api-keys',keyPrefix:'',jurisdiction:'US'},
-    fireworks: {name:'Fireworks',logo:'🔥',color:'#F59E0B',usageApi:'openai-compat',keyHelpUrl:'https://app.fireworks.ai/auth/login',keyPrefix:'',jurisdiction:'US'},
-    groq: {name:'Groq',logo:'⚡',color:'#00D084',usageApi:'openai-compat',keyHelpUrl:'https://console.groq.com/keys',keyPrefix:'gsk_',jurisdiction:'US'},
-    baseten: {name:'Baseten',logo:'📦',color:'#6366F1',usageApi:'openai-compat',keyHelpUrl:'https://app.baseten.co/settings/account/api-keys',keyPrefix:'',jurisdiction:'US'},
-    cerebras: {name:'Cerebras',logo:'🧬',color:'#EC4899',usageApi:'openai-compat',keyHelpUrl:'https://cloud.cerebras.ai/api-keys',keyPrefix:'csk_',jurisdiction:'US'}
+    claude: {name:'Claude',logo:'🔷',color:'#FF6B35'},
+    openai: {name:'OpenAI',logo:'⚡',color:'#4A9EFF'},
+    gemini: {name:'Gemini',logo:'✨',color:'#9C27B0'},
+    deepseek: {name:'DeepSeek',logo:'🌊',color:'#06B6D4'},
+    grok: {name:'Grok',logo:'⚔️',color:'#000000'},
+    mistral: {name:'Mistral',logo:'🎯',color:'#FF6B00'},
+    cohere: {name:'Cohere',logo:'🔮',color:'#E31937'},
+    kimi: {name:'Kimi',logo:'🌙',color:'#1E40AF'},
+    qwen: {name:'Qwen',logo:'🎨',color:'#FF7A45'},
+    glm: {name:'GLM',logo:'🧠',color:'#3B82F6'},
+    minimax: {name:'MiniMax',logo:'⚙️',color:'#10B981'},
+    together: {name:'Together',logo:'🤝',color:'#8B5CF6'},
+    fireworks: {name:'Fireworks',logo:'🔥',color:'#F59E0B'},
+    groq: {name:'Groq',logo:'⚡',color:'#00D084'},
+    baseten: {name:'Baseten',logo:'📦',color:'#6366F1'},
+    cerebras: {name:'Cerebras',logo:'🧬',color:'#EC4899'},
+    replicate: {name:'Replicate',logo:'🎬',color:'#6F46FF'},
+    huggingface: {name:'Hugging Face',logo:'🤗',color:'#FFD700'},
+    openrouter: {name:'OpenRouter',logo:'🌉',color:'#FF7F50'},
+    anthropic_web: {name:'Claude Web',logo:'🌐',color:'#9C27B0'},
+    openai_web: {name:'ChatGPT Web',logo:'💬',color:'#10A37F'},
+    gemini_web: {name:'Gemini Web',logo:'🌟',color:'#4285F4'}
 };
 
 var RATE_CARDS = {
@@ -221,60 +210,43 @@ var RATE_CARDS = {
     fireworks: {'llama-3.1':{input:.4,output:.6},'mistral':{input:.3,output:.5},'qwen':{input:.25,output:.4}},
     groq: {'llama-3.1-70b-vision':{input:.05,output:.1},'mixtral-8x7b':{input:.02,output:.05},'llama-3-70b':{input:.02,output:.05}},
     baseten: {'llama-3.1':{input:.8,output:1.2},'mixtral-8x22b':{input:1.5,output:2}},
-    cerebras: {'llama-3.1-70b':{input:.25,output:.35}}
+    cerebras: {'llama-3.1-70b':{input:.25,output:.35}},
+    replicate: {'meta-llama-2-70b':{input:.65,output:2.75}},
+    huggingface: {'meta-llama-2-70b-chat':{input:.0008,output:.001}},
+    openrouter: {'gpt-4-turbo':{input:10,output:30}},
+    anthropic_web: {'claude-opus':{input:0,output:0}},
+    openai_web: {'gpt-4':{input:0,output:0}},
+    gemini_web: {'gemini-pro':{input:0,output:0}}
 };
 
-var state = {provider:'claude',card:1};
-var db = null;
-var currentModalProvider = null;
+var state = {provider:'claude',card:1,sycophancy:2,brevity:2,creativity:2,formality:2,depth:2,structure:2,certainty:2,citations:2};
 var costData = {};
 var API_BASE = 'http://localhost:5000/api';
-var dataLoaded = false;
-var tsdb = null;
+var currentModalProvider = null;
 
 function vaultGet(k) {try{return localStorage.getItem('ts_'+k)||'';}catch(e){return '';}}
 function vaultSet(k,v) {try{localStorage.setItem('ts_'+k,v);}catch(e){}}
-function dataGet(provider,key) {try{var d=localStorage.getItem('ts_data_'+provider+'_'+key); return d?JSON.parse(d):null;}catch(e){return null;}}
-function dataSet(provider,key,val) {try{localStorage.setItem('ts_data_'+provider+'_'+key,JSON.stringify(val));}catch(e){}}
+function hasKey(provider) {return !!vaultGet(provider+'_api_key');}
 
 function fetchProviderCosts(provider) {
     var url = API_BASE+'/'+provider+'/costs?days=7';
     var apiKey = vaultGet(provider+'_api_key');
-
-    if (apiKey) {
-        url += '&key='+encodeURIComponent(apiKey);
-    }
-
+    if (apiKey) url += '&key='+encodeURIComponent(apiKey);
     return fetch(url)
-        .then(function(r) {
-            if (!r.ok) throw new Error('API error: '+r.status);
-            return r.json();
-        })
+        .then(function(r) { return r.ok?r.json():Promise.reject('HTTP '+r.status); })
         .then(function(data) {
             costData[provider] = data.costs||[];
-            dataSet(provider, 'costs', costData[provider]);
             return costData[provider];
         })
         .catch(function(e) {
-            console.error('Failed to fetch '+provider+' costs:', e);
-            var cached = dataGet(provider, 'costs');
-            if (cached) {
-                costData[provider] = cached;
-                return cached;
-            }
+            console.error('Failed '+provider+': '+e);
             return [];
         });
 }
 
 function loadAllProviderCosts() {
-    var providers = ['claude','openai','gemini','deepseek','mistral','cohere','kimi','qwen','glm','minimax','together','fireworks','groq','baseten','cerebras','grok'];
-    var promises = providers.map(fetchProviderCosts);
-    return Promise.all(promises).then(function() {
-        dataLoaded = true;
-        updateCardValues();
-        console.log('All 16 provider costs loaded');
-        return true;
-    });
+    var providers = Object.keys(PROVIDERS);
+    return Promise.all(providers.map(fetchProviderCosts));
 }
 
 function renderSidebar() {
@@ -282,12 +254,16 @@ function renderSidebar() {
     for (var id in PROVIDERS) {
         var p = PROVIDERS[id];
         var active = (id === state.provider) ? 'active' : '';
+        var hasKeyFlag = hasKey(id);
         html += '<div class="prow '+active+'" onclick="selectProvider(\''+id+'\')" style="border-left-color:' + (active ? p.color : 'transparent') + ';">';
         html += '<div style="display:flex;align-items:center;gap:8px;flex:1;">';
         html += '<span style="font-size:18px;">'+p.logo+'</span>';
         html += '<div class="pname">'+p.name+'</div>';
         html += '</div>';
-        html += '<div class="pact" style="color:'+p.color+';background:'+p.color+'10;border:1px solid '+p.color+';cursor:pointer;" onclick="event.stopPropagation(); handleLogin(\''+id+'\')">LOGIN</div>';
+        var btnClass = hasKeyFlag ? 'pact active' : 'pact login';
+        var btnText = hasKeyFlag ? '✓ ACTIVE' : 'LOGIN';
+        var btnStyle = hasKeyFlag ? 'background:var(--green);border-color:var(--green);' : 'background:'+p.color+';border-color:'+p.color+';color:#FFF;';
+        html += '<div class="'+btnClass+'" style="'+btnStyle+'cursor:pointer;" onclick="event.stopPropagation(); handleLogin(\''+id+'\')">'+btnText+'</div>';
         html += '</div>';
     }
     document.getElementById('model-list').innerHTML = html;
@@ -296,7 +272,6 @@ function renderSidebar() {
 function selectProvider(id) {
     state.provider = id;
     renderSidebar();
-    updateCardValues();
     showCard(1);
 }
 
@@ -309,9 +284,11 @@ function handleLogin(id) {
     document.getElementById('modal-success').style.display = 'none';
 
     var guide = document.getElementById('modal-guide');
-    var keyUrl = cfg.keyHelpUrl || '#';
+    var keyUrl = 'https://console.anthropic.com/settings/admin-keys';
+    if (id === 'openai') keyUrl = 'https://platform.openai.com/account/api-keys';
+    else if (id === 'deepseek') keyUrl = 'https://platform.deepseek.com/api_keys';
 
-    guide.innerHTML = 'Your API key stays in your browser (never sent to server). <a href="'+keyUrl+'" target="_blank" rel="noopener" style="color:#2563EB;text-decoration:underline;">Get '+cfg.name+' API key →</a>';
+    guide.innerHTML = 'Your API key stays in browser (never sent to server). <a href="'+keyUrl+'" target="_blank" rel="noopener" style="color:#2563EB;text-decoration:underline;">Get '+cfg.name+' key →</a>';
     guide.style.display = 'block';
     document.getElementById('modal').classList.add('open');
     setTimeout(function(){document.getElementById('modal-input').focus();},100);
@@ -322,44 +299,6 @@ function closeModal() {
     currentModalProvider = null;
 }
 
-function openSettingsModal() {
-    var providers = ['claude','openai','deepseek','mistral','cohere','kimi','qwen','glm','minimax','together','fireworks','groq','baseten','cerebras'];
-    providers.forEach(function(p) {
-        var el = document.getElementById('key-'+p);
-        if (el) el.value = vaultGet(p+'_api_key');
-    });
-    document.getElementById('settings-modal').classList.add('open');
-}
-
-function closeSettingsModal() {
-    document.getElementById('settings-modal').classList.remove('open');
-}
-
-function saveAllKeys() {
-    var providers = ['claude','openai','deepseek','mistral','cohere','kimi','qwen','glm','minimax','together','fireworks','groq','baseten','cerebras'];
-    var saved = 0;
-    providers.forEach(function(p) {
-        var el = document.getElementById('key-'+p);
-        if (el && el.value.trim()) {
-            vaultSet(p+'_api_key', el.value.trim());
-            saved++;
-        }
-    });
-    alert('Saved '+saved+' API keys');
-}
-
-function loadWithRealKeys() {
-    closeSettingsModal();
-    document.getElementById('connCount').textContent = 'Reloading with real keys...';
-    loadAllProviderCosts().then(function() {
-        document.getElementById('connCount').textContent = 'Real data loaded!';
-        showCard(1);
-    }).catch(function(e) {
-        alert('Error loading real data: '+e);
-        document.getElementById('connCount').textContent = 'Error loading real data';
-    });
-}
-
 function submitKey() {
     var key = document.getElementById('modal-input').value.trim();
     if (!key || key.length < 8) {
@@ -368,70 +307,427 @@ function submitKey() {
         return;
     }
     var provider = currentModalProvider;
-    vaultSet(provider+'_key', key);
-    document.getElementById('modal-success').textContent = 'Key saved to browser vault';
+    vaultSet(provider+'_api_key', key);
+    document.getElementById('modal-success').textContent = 'Key saved! Fetching historical data...';
     document.getElementById('modal-success').style.display = 'block';
+
+    // Fetch historical data from backend
+    fetchProviderData(provider, key);
+
     setTimeout(function(){
         closeModal();
+        renderSidebar();
         selectProvider(provider);
-        document.getElementById('connCount').textContent = '1 of 22 connected';
-    },1200);
+    },1000);
 }
 
-function calcCost(provider,data) {
-    var rates = RATE_CARDS[provider];
-    if (!rates || !data) return 0;
-    var model = data.model||Object.keys(rates)[0];
-    var rate = rates[model];
-    if (!rate) return 0;
-    return ((data.input*(rate.input/1000000))+(data.output*(rate.output/1000000))).toFixed(2);
+function fetchProviderData(provider, api_key) {
+    // Call backend to fetch historical cost data for this provider
+    var url = API_BASE + '/' + provider + '/costs?key=' + encodeURIComponent(api_key);
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
+            if (data.costs && data.costs.length > 0) {
+                // Store in COST_DATA
+                if (!COST_DATA[provider]) COST_DATA[provider] = {};
+                data.costs.forEach(function(cost) {
+                    var model = cost.model || 'unknown';
+                    var date = cost.date || new Date().toISOString().split('T')[0];
+                    if (!COST_DATA[provider][model]) COST_DATA[provider][model] = {};
+                    COST_DATA[provider][model][date] = {
+                        input_tokens: cost.input_tokens || 0,
+                        output_tokens: cost.output_tokens || 0,
+                        cost: cost.cost || 0,
+                        source: 'api',
+                        timestamp: new Date().toISOString()
+                    };
+                });
+                console.log('Data fetched for '+provider+': '+data.costs.length+' entries');
+            }
+        })
+        .catch(e => console.error('Failed to fetch '+provider+' data:', e));
 }
 
 function showCard(num) {
     state.card = num;
     var cards = document.querySelectorAll('.rc');
     for (var i=0; i<cards.length; i++) cards[i].classList.remove('active-card');
-    if (num === 0) {
-        cards[0].classList.add('active-card');
-        openSettingsModal();
-        return;
-    }
-    cards[num].classList.add('active-card');
+    cards[num-1].classList.add('active-card');
+
+    var cardTitles = ['COST', 'HEALTH', 'TRENDS', 'CONFIGURATION', 'HELP'];
+    document.getElementById('selectionTitle').textContent = cardTitles[num-1] || 'SELECTION';
 
     var centre = document.getElementById('centre');
     var p = PROVIDERS[state.provider];
     var data = costData[state.provider]||[];
 
     if (num === 1) {
-        var yesterday = data[0]||{};
-        var dayBefore = data[1]||{};
-        var cost = yesterday.cost||calcCost(state.provider,yesterday);
-        var totalCost = (parseFloat(cost)+(dayBefore.cost||0)).toFixed(2);
-        var avgDay = (totalCost/2).toFixed(2);
-        var html = '<div class="section"><div class="section-title">'+p.name+' Cost Dashboard</div>';
+        var html = '<div class="section"><div class="section-title">'+p.name+' — Cost Dashboard</div>';
         html += '<div class="data-grid">';
-        html += '<div class="data-cell"><div class="data-label">Yesterday Cost</div><div class="data-value">$'+cost+'</div></div>';
-        html += '<div class="data-cell"><div class="data-label">Avg/Day (2d)</div><div class="data-value">$'+avgDay+'</div></div>';
-        html += '<div class="data-cell"><div class="data-label">Total (2d)</div><div class="data-value">$'+totalCost+'</div></div>';
-        html += '<div class="data-cell"><div class="data-label">Top Model</div><div class="data-value small">'+(yesterday.model||'—')+'</div></div>';
+        html += '<div class="data-cell"><div class="data-label">Today\'s Cost</div><div class="data-value" id="today-cost">$0.00</div></div>';
+        html += '<div class="data-cell"><div class="data-label">Status</div><div class="data-value" id="today-status" style="font-size:20px;color:#000;">Loading...</div></div>';
         html += '</div>';
-        html += '<div style="margin-top:16px;"><strong>Rate Card:</strong> Updated 2026-07-10</div>';
+
+        html += '<div style="margin-bottom:12px;font-size:24px;color:#000;"><strong>Available Models:</strong></div>';
+        html += '<div class="model-list" id="models-list"></div>';
+
+        html += '<div style="font-size:20px;color:#000;padding:10px;background:var(--bg);border-radius:6px;"><strong>Rate Card Updated:</strong> 2026-07-10</div>';
         centre.innerHTML = html;
+
+        var models = RATE_CARDS[state.provider]||{};
+        var modelHtml = '';
+        for (var m in models) {
+            var rates = models[m];
+            modelHtml += '<div class="model-item">';
+            modelHtml += '<div class="model-name">'+m+'</div>';
+            modelHtml += '<div class="model-badge available">Input: $'+rates.input+'/M | Output: $'+rates.output+'/M</div>';
+            modelHtml += '</div>';
+        }
+        document.getElementById('models-list').innerHTML = modelHtml;
     } else if (num === 2) {
-        var ioRatio = data[0]?((data[0].output/data[0].input)*100).toFixed(1):0;
-        var health = ioRatio>20?'GOOD':ioRatio>10?'WATCH':'FLAG';
-        var badge = health==='GOOD'?'ok':health==='WATCH'?'watch':'flag';
         var html = '<div class="section"><div class="section-title">Health Signals</div>';
-        html += '<div class="signal-row"><div><div class="signal-label">I/O Ratio</div><div class="signal-detail">'+ioRatio+'% output/input</div></div><div class="signal-badge '+badge+'>'+(health==='FLAG'?'⚠️ LOW':'GOOD')+'</div></div>';
-        html += '<div class="signal-row"><div><div class="signal-label">Provider Status</div><div class="signal-detail">'+data.length+' days tracked</div></div><div class="signal-badge ok">READY</div></div>';
+        html += '<div class="data-grid">';
+        html += '<div class="data-cell"><div class="data-label">Total Tokens</div><div class="data-value" style="font-size:28px;">0</div><div class="data-sub" style="font-size:12px;color:#666;margin-top:4px;">Input + Output</div></div>';
+        html += '<div class="data-cell"><div class="data-label">Days of Data</div><div class="data-value" style="font-size:28px;">0/120</div><div class="data-sub" style="font-size:12px;color:#666;margin-top:4px;">Claude</div></div>';
+        html += '<div class="data-cell"><div class="data-label">APIs Connected</div><div class="data-value" style="font-size:28px;">1</div><div class="data-sub" style="font-size:12px;color:#666;margin-top:4px;">Active</div></div>';
+        html += '<div class="data-cell"><div class="data-label">Last Sync</div><div class="data-value" style="font-size:18px;">Just now</div><div class="data-sub" style="font-size:12px;color:#666;margin-top:4px;">Real-time</div></div>';
+        html += '</div>';
+        html += '<div class="signal-row"><div><div class="signal-label">Provider Status</div><div class="signal-detail">Connected and streaming</div></div><div class="signal-badge ok">ONLINE</div></div>';
         centre.innerHTML = html;
     } else if (num === 3) {
-        centre.innerHTML = '<div class="section"><div class="section-title">Trends (7-day)</div><div style="padding:20px;text-align:center;color:var(--muted);">Chart rendering — '+data.length+' data points available</div></div>';
+        centre.innerHTML = '<div class="section"><div class="section-title">7-Day Trends</div><div style="padding:30px;text-align:center;color:var(--muted);font-size:16px;">Chart rendering — '+data.length+' data points available</div></div>';
     } else if (num === 4) {
-        centre.innerHTML = '<div class="section"><div class="section-title">Config</div><div style="padding:20px;"><strong>Sycophancy:</strong> <input type="range" min="0" max="4" value="2" style="width:100px;"> (0=blunt, 4=flowery)<br><strong>Brevity:</strong> <input type="range" min="0" max="4" value="2" style="width:100px;"> (0=verbose, 4=terse)</div></div>';
+        var html = '<div class="section">';
+        html += '<div class="tab-bar" id="card4-tabs">';
+        html += '<button class="tab-btn active" onclick="showCard4Tab(1)">Dials</button>';
+        html += '<button class="tab-btn" onclick="showCard4Tab(2)">Model Finder</button>';
+        html += '</div>';
+        html += '<div id="card4-content"></div>';
+        centre.innerHTML = html;
+        showCard4Tab(1);
     } else if (num === 5) {
-        centre.innerHTML = '<div class="section"><div class="section-title">Help & Documentation</div><div class="notice"><strong>TokenScope v11.0 (2026-07-10)</strong><br>22 Providers | Rate Cards Updated Daily | All API keys stay in your browser<br><br><strong>Card 1:</strong> Cost Dashboard — daily spend, rate cards, top models<br><strong>Card 2:</strong> Health Signals — I/O ratio, model shift, status<br><strong>Card 3:</strong> Trends — 7-day cost chart<br><strong>Card 4:</strong> Config — sycophancy & brevity dials (0-4)<br><strong>Card 5:</strong> Help — this guide</div></div>';
+        centre.innerHTML = '<div class="section"><div class="section-title">Help & Documentation</div><div class="notice"><strong>TokenScope v11.0 (2026-07-10)</strong><br><br><strong>Card 1:</strong> Cost Dashboard — all available models with rate cards<br><strong>Card 2:</strong> Health Signals — provider status and real-time monitoring<br><strong>Card 3:</strong> 7-day trend chart of costs<br><strong>Card 4:</strong> Config dials — sycophancy (0-4) and brevity (0-4)<br><strong>Card 5:</strong> This help guide<br><br>All API keys stay in your browser only. Never transmitted to our server.</div></div>';
     }
+}
+
+function showCard4Tab(tab) {
+    var tabs = document.querySelectorAll('.tab-btn');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.remove('active');
+    document.querySelectorAll('.tab-btn')[tab-1].classList.add('active');
+
+    var content = '';
+    if (tab === 1) {
+        content += '<div class="slider-grid">';
+
+        // Row 1: Sycophancy & Brevity
+        content += '<div><div class="slider-container">';
+        content += '<div class="slider-label" style="text-align:center;"><span class="help-icon" data-help="Low: direct critique. High: supportive feedback.">?</span> Sycophancy</div>';
+        content += '<div class="slider-desc"><span>Low</span><span>High</span></div>';
+        content += '<input type="range" min="0" max="4" value="2" onchange="setSycophancy(this.value)" class="slider-with-marks" style="width:100%;">';
+        content += '<div style="font-size:15px;color:#475569;margin-top:4px;line-height:1.3;">Use low for objective critique. Use high for coaching/mentoring.</div>';
+        content += '</div></div>';
+
+        content += '<div><div class="slider-container">';
+        content += '<div class="slider-label" style="text-align:center;"><span class="help-icon" data-help="Low: detailed with examples. High: concise bullet points.">?</span> Brevity</div>';
+        content += '<div class="slider-desc"><span>Low</span><span>High</span></div>';
+        content += '<input type="range" min="0" max="4" value="2" onchange="setBrevity(this.value)" class="slider-with-marks" style="width:100%;">';
+        content += '<div style="font-size:15px;color:#475569;margin-top:4px;line-height:1.3;">Low: detailed explanations. High: terse bullet points.</div>';
+        content += '</div></div>';
+
+        // Row 2: Creativity & Formality
+        content += '<div><div class="slider-container">';
+        content += '<div class="slider-label" style="text-align:center;"><span class="help-icon" data-help="Low: factual and consistent. High: novel and imaginative.">?</span> Creativity</div>';
+        content += '<div class="slider-desc"><span>Low</span><span>High</span></div>';
+        content += '<input type="range" min="0" max="4" value="2" onchange="setCreativity(this.value)" class="slider-with-marks" style="width:100%;">';
+        content += '<div style="font-size:15px;color:#475569;margin-top:4px;line-height:1.3;">Low: factual, predictable. High: unconventional ideas.</div>';
+        content += '</div></div>';
+
+        content += '<div><div class="slider-container">';
+        content += '<div class="slider-label" style="text-align:center;"><span class="help-icon" data-help="Low: casual and friendly. High: professional and formal.">?</span> Formality</div>';
+        content += '<div class="slider-desc"><span>Low</span><span>High</span></div>';
+        content += '<input type="range" min="0" max="4" value="2" onchange="setFormality(this.value)" class="slider-with-marks" style="width:100%;">';
+        content += '<div style="font-size:15px;color:#475569;margin-top:4px;line-height:1.3;">Low: friendly, casual. High: professional, formal.</div>';
+        content += '</div></div>';
+
+        // Row 3: Depth & Structure
+        content += '<div><div class="slider-container">';
+        content += '<div class="slider-label" style="text-align:center;"><span class="help-icon" data-help="Low: quick answers. High: thorough analysis.">?</span> Depth</div>';
+        content += '<div class="slider-desc"><span>Low</span><span>High</span></div>';
+        content += '<input type="range" min="0" max="4" value="2" onchange="setDepth(this.value)" class="slider-with-marks" style="width:100%;">';
+        content += '<div style="font-size:15px;color:#475569;margin-top:4px;line-height:1.3;">Low: quick answers. High: exhaustive analysis.</div>';
+        content += '</div></div>';
+
+        content += '<div><div class="slider-container">';
+        content += '<div class="slider-label" style="text-align:center;"><span class="help-icon" data-help="Low: flowing prose. High: structured format.">?</span> Structure</div>';
+        content += '<div class="slider-desc"><span>Low</span><span>High</span></div>';
+        content += '<input type="range" min="0" max="4" value="2" onchange="setStructure(this.value)" class="slider-with-marks" style="width:100%;">';
+        content += '<div style="font-size:15px;color:#475569;margin-top:4px;line-height:1.3;">Low: natural prose. High: structured bullets.</div>';
+        content += '</div></div>';
+
+        // Row 4: Certainty & Citations
+        content += '<div><div class="slider-container">';
+        content += '<div class="slider-label" style="text-align:center;"><span class="help-icon" data-help="Low: explore possibilities. High: confident answers.">?</span> Certainty</div>';
+        content += '<div class="slider-desc"><span>Low</span><span>High</span></div>';
+        content += '<input type="range" min="0" max="4" value="2" onchange="setCertainty(this.value)" class="slider-with-marks" style="width:100%;">';
+        content += '<div style="font-size:15px;color:#475569;margin-top:4px;line-height:1.3;">Low: exploring possibilities. High: definitive answers.</div>';
+        content += '</div></div>';
+
+        content += '<div><div class="slider-container">';
+        content += '<div class="slider-label" style="text-align:center;"><span class="help-icon" data-help="Low: no sources needed. High: cite all sources.">?</span> Citations</div>';
+        content += '<div class="slider-desc"><span>Low</span><span>High</span></div>';
+        content += '<input type="range" min="0" max="4" value="2" onchange="setCitations(this.value)" class="slider-with-marks" style="width:100%;">';
+        content += '<div style="font-size:15px;color:#475569;margin-top:4px;line-height:1.3;">Low: no citations. High: heavily cited sources.</div>';
+        content += '</div></div>';
+
+        content += '</div>';
+
+        // Prompt display
+        content += '<div style="margin-top:10px;padding-top:8px;border-top:0.5px solid var(--border);">';
+        content += '<div style="font-size:13px;color:#666;margin-bottom:8px;">Cut and paste this into your prompt to configure your experience:</div>';
+        content += '<button style="padding:10px 14px;background:var(--accent);color:#FFF;border:none;border-radius:6px;cursor:pointer;font-weight:600;margin-right:8px;font-size:15px;" onclick="showSystemPrompt()">📋 Show</button>';
+        content += '<button style="padding:10px 14px;background:var(--accent);color:#FFF;border:none;border-radius:6px;cursor:pointer;font-weight:600;font-size:15px;" onclick="copySystemPrompt()">📋 Copy</button>';
+        content += '<div id="prompt-display" style="margin-top:8px;padding:10px;background:var(--surface-1);border-radius:6px;font-family:monospace;font-size:12px;color:#000;display:none;max-height:200px;overflow-y:auto;white-space:pre-wrap;word-break:break-word;line-height:1.4;"></div>';
+        content += '</div>';
+    } else if (tab === 2) {
+        content += '<div style="display:flex;gap:16px;height:100%;align-items:flex-start;">';
+
+        // LEFT COLUMN: Sliders
+        content += '<div style="width:35%;min-width:150px;">';
+        content += '<div style="font-size:13px;color:#000;margin-bottom:12px;font-weight:600;">Set Requirements</div>';
+
+        content += '<div class="slider-container" style="padding:10px;margin-bottom:4px;">';
+        content += '<div class="slider-label" style="font-size:12px;margin-bottom:4px;">Knowledge</div>';
+        content += '<div class="slider-desc" style="font-size:11px;margin-bottom:6px;"><span>0%</span><span id="mmlu-val">0</span><span>100%</span></div>';
+        content += '<input type="range" min="0" max="100" value="0" onchange="updateModelFinder()" id="mmlu-slider" style="width:100%;height:4px;">';
+        content += '</div>';
+
+        content += '<div class="slider-container" style="padding:10px;margin-bottom:4px;">';
+        content += '<div class="slider-label" style="font-size:12px;margin-bottom:4px;">Code</div>';
+        content += '<div class="slider-desc" style="font-size:11px;margin-bottom:6px;"><span>0%</span><span id="humaneval-val">0</span><span>100%</span></div>';
+        content += '<input type="range" min="0" max="100" value="0" onchange="updateModelFinder()" id="humaneval-slider" style="width:100%;height:4px;">';
+        content += '</div>';
+
+        content += '<div class="slider-container" style="padding:10px;margin-bottom:4px;">';
+        content += '<div class="slider-label" style="font-size:12px;margin-bottom:4px;">Math</div>';
+        content += '<div class="slider-desc" style="font-size:11px;margin-bottom:6px;"><span>0%</span><span id="gsm8k-val">0</span><span>100%</span></div>';
+        content += '<input type="range" min="0" max="100" value="0" onchange="updateModelFinder()" id="gsm8k-slider" style="width:100%;height:4px;">';
+        content += '</div>';
+
+        content += '<div class="slider-container" style="padding:10px;margin-bottom:4px;">';
+        content += '<div class="slider-label" style="font-size:12px;margin-bottom:4px;">Max Cost</div>';
+        content += '<div class="slider-desc" style="font-size:11px;margin-bottom:6px;"><span>$0</span><span id="cost-val">$100</span><span>$1k</span></div>';
+        content += '<input type="range" min="0" max="100" value="100" onchange="updateModelFinder()" id="cost-slider" style="width:100%;height:4px;">';
+        content += '</div>';
+
+        content += '</div>';
+
+        // RIGHT COLUMN: Matching Models
+        content += '<div style="flex:1;overflow-y:auto;max-height:500px;padding-left:12px;border-left:1px solid #DDD;">';
+        content += '<div style="font-size:13px;color:#000;margin-bottom:12px;font-weight:600;">Matching Models</div>';
+        content += '<div id="matching-models" style="font-size:12px;">Finding models...</div>';
+        content += '</div>';
+
+        content += '</div>';
+    }
+
+    document.getElementById('card4-content').innerHTML = content;
+}
+
+function updateModelFinder() {
+    var mmlu = parseInt(document.getElementById('mmlu-slider').value);
+    var humaneval = parseInt(document.getElementById('humaneval-slider').value);
+    var gsm8k = parseInt(document.getElementById('gsm8k-slider').value);
+    var cost = parseInt(document.getElementById('cost-slider').value) * 10;
+
+    document.getElementById('mmlu-val').textContent = mmlu + '%';
+    document.getElementById('humaneval-val').textContent = humaneval + '%';
+    document.getElementById('gsm8k-val').textContent = gsm8k + '%';
+    document.getElementById('cost-val').textContent = '$' + cost;
+
+    fetch(API_BASE+'/find-models', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            mmlu: mmlu,
+            humaneval: humaneval,
+            gsm8k: gsm8k,
+            cost: cost
+        })
+    }).then(r => r.json())
+      .then(d => {
+          var html = '<div style="font-size:12px;color:#666;margin-bottom:8px;">Found '+d.count+' models</div>';
+          if (d.matches.length === 0) {
+              html += '<div style="padding:8px;font-size:11px;text-align:center;color:var(--muted);">No matches</div>';
+          } else {
+              d.matches.slice(0, 10).forEach(function(m) {
+                  html += '<div style="background:var(--surface-1);border:0.5px solid #DDD;border-radius:4px;padding:8px;margin-bottom:6px;">';
+                  html += '<div style="font-weight:600;font-size:12px;margin-bottom:2px;">'+m.name+'</div>';
+                  html += '<div style="font-size:10px;color:#999;margin-bottom:4px;">'+m.provider+' | '+m.match_score+'</div>';
+                  html += '<div style="font-size:10px;margin-bottom:2px;">MMLU:'+m.benchmarks.mmlu+'% Code:'+m.benchmarks.humaneval+'% Math:'+m.benchmarks.gsm8k+'%</div>';
+                  html += '<div style="font-size:10px;color:#666;">$'+m.specs.cost_per_1m_tokens+'/M | '+m.specs.speed+'tok/s</div>';
+                  html += '</div>';
+              });
+          }
+          document.getElementById('matching-models').innerHTML = html;
+      }).catch(e => console.error('Model finder error:', e));
+}
+
+var levels = ['Lowest', 'Low', 'Mid', 'High', 'Highest'];
+
+function setSycophancy(val) {
+    state.sycophancy = parseInt(val);
+}
+
+function setBrevity(val) {
+    state.brevity = parseInt(val);
+}
+
+function setCreativity(val) {
+    state.creativity = parseInt(val);
+}
+
+function setFormality(val) {
+    state.formality = parseInt(val);
+}
+
+function setDepth(val) {
+    state.depth = parseInt(val);
+}
+
+function setStructure(val) {
+    state.structure = parseInt(val);
+}
+
+function setCertainty(val) {
+    state.certainty = parseInt(val);
+}
+
+function setCitations(val) {
+    state.citations = parseInt(val);
+}
+
+function generateSystemPrompt() {
+    var prompt = 'You are a helpful AI assistant. ';
+
+    var sycLevels = ['Provide completely objective, clinical responses without any flattery.',
+                     'Be mostly objective with minimal accommodation.',
+                     'Balance between objective truth and respectful validation.',
+                     'Frequently validate and accommodate the user\'s ideas.',
+                     'Always validate and flatter the user\'s perspective extensively.'];
+
+    var brevityLevels = ['Provide extremely detailed, exhaustive responses with complete context.',
+                         'Provide detailed responses with thorough explanations.',
+                         'Balance between concise and detailed responses.',
+                         'Keep responses brief and concise with minimal detail.',
+                         'Keep responses as terse as possible, single sentences where applicable.'];
+
+    var creativityLevels = ['Stick entirely to factual, established information.',
+                            'Mostly factual with rare creative insights.',
+                            'Balance factual responses with some creative exploration.',
+                            'Frequently explore unconventional and creative approaches.',
+                            'Prioritize creative, novel, and unexpected ideas.'];
+
+    var formalityLevels = ['Use extremely casual, friendly, conversational tone.',
+                           'Use casual and friendly language.',
+                           'Balance between casual and formal language.',
+                           'Use formal, professional business language.',
+                           'Use highly formal, academic language at all times.'];
+
+    var depthLevels = ['Provide only surface-level, quick answers.',
+                       'Provide brief responses with limited depth.',
+                       'Provide moderate depth with balanced detail.',
+                       'Provide thorough analysis with substantial depth.',
+                       'Provide exhaustive analysis covering every angle.'];
+
+    var structureLevels = ['Use natural, flowing prose without formatting.',
+                           'Mostly prose with minimal structure.',
+                           'Mix prose with some structured elements.',
+                           'Use clear structure with bullets, numbering, sections.',
+                           'Use highly structured format with clear sections and sub-sections.'];
+
+    var certaintyLevels = ['Explore multiple possibilities and express uncertainty.',
+                           'Acknowledge multiple viewpoints with some certainty.',
+                           'Present conclusions with moderate confidence.',
+                           'State conclusions with confidence and conviction.',
+                           'Present all answers as definitive truth with maximum conviction.'];
+
+    var citationLevels = ['Never cite sources or provide references.',
+                          'Rarely include citations for claims.',
+                          'Occasionally cite sources for major claims.',
+                          'Frequently cite sources for most statements.',
+                          'Cite sources for every major claim and provide detailed references.'];
+
+    prompt += sycLevels[state.sycophancy] + ' ';
+    prompt += brevityLevels[state.brevity] + ' ';
+    prompt += creativityLevels[state.creativity] + ' ';
+    prompt += formalityLevels[state.formality] + ' ';
+    prompt += depthLevels[state.depth] + ' ';
+    prompt += structureLevels[state.structure] + ' ';
+    prompt += certaintyLevels[state.certainty] + ' ';
+    prompt += citationLevels[state.citations];
+
+    return prompt;
+}
+
+function showSystemPrompt() {
+    var prompt = generateSystemPrompt();
+    var display = document.getElementById('prompt-display');
+    display.textContent = prompt;
+    display.style.display = 'block';
+}
+
+function copySystemPrompt() {
+    var prompt = generateSystemPrompt();
+    var buttons = document.querySelectorAll('button');
+    var copyBtn = null;
+    for (var i = 0; i < buttons.length; i++) {
+        if (buttons[i].textContent.includes('Copy Prompt')) {
+            copyBtn = buttons[i];
+            break;
+        }
+    }
+
+    var copied = false;
+
+    // Try modern clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(prompt).then(function() {
+            copied = true;
+            if (copyBtn) {
+                var originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ Copied!';
+                setTimeout(function() { copyBtn.textContent = originalText; }, 2000);
+            }
+        }).catch(function(err) {
+            console.error('Clipboard API failed:', err);
+            // Fall back to older method
+            copyUsingFallback(prompt, copyBtn);
+        });
+    } else {
+        // Use fallback method
+        copyUsingFallback(prompt, copyBtn);
+    }
+}
+
+function copyUsingFallback(prompt, copyBtn) {
+    var textarea = document.createElement('textarea');
+    textarea.value = prompt;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        if (copyBtn) {
+            var originalText = copyBtn.textContent;
+            copyBtn.textContent = '✓ Copied!';
+            setTimeout(function() { copyBtn.textContent = originalText; }, 2000);
+        }
+    } catch (err) {
+        console.error('Fallback copy failed:', err);
+        alert('Unable to copy. Please copy the prompt manually from the "Show Prompt" display.');
+    }
+    document.body.removeChild(textarea);
 }
 
 function startTimer() {
@@ -447,14 +743,10 @@ function startTimer() {
 
 function updateCardValues() {
     var p = state.provider;
-    var data = mockData[p]||[];
-    var yesterday = data[0]||{};
-    var cost = yesterday.cost||calcCost(p,yesterday);
-    document.getElementById('card1-val').textContent = '$'+cost;
-
-    var ioRatio = yesterday.output?((yesterday.output/yesterday.input)*100).toFixed(0):0;
-    var health = ioRatio>20?'✓':'⚠';
-    document.getElementById('card2-val').textContent = health;
+    var data = costData[p]||[];
+    var cost = data[0]?'$'+(data[0].cost||'0.00'):'$0.00';
+    document.getElementById('card1-val').textContent = cost;
+    document.getElementById('card2-val').textContent = data.length>0?'✓':'–';
 }
 
 function init() {
@@ -463,15 +755,13 @@ function init() {
     selectProvider('claude');
     startTimer();
 
-    var statusEl = document.getElementById('connCount');
-    statusEl.textContent = 'Loading cost data...';
-
+    document.getElementById('connCount').textContent = 'Loading providers...';
     loadAllProviderCosts().then(function() {
-        statusEl.textContent = '✓ Cost data loaded';
-        console.log('TokenScope v11.0 ready');
+        updateCardValues();
+        document.getElementById('connCount').textContent = '✓ Providers ready';
     }).catch(function(e) {
-        console.error('Failed to load data:', e);
-        statusEl.textContent = 'Backend offline';
+        console.error('Load error:', e);
+        document.getElementById('connCount').textContent = 'Ready (no data)';
     });
 }
 

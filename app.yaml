@@ -1,0 +1,27 @@
+name: TokenScope
+services:
+- name: backend
+  github:
+    repo: philcheevers-pixel/tokenscope
+    branch: main
+  build_command: pip install -r requirements.txt
+  run_command: python backend.py
+  http_port: 8080
+  envs:
+  - key: FLASK_ENV
+    value: production
+  - key: PORT
+    value: "8080"
+  health_check:
+    http_path: /
+  http_routes:
+  - path: /api
+static_sites:
+- name: frontend
+  github:
+    repo: philcheevers-pixel/tokenscope
+    branch: main
+  source_dir: /
+  routes:
+  - path: /
+    file: TokenScope-v11.0.html

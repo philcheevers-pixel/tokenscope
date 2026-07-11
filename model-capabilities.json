@@ -1,0 +1,668 @@
+{
+  "benchmarks": {
+    "mmlu": {"name": "MMLU (General Knowledge)", "unit": "%", "scale": "0-100"},
+    "humaneval": {"name": "HumanEval (Code)", "unit": "%", "scale": "0-100"},
+    "gsm8k": {"name": "GSM8K (Math)", "unit": "%", "scale": "0-100"},
+    "truthfulqa": {"name": "TruthfulQA (Accuracy)", "unit": "%", "scale": "0-100"},
+    "arc": {"name": "Arc Challenge (Reasoning)", "unit": "%", "scale": "0-100"},
+    "vision": {"name": "Vision Capability", "unit": "yes/no", "scale": "0-1"},
+    "context": {"name": "Context Window", "unit": "K tokens", "scale": "0-200"},
+    "speed": {"name": "Inference Speed", "unit": "tokens/sec", "scale": "0-500"}
+  },
+  "models": {
+    "claude": {
+      "claude-opus-4-8": {
+        "name": "Claude Opus 4.8",
+        "mmlu": 92,
+        "humaneval": 89,
+        "gsm8k": 95,
+        "truthfulqa": 88,
+        "arc": 90,
+        "vision": 1,
+        "context": 200,
+        "speed": 80,
+        "cost_per_1m_tokens": 30,
+        "strengths": ["reasoning", "accuracy", "long-context"],
+        "use_cases": ["complex analysis", "code review", "research"]
+      },
+      "claude-opus-4-7": {
+        "name": "Claude Opus 4.7",
+        "mmlu": 90,
+        "humaneval": 87,
+        "gsm8k": 93,
+        "truthfulqa": 86,
+        "arc": 88,
+        "vision": 1,
+        "context": 200,
+        "speed": 75,
+        "cost_per_1m_tokens": 30,
+        "strengths": ["reasoning", "accuracy"],
+        "use_cases": ["complex analysis", "research"]
+      },
+      "claude-sonnet-5": {
+        "name": "Claude Sonnet 5",
+        "mmlu": 86,
+        "humaneval": 82,
+        "gsm8k": 89,
+        "truthfulqa": 84,
+        "arc": 85,
+        "vision": 1,
+        "context": 200,
+        "speed": 150,
+        "cost_per_1m_tokens": 18,
+        "strengths": ["balanced", "speed", "cost"],
+        "use_cases": ["general purpose", "applications"]
+      },
+      "claude-haiku-4-5": {
+        "name": "Claude Haiku 4.5",
+        "mmlu": 78,
+        "humaneval": 75,
+        "gsm8k": 80,
+        "truthfulqa": 76,
+        "arc": 77,
+        "vision": 1,
+        "context": 200,
+        "speed": 250,
+        "cost_per_1m_tokens": 6,
+        "strengths": ["speed", "cost", "efficiency"],
+        "use_cases": ["real-time", "high-volume", "budget"]
+      },
+      "claude-fable-5": {
+        "name": "Claude Fable 5",
+        "mmlu": 72,
+        "humaneval": 68,
+        "gsm8k": 75,
+        "truthfulqa": 70,
+        "arc": 72,
+        "vision": 0,
+        "context": 100,
+        "speed": 350,
+        "cost_per_1m_tokens": 1.5,
+        "strengths": ["ultra-fast", "ultra-cheap"],
+        "use_cases": ["low-cost", "simple tasks"]
+      }
+    },
+    "openai": {
+      "gpt-4o": {
+        "name": "GPT-4o",
+        "mmlu": 88,
+        "humaneval": 90,
+        "gsm8k": 92,
+        "truthfulqa": 85,
+        "arc": 87,
+        "vision": 1,
+        "context": 128,
+        "speed": 120,
+        "cost_per_1m_tokens": 12.5,
+        "strengths": ["code", "vision", "multimodal"],
+        "use_cases": ["coding", "image analysis"]
+      },
+      "gpt-4-turbo": {
+        "name": "GPT-4 Turbo",
+        "mmlu": 86,
+        "humaneval": 88,
+        "gsm8k": 90,
+        "truthfulqa": 83,
+        "arc": 85,
+        "vision": 1,
+        "context": 128,
+        "speed": 100,
+        "cost_per_1m_tokens": 40,
+        "strengths": ["reasoning", "code"],
+        "use_cases": ["complex logic", "code generation"]
+      },
+      "gpt-3.5-turbo": {
+        "name": "GPT-3.5 Turbo",
+        "mmlu": 71,
+        "humaneval": 65,
+        "gsm8k": 70,
+        "truthfulqa": 68,
+        "arc": 69,
+        "vision": 0,
+        "context": 16,
+        "speed": 200,
+        "cost_per_1m_tokens": 2,
+        "strengths": ["speed", "cost"],
+        "use_cases": ["budget", "simple tasks"]
+      }
+    },
+    "gemini": {
+      "gemini-2.0": {
+        "name": "Gemini 2.0",
+        "mmlu": 90,
+        "humaneval": 85,
+        "gsm8k": 91,
+        "truthfulqa": 87,
+        "arc": 88,
+        "vision": 1,
+        "context": 200,
+        "speed": 110,
+        "cost_per_1m_tokens": 6.25,
+        "strengths": ["reasoning", "multimodal", "cost"],
+        "use_cases": ["general purpose", "vision", "reasoning"]
+      },
+      "gemini-1.5-pro": {
+        "name": "Gemini 1.5 Pro",
+        "mmlu": 88,
+        "humaneval": 83,
+        "gsm8k": 89,
+        "truthfulqa": 85,
+        "arc": 86,
+        "vision": 1,
+        "context": 200,
+        "speed": 130,
+        "cost_per_1m_tokens": 6.25,
+        "strengths": ["long-context", "vision"],
+        "use_cases": ["document analysis", "video"]
+      },
+      "gemini-1.5-flash": {
+        "name": "Gemini 1.5 Flash",
+        "mmlu": 78,
+        "humaneval": 72,
+        "gsm8k": 80,
+        "truthfulqa": 75,
+        "arc": 76,
+        "vision": 1,
+        "context": 200,
+        "speed": 200,
+        "cost_per_1m_tokens": 0.375,
+        "strengths": ["speed", "cost", "vision"],
+        "use_cases": ["real-time", "high-volume", "vision"]
+      }
+    },
+    "deepseek": {
+      "deepseek-v3": {
+        "name": "DeepSeek V3",
+        "mmlu": 85,
+        "humaneval": 81,
+        "gsm8k": 87,
+        "truthfulqa": 82,
+        "arc": 84,
+        "vision": 0,
+        "context": 32,
+        "speed": 180,
+        "cost_per_1m_tokens": 0.87,
+        "strengths": ["cost", "reasoning"],
+        "use_cases": ["budget reasoning"]
+      },
+      "deepseek-v2.5": {
+        "name": "DeepSeek V2.5",
+        "mmlu": 80,
+        "humaneval": 76,
+        "gsm8k": 82,
+        "truthfulqa": 78,
+        "arc": 79,
+        "vision": 0,
+        "context": 32,
+        "speed": 200,
+        "cost_per_1m_tokens": 0.56,
+        "strengths": ["cost", "speed"],
+        "use_cases": ["budget", "high-volume"]
+      },
+      "deepseek-v2": {
+        "name": "DeepSeek V2",
+        "mmlu": 77,
+        "humaneval": 72,
+        "gsm8k": 79,
+        "truthfulqa": 75,
+        "arc": 76,
+        "vision": 0,
+        "context": 32,
+        "speed": 220,
+        "cost_per_1m_tokens": 0.4,
+        "strengths": ["ultra-cost", "speed"],
+        "use_cases": ["maximum budget efficiency"]
+      }
+    },
+    "grok": {
+      "grok-4.3": {
+        "name": "Grok 4.3",
+        "mmlu": 84,
+        "humaneval": 79,
+        "gsm8k": 85,
+        "truthfulqa": 81,
+        "arc": 82,
+        "vision": 0,
+        "context": 32,
+        "speed": 150,
+        "cost_per_1m_tokens": 5,
+        "strengths": ["reasoning", "cost"],
+        "use_cases": ["reasoning tasks", "budget"]
+      },
+      "grok-build-0.1": {
+        "name": "Grok Build 0.1",
+        "mmlu": 79,
+        "humaneval": 74,
+        "gsm8k": 80,
+        "truthfulqa": 76,
+        "arc": 77,
+        "vision": 0,
+        "context": 16,
+        "speed": 200,
+        "cost_per_1m_tokens": 4,
+        "strengths": ["cost", "speed"],
+        "use_cases": ["budget applications"]
+      }
+    },
+    "mistral": {
+      "mistral-large-latest": {
+        "name": "Mistral Large",
+        "mmlu": 84,
+        "humaneval": 81,
+        "gsm8k": 85,
+        "truthfulqa": 80,
+        "arc": 82,
+        "vision": 0,
+        "context": 32,
+        "speed": 140,
+        "cost_per_1m_tokens": 12,
+        "strengths": ["reasoning", "balanced"],
+        "use_cases": ["general reasoning"]
+      },
+      "mistral-medium-latest": {
+        "name": "Mistral Medium",
+        "mmlu": 78,
+        "humaneval": 75,
+        "gsm8k": 80,
+        "truthfulqa": 76,
+        "arc": 77,
+        "vision": 0,
+        "context": 32,
+        "speed": 180,
+        "cost_per_1m_tokens": 4.86,
+        "strengths": ["balanced", "cost"],
+        "use_cases": ["general purpose"]
+      },
+      "mistral-small-latest": {
+        "name": "Mistral Small",
+        "mmlu": 71,
+        "humaneval": 67,
+        "gsm8k": 72,
+        "truthfulqa": 68,
+        "arc": 69,
+        "vision": 0,
+        "context": 32,
+        "speed": 250,
+        "cost_per_1m_tokens": 0.84,
+        "strengths": ["cost", "speed"],
+        "use_cases": ["budget", "fast"]
+      }
+    },
+    "cohere": {
+      "command-r-plus": {
+        "name": "Command R+",
+        "mmlu": 82,
+        "humaneval": 78,
+        "gsm8k": 83,
+        "truthfulqa": 79,
+        "arc": 80,
+        "vision": 0,
+        "context": 128,
+        "speed": 120,
+        "cost_per_1m_tokens": 5,
+        "strengths": ["reasoning", "long-context"],
+        "use_cases": ["document processing", "reasoning"]
+      },
+      "command-r": {
+        "name": "Command R",
+        "mmlu": 77,
+        "humaneval": 72,
+        "gsm8k": 78,
+        "truthfulqa": 74,
+        "arc": 75,
+        "vision": 0,
+        "context": 128,
+        "speed": 150,
+        "cost_per_1m_tokens": 2,
+        "strengths": ["cost", "long-context"],
+        "use_cases": ["budget reasoning"]
+      }
+    },
+    "kimi": {
+      "moonshot-v1": {
+        "name": "Kimi Moonshot",
+        "mmlu": 80,
+        "humaneval": 76,
+        "gsm8k": 81,
+        "truthfulqa": 77,
+        "arc": 78,
+        "vision": 0,
+        "context": 200,
+        "speed": 140,
+        "cost_per_1m_tokens": 1.72,
+        "strengths": ["long-context", "cost"],
+        "use_cases": ["document analysis", "budget"]
+      }
+    },
+    "qwen": {
+      "qwen-2.5-72b": {
+        "name": "Qwen 2.5 72B",
+        "mmlu": 82,
+        "humaneval": 79,
+        "gsm8k": 84,
+        "truthfulqa": 80,
+        "arc": 81,
+        "vision": 0,
+        "context": 32,
+        "speed": 160,
+        "cost_per_1m_tokens": 0.24,
+        "strengths": ["reasoning", "ultra-cost"],
+        "use_cases": ["budget reasoning"]
+      },
+      "qwen-2-72b": {
+        "name": "Qwen 2 72B",
+        "mmlu": 80,
+        "humaneval": 77,
+        "gsm8k": 82,
+        "truthfulqa": 78,
+        "arc": 79,
+        "vision": 0,
+        "context": 32,
+        "speed": 170,
+        "cost_per_1m_tokens": 0.4,
+        "strengths": ["reasoning", "cost"],
+        "use_cases": ["budget"]
+      },
+      "qwen-1.5-110b": {
+        "name": "Qwen 1.5 110B",
+        "mmlu": 81,
+        "humaneval": 78,
+        "gsm8k": 83,
+        "truthfulqa": 79,
+        "arc": 80,
+        "vision": 0,
+        "context": 32,
+        "speed": 140,
+        "cost_per_1m_tokens": 0.8,
+        "strengths": ["reasoning", "balanced"],
+        "use_cases": ["reasoning tasks"]
+      }
+    },
+    "glm": {
+      "glm-4": {
+        "name": "GLM-4",
+        "mmlu": 81,
+        "humaneval": 77,
+        "gsm8k": 82,
+        "truthfulqa": 78,
+        "arc": 79,
+        "vision": 0,
+        "context": 128,
+        "speed": 140,
+        "cost_per_1m_tokens": 0.2,
+        "strengths": ["reasoning", "ultra-cost"],
+        "use_cases": ["budget reasoning"]
+      },
+      "glm-3.5-turbo": {
+        "name": "GLM-3.5 Turbo",
+        "mmlu": 72,
+        "humaneval": 68,
+        "gsm8k": 73,
+        "truthfulqa": 69,
+        "arc": 70,
+        "vision": 0,
+        "context": 32,
+        "speed": 250,
+        "cost_per_1m_tokens": 0.002,
+        "strengths": ["ultra-cost", "speed"],
+        "use_cases": ["maximum budget"]
+      }
+    },
+    "minimax": {
+      "minimax-text-01": {
+        "name": "MiniMax Text 01",
+        "mmlu": 76,
+        "humaneval": 72,
+        "gsm8k": 78,
+        "truthfulqa": 73,
+        "arc": 74,
+        "vision": 0,
+        "context": 32,
+        "speed": 180,
+        "cost_per_1m_tokens": 0.6,
+        "strengths": ["cost", "speed"],
+        "use_cases": ["budget"]
+      },
+      "minimax-text-01-mini": {
+        "name": "MiniMax Text 01 Mini",
+        "mmlu": 70,
+        "humaneval": 65,
+        "gsm8k": 72,
+        "truthfulqa": 68,
+        "arc": 69,
+        "vision": 0,
+        "context": 32,
+        "speed": 250,
+        "cost_per_1m_tokens": 0.2,
+        "strengths": ["ultra-cost", "speed"],
+        "use_cases": ["maximum budget"]
+      }
+    },
+    "together": {
+      "llama-3.1-405b": {
+        "name": "Llama 3.1 405B",
+        "mmlu": 86,
+        "humaneval": 84,
+        "gsm8k": 88,
+        "truthfulqa": 83,
+        "arc": 85,
+        "vision": 0,
+        "context": 128,
+        "speed": 90,
+        "cost_per_1m_tokens": 4,
+        "strengths": ["reasoning", "cost"],
+        "use_cases": ["reasoning", "budget"]
+      },
+      "llama-3.1-70b": {
+        "name": "Llama 3.1 70B",
+        "mmlu": 82,
+        "humaneval": 79,
+        "gsm8k": 84,
+        "truthfulqa": 79,
+        "arc": 81,
+        "vision": 0,
+        "context": 128,
+        "speed": 140,
+        "cost_per_1m_tokens": 1.5,
+        "strengths": ["reasoning", "cost"],
+        "use_cases": ["reasoning", "budget"]
+      },
+      "llama-3.1-8b": {
+        "name": "Llama 3.1 8B",
+        "mmlu": 72,
+        "humaneval": 68,
+        "gsm8k": 74,
+        "truthfulqa": 69,
+        "arc": 70,
+        "vision": 0,
+        "context": 128,
+        "speed": 300,
+        "cost_per_1m_tokens": 0.3,
+        "strengths": ["cost", "speed"],
+        "use_cases": ["budget", "fast"]
+      }
+    },
+    "fireworks": {
+      "llama-3.1": {
+        "name": "Fireworks Llama 3.1",
+        "mmlu": 81,
+        "humaneval": 78,
+        "gsm8k": 83,
+        "truthfulqa": 79,
+        "arc": 80,
+        "vision": 0,
+        "context": 128,
+        "speed": 200,
+        "cost_per_1m_tokens": 1.2,
+        "strengths": ["reasoning", "cost"],
+        "use_cases": ["budget reasoning"]
+      },
+      "mistral": {
+        "name": "Fireworks Mistral",
+        "mmlu": 79,
+        "humaneval": 76,
+        "gsm8k": 81,
+        "truthfulqa": 77,
+        "arc": 78,
+        "vision": 0,
+        "context": 32,
+        "speed": 220,
+        "cost_per_1m_tokens": 1,
+        "strengths": ["cost", "speed"],
+        "use_cases": ["budget"]
+      },
+      "qwen": {
+        "name": "Fireworks Qwen",
+        "mmlu": 80,
+        "humaneval": 77,
+        "gsm8k": 82,
+        "truthfulqa": 78,
+        "arc": 79,
+        "vision": 0,
+        "context": 32,
+        "speed": 240,
+        "cost_per_1m_tokens": 0.8,
+        "strengths": ["cost", "speed"],
+        "use_cases": ["budget"]
+      }
+    },
+    "groq": {
+      "llama-3.1-70b-vision": {
+        "name": "Groq Llama 3.1 70B Vision",
+        "mmlu": 82,
+        "humaneval": 79,
+        "gsm8k": 84,
+        "truthfulqa": 79,
+        "arc": 81,
+        "vision": 1,
+        "context": 8,
+        "speed": 500,
+        "cost_per_1m_tokens": 0.2,
+        "strengths": ["ultra-speed", "vision", "cost"],
+        "use_cases": ["real-time vision", "ultra-low-latency"]
+      },
+      "mixtral-8x7b": {
+        "name": "Groq Mixtral 8x7B",
+        "mmlu": 78,
+        "humaneval": 75,
+        "gsm8k": 80,
+        "truthfulqa": 76,
+        "arc": 77,
+        "vision": 0,
+        "context": 32,
+        "speed": 450,
+        "cost_per_1m_tokens": 0.1,
+        "strengths": ["ultra-speed", "ultra-cost"],
+        "use_cases": ["ultra-low-latency", "budget"]
+      },
+      "llama-3-70b": {
+        "name": "Groq Llama 3 70B",
+        "mmlu": 80,
+        "humaneval": 77,
+        "gsm8k": 82,
+        "truthfulqa": 77,
+        "arc": 79,
+        "vision": 0,
+        "context": 8,
+        "speed": 480,
+        "cost_per_1m_tokens": 0.1,
+        "strengths": ["ultra-speed", "cost"],
+        "use_cases": ["real-time", "budget"]
+      }
+    },
+    "baseten": {
+      "llama-3.1": {
+        "name": "Baseten Llama 3.1",
+        "mmlu": 81,
+        "humaneval": 78,
+        "gsm8k": 83,
+        "truthfulqa": 79,
+        "arc": 80,
+        "vision": 0,
+        "context": 128,
+        "speed": 120,
+        "cost_per_1m_tokens": 2.4,
+        "strengths": ["reasoning", "cost"],
+        "use_cases": ["reasoning", "budget"]
+      },
+      "mixtral-8x22b": {
+        "name": "Baseten Mixtral 8x22B",
+        "mmlu": 83,
+        "humaneval": 80,
+        "gsm8k": 85,
+        "truthfulqa": 80,
+        "arc": 82,
+        "vision": 0,
+        "context": 64,
+        "speed": 100,
+        "cost_per_1m_tokens": 4,
+        "strengths": ["reasoning", "balanced"],
+        "use_cases": ["reasoning"]
+      }
+    },
+    "cerebras": {
+      "llama-3.1-70b": {
+        "name": "Cerebras Llama 3.1 70B",
+        "mmlu": 82,
+        "humaneval": 79,
+        "gsm8k": 84,
+        "truthfulqa": 79,
+        "arc": 81,
+        "vision": 0,
+        "context": 128,
+        "speed": 180,
+        "cost_per_1m_tokens": 0.7,
+        "strengths": ["reasoning", "cost", "speed"],
+        "use_cases": ["balanced reasoning"]
+      }
+    },
+    "replicate": {
+      "meta-llama-2-70b": {
+        "name": "Replicate Llama 2 70B",
+        "mmlu": 80,
+        "humaneval": 77,
+        "gsm8k": 82,
+        "truthfulqa": 78,
+        "arc": 79,
+        "vision": 0,
+        "context": 4,
+        "speed": 140,
+        "cost_per_1m_tokens": 1.375,
+        "strengths": ["reasoning", "cost"],
+        "use_cases": ["budget reasoning"]
+      }
+    },
+    "huggingface": {
+      "meta-llama-2-70b-chat": {
+        "name": "HF Llama 2 70B Chat",
+        "mmlu": 80,
+        "humaneval": 77,
+        "gsm8k": 82,
+        "truthfulqa": 78,
+        "arc": 79,
+        "vision": 0,
+        "context": 4,
+        "speed": 150,
+        "cost_per_1m_tokens": 0.002,
+        "strengths": ["ultra-cost"],
+        "use_cases": ["maximum budget"]
+      }
+    },
+    "openrouter": {
+      "gpt-4-turbo": {
+        "name": "OpenRouter GPT-4 Turbo",
+        "mmlu": 86,
+        "humaneval": 88,
+        "gsm8k": 90,
+        "truthfulqa": 83,
+        "arc": 85,
+        "vision": 1,
+        "context": 128,
+        "speed": 100,
+        "cost_per_1m_tokens": 60,
+        "strengths": ["reasoning", "vision"],
+        "use_cases": ["reasoning", "vision"]
+      }
+    }
+  }
+}
