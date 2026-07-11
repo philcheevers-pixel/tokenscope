@@ -376,9 +376,24 @@ function submitKey() {
 function fetchProviderData(provider, api_key) {
     // Call backend to fetch historical cost data for this provider
     var url = API_BASE + '/' + provider + '/costs?key=' + encodeURIComponent(api_key);
+    console.log('[FETCH] Starting data fetch for '+provider);
+    console.log('[FETCH] URL: '+url);
+
     fetch(url)
-        .then(r => r.json())
+        .then(r => {
+            console.log('[FETCH] Response status: '+r.status);
+            return r.json();
+        })
         .then(data => {
+            console.log('[FETCH] Response data:', data);
+            sessionLastUpdate = new Date();
+
+            if (data.error) {
+                console.error('[FETCH] API error for '+provider+': '+data.error);
+                alert(provider+' data fetch failed:\n'+data.error);
+                return;
+            }
+
             if (data.costs && data.costs.length > 0) {
                 // Store in COST_DATA
                 if (!COST_DATA[provider]) COST_DATA[provider] = {};
@@ -394,10 +409,19 @@ function fetchProviderData(provider, api_key) {
                         timestamp: new Date().toISOString()
                     };
                 });
-                console.log('Data fetched for '+provider+': '+data.costs.length+' entries');
+                console.log('[FETCH] SUCCESS: '+provider+' — '+data.costs.length+' data points stored');
+                updateSessionMetrics();
+            } else {
+                console.warn('[FETCH] No data returned for '+provider+' (empty response)');
+                updateSessionMetrics();
             }
         })
-        .catch(e => console.error('Failed to fetch '+provider+' data:', e));
+        .catch(e => {
+            console.error('[FETCH] Network error for '+provider+':', e);
+            alert('Failed to fetch '+provider+' data:\n'+e.message);
+            sessionLastUpdate = new Date();
+            updateSessionMetrics();
+        });
 }
 
 function showCard(num) {
