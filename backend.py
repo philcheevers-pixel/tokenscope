@@ -5,7 +5,7 @@ Per-model cost tracking, 120-day accumulation
 Real API integrations, no simulations
 """
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_file
 from flask_cors import CORS
 from datetime import datetime, timedelta
 import os
@@ -366,14 +366,26 @@ def get_provider_costs(provider, api_key, days=7):
 # ===== ROUTES =====
 
 @app.route('/', methods=['GET'])
-def health():
-    return jsonify({
-        'status': 'ok',
-        'service': 'TokenScope Backend v2',
-        'providers': len(PROVIDERS),
-        'providers_list': list(PROVIDERS.keys()),
-        'tracking': 'per-model 120-day'
-    })
+def root():
+    """Serve TokenScope frontend HTML"""
+    try:
+        return send_file('TokenScope-v11.0.html', mimetype='text/html')
+    except:
+        return jsonify({
+            'status': 'ok',
+            'service': 'TokenScope Backend v2',
+            'providers': len(PROVIDERS),
+            'providers_list': list(PROVIDERS.keys()),
+            'tracking': 'per-model 120-day'
+        })
+
+@app.route('/TokenScope-v11.0.html', methods=['GET'])
+def frontend():
+    """Serve TokenScope frontend HTML"""
+    try:
+        return send_file('TokenScope-v11.0.html', mimetype='text/html')
+    except:
+        return jsonify({'error': 'Frontend not found'}), 404
 
 @app.route('/api/providers', methods=['GET'])
 def get_providers():
