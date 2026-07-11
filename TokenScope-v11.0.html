@@ -221,7 +221,7 @@ var RATE_CARDS = {
 
 var state = {provider:'claude',card:1,sycophancy:2,brevity:2,creativity:2,formality:2,depth:2,structure:2,certainty:2,citations:2};
 var costData = {};
-var API_BASE = 'http://localhost:5000/api';
+var API_BASE = '/api';
 var currentModalProvider = null;
 
 function vaultGet(k) {try{return localStorage.getItem('ts_'+k)||'';}catch(e){return '';}}
