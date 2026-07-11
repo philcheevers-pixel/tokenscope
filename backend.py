@@ -631,6 +631,51 @@ def get_model_details(provider, model_id):
         'details': model
     })
 
+@app.route('/api/debug/status', methods=['GET'])
+def debug_status():
+    """Debug endpoint: show status of all stored cost data and token counts"""
+    status = {
+        'timestamp': datetime.now().isoformat(),
+        'providers': {},
+        'summary': {
+            'total_providers_with_data': 0,
+            'total_tokens': 0,
+            'data_points': 0
+        }
+    }
+
+    for provider_id, provider_data in COST_DATA.items():
+        provider_status = {
+            'name': PROVIDERS.get(provider_id, {}).get('name', provider_id),
+            'models': {},
+            'total_tokens': 0,
+            'data_points': 0
+        }
+
+        for model_name, dates in provider_data.items():
+            model_tokens = 0
+            date_count = 0
+            for date_str, data_point in dates.items():
+                if isinstance(data_point, dict):
+                    model_tokens += data_point.get('input_tokens', 0) + data_point.get('output_tokens', 0)
+                    date_count += 1
+
+            if model_tokens > 0:
+                provider_status['models'][model_name] = {
+                    'total_tokens': model_tokens,
+                    'data_points': date_count
+                }
+                provider_status['total_tokens'] += model_tokens
+                provider_status['data_points'] += date_count
+
+        if provider_status['total_tokens'] > 0:
+            status['providers'][provider_id] = provider_status
+            status['summary']['total_providers_with_data'] += 1
+            status['summary']['total_tokens'] += provider_status['total_tokens']
+            status['summary']['data_points'] += provider_status['data_points']
+
+    return jsonify(status)
+
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({'error': 'Endpoint not found'}), 404
