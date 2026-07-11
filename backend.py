@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TokenScope Backend API v2 - All 22 Providers Wired
+TokenScope Backend API v11.01 - All 22 Providers Wired
 Per-model cost tracking, 120-day accumulation
 Real API integrations, no simulations
 """
@@ -373,7 +373,7 @@ def root():
     except:
         return jsonify({
             'status': 'ok',
-            'service': 'TokenScope Backend v2',
+            'service': 'TokenScope Backend v11.01',
             'providers': len(PROVIDERS),
             'providers_list': list(PROVIDERS.keys()),
             'tracking': 'per-model 120-day'
@@ -694,7 +694,7 @@ def not_found(error):
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("TokenScope Backend v2 - Per-Model 120-Day Tracking")
+    print("TokenScope Backend v11.01 - Per-Model 120-Day Tracking")
     print("=" * 60)
     print(f"Providers configured: {len(PROVIDERS)}")
     print("\nAll providers:")
