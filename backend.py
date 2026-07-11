@@ -12,7 +12,7 @@ import os
 import json
 import requests
 
-app = Flask(__name__)
+app = Flask(__name__, instance_path=os.path.abspath('/tmp/tokenscope'))
 CORS(app)
 
 # Load model capabilities from JSON
