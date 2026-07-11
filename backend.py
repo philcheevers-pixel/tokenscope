@@ -644,6 +644,8 @@ if __name__ == '__main__':
     for i, (pid, pdata) in enumerate(sorted(PROVIDERS.items()), 1):
         model_count = len(RATE_CARDS.get(pid, {}))
         print(f"  {i:2d}. {pdata['name']:20s} ({model_count} models)")
-    print("\nStarting Flask server on http://127.0.0.1:5000")
+    port = int(os.environ.get('PORT', 8080))
+    debug = os.environ.get('FLASK_ENV') != 'production'
+    print(f"\nStarting Flask server on http://0.0.0.0:{port}")
     print("=" * 60)
-    app.run(debug=True, host='127.0.0.1', port=5000)
+    app.run(debug=debug, host='0.0.0.0', port=port)
