@@ -3,7 +3,7 @@ services:
 - name: backend
   github:
     repo: philcheevers-pixel/tokenscope
-    branch: main
+    branch: master
   build_command: pip install -r requirements.txt
   run_command: python backend.py
   http_port: 8080
@@ -20,7 +20,7 @@ static_sites:
 - name: frontend
   github:
     repo: philcheevers-pixel/tokenscope
-    branch: main
+    branch: master
   source_dir: /
   routes:
   - path: /
