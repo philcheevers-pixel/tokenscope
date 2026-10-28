@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CarveIntel — Patent Intelligence Report (shell)</title>
+<style>
+  :root {
+    --blue: #2B61E5;
+    --blue-light: rgba(43, 97, 229, 0.08);
+    --dark: #0F172A;
+    --grey: #64748B;
+    --border: #E2E8F0;
+    --white: #fff;
+    --sheet: #E8ECF0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    color: var(--dark);
+    background: #F8FAFC;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+  .topbar {
+    height: 51px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  .brand { font-weight: 800; font-size: 18px; letter-spacing: -0.3px; }
+  .brand span { color: var(--blue); }
+  .sep { color: var(--grey); font-weight: 700; }
+  .tag { color: var(--grey); font-weight: 600; font-size: 14px; }
+  .actions { margin-left: auto; display: flex; gap: 8px; }
+  .actions button, .lang-btn, .toc-item {
+    font: inherit;
+    cursor: pointer;
+  }
+  .actions button {
+    border: 1px solid var(--border);
+    background: var(--white);
+    color: var(--dark);
+    border-radius: 5px;
+    padding: 6px 10px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .actions button.primary { background: var(--blue); color: var(--white); border-color: var(--blue); }
+  .layout { display: flex; height: calc(100vh - 51px); }
+  .sidebar {
+    width: 280px;
+    flex: none;
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar-inner { flex: 1; overflow: auto; padding: 20px 16px; }
+  .lang-grid { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+  .lang-btn {
+    text-align: left;
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: var(--white);
+    color: #475569;
+  }
+  .lang-btn.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
+  .toc-label {
+    font-size: 12px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--grey);
+    font-weight: 700;
+    margin: 8px 0 10px;
+  }
+  .toc-item {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    text-align: left;
+    border: 0;
+    border-left: 3px solid transparent;
+    background: transparent;
+    color: #475569;
+    font-weight: 600;
+    font-size: 14px;
+    padding: 7px 8px;
+    border-radius: 4px;
+  }
+  .toc-item.active { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); }
+  .toc-num { min-width: 18px; font-variant-numeric: tabular-nums; font-size: 12px; }
+  .sidebar-footer { border-top: 1px solid var(--border); padding: 12px 16px 16px; background: #F8FAFC; }
+  .sf-label { font-size: 11px; letter-spacing: 1.1px; text-transform: uppercase; color: var(--grey); font-weight: 700; }
+  .sf-value { font-family: ui-monospace, monospace; font-size: 12px; margin-top: 4px; word-break: break-all; }
+  .sheet-scroll {
+    flex: 1;
+    overflow: auto;
+    background: var(--sheet);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 16px 48px;
+  }
+  .page {
+    width: 816px;
+    max-width: 100%;
+    min-height: 960px;
+    background: var(--white);
+    border: 1px solid #d5dde8;
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08), 0 4px 16px rgba(15, 23, 42, 0.06);
+    border-radius: 2px;
+    margin: 12px 0;
+    padding: 56px 68px 28px;
+    display: flex;
+    flex-direction: column;
+  }
+  .kicker {
+    display: inline-block;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--blue);
+    background: var(--blue-light);
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+  h1 { font-size: 40px; line-height: 1.05; letter-spacing: -1px; margin: 0 0 6px; }
+  .sub { color: var(--grey); margin: 0 0 18px; }
+  .rule { width: 48px; height: 3px; background: var(--blue); border: 0; margin: 0 0 18px; }
+  .meta { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 24px; }
+  .meta .lbl { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--grey); font-weight: 700; }
+  .meta .val { font-size: 14px; font-weight: 500; }
+  .eyebrow { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--blue); font-weight: 700; }
+  h2 { font-size: 26px; letter-spacing: -0.3px; margin: 6px 0 0; }
+  .body { color: var(--dark); font-size: 15px; }
+  .page-foot {
+    margin-top: auto;
+    padding-top: 18px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    border-top: 1px solid var(--border);
+    color: var(--grey);
+    font-size: 12px;
+  }
+  @media print {
+    .topbar, .sidebar { display: none !important; }
+    .layout, .sheet-scroll { display: block; height: auto; overflow: visible; background: white; }
+    .page { box-shadow: none; border: 0; margin: 0; page-break-after: always; width: auto; min-height: 0; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">Carve<span>Intel</span></div>
+  <span class="sep">//</span>
+  <span class="tag">Patent Intelligence Division</span>
+  <div class="actions">
+    <button class="primary" type="button" onclick="window.print()">Print</button>
+    <button type="button">Email</button>
+    <button type="button">Save</button>
+    <button type="button" onclick="window.print()">Download as PDF</button>
+  </div>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="sidebar-inner">
+      <div class="lang-grid" id="langs">
+        <button class="lang-btn active" type="button" data-lang="en">EN</button>
+        <button class="lang-btn" type="button" data-lang="zh">中文</button>
+        <button class="lang-btn" type="button" data-lang="ja">日本語</button>
+        <button class="lang-btn" type="button" data-lang="de">DE</button>
+        <button class="lang-btn" type="button" data-lang="fr">FR</button>
+        <button class="lang-btn" type="button" data-lang="es">ES</button>
+      </div>
+      <div class="toc-label">Sections</div>
+      <div id="toc"></div>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sf-label">Control Number</div>
+      <div class="sf-value">20260222131750/CHEEVE/LM-299</div>
+    </div>
+  </nav>
+  <main class="sheet-scroll" id="scroller"></main>
+</div>
+<script>
+const CTRL = "20260222131750/CHEEVE/LM-299";
+const pages = [
+  ["sec-cover", "", "Cover"],
+  ["sec-scope", "01", "Scope"],
+  ["sec-01", "02", "Executive Summary"],
+  ["sec-02", "03", "Key Claims and Risk"],
+  ["sec-03", "04", "Patent Portfolio"],
+  ["sec-04", "05", "Claim Architecture"],
+  ["sec-05", "06", "Jurisdictional Topology"],
+  ["sec-06", "07", "Litigation History"],
+  ["sec-07", "08", "Biosimilar Pipeline"],
+  ["sec-08", "09", "Design-Around"],
+  ["sec-09", "10", "Patent Lifecycle"],
+  ["sec-10", "11", "Thicket and White Space"],
+  ["sec-11", "12", "Signal Detection"],
+  ["sec-12", "13", "Strategic Verdict"],
+  ["sec-appendix-a", "A", "Customer Intake"]
+];
+const scroller = document.getElementById("scroller");
+const toc = document.getElementById("toc");
+pages.forEach((p, i) => {
+  const [id, num, label] = p;
+  const btn = document.createElement("button");
+  btn.className = "toc-item" + (i === 0 ? " active" : "");
+  btn.dataset.sec = id;
+  btn.innerHTML = '<span class="toc-num">' + num + '</span><span>' + label + '</span>';
+  btn.onclick = () => document.getElementById(id).scrollIntoView({ behavior: "smooth", block: "start" });
+  toc.appendChild(btn);
+  const page = document.createElement("article");
+  page.className = "page";
+  page.id = id;
+  const n = i + 1;
+  if (id === "sec-cover") {
+    page.innerHTML =
+      '<div class="kicker">ABFTO Report</div><h1>LM-299</h1><p class="sub">Patent Intelligence Report</p><hr class="rule">' +
+      '<div class="meta">' +
+      meta("Control Number", CTRL) + meta("Prepared For", "—") + meta("Generated", "22 Feb 2026") +
+      meta("Sections", "12") + meta("Search Date", "22 Feb 2026") + meta("Sources Searched", "—") +
+      meta("Patents Found", "—") +
+      '</div>' + foot(n);
+  } else if (id === "sec-scope") {
+    page.innerHTML = block("Scope & Limitations", "About This Report",
+      "This shell is the February 22, 2026 report viewer. It shows the page, the tombstone, and the section order. It does not load a molecule writeup, and it is not a legal opinion.") + foot(n);
+  } else if (id === "sec-appendix-a") {
+    page.innerHTML = block("Appendix A", "Customer Intake",
+      "Intake supplied with the order sits here. This shell has no intake text loaded.") + foot(n);
+  } else {
+    page.innerHTML = block("Section", label, "Page reserved for this section. The writeup is not loaded in this shell.") + foot(n);
+  }
+  scroller.appendChild(page);
+});
+function meta(l, v) { return '<div><div class="lbl">' + l + '</div><div class="val">' + v + '</div></div>'; }
+function block(eye, title, text) {
+  return '<div class="eyebrow">' + eye + '</div><h2>' + title + '</h2><hr class="rule"><div class="body"><p>' + text + '</p></div>';
+}
+function foot(n) {
+  return '<div class="page-foot"><span>' + CTRL + '</span><span>Page ' + n + ' of ' + pages.length + '</span></div>';
+}
+document.getElementById("langs").onclick = (e) => {
+  const b = e.target.closest(".lang-btn");
+  if (!b) return;
+  document.querySelectorAll(".lang-btn").forEach((x) => x.classList.remove("active"));
+  b.classList.add("active");
+};
+scroller.addEventListener("scroll", () => {
+  const top = scroller.getBoundingClientRect().top;
+  let current = pages[0][0];
+  pages.forEach((p) => {
+    const el = document.getElementById(p[0]);
+    if (el.getBoundingClientRect().top - top < 120) current = p[0];
+  });
+  document.querySelectorAll(".toc-item").forEach((el) => {
+    el.classList.toggle("active", el.dataset.sec === current);
+  });
+});
+</script>
+</body>
+</html>
