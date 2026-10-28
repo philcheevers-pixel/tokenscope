@@ -1,0 +1,519 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dictio · Voices (test build)</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--bg:#f3efe6;--card:#fffdf8;--ink:#1e1a16;--muted:#5c5348;--line:#e3d8c8;--green:#1f4a38;--green-soft:#e6f0ea;--clay:#8d341c;
+--border:#d4cfc6;--forest:#1b4332;--slate:#475569;--track:#E2E8F0;--tick:#D1D5DB}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Iowan Old Style",Palatino,"Palatino Linotype",Georgia,serif;line-height:1.45}
+a{color:var(--green)}
+.wrap{max-width:1040px;margin:0 auto;padding:18px 16px 60px}
+header.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+header.top h1{font-size:28px;margin:6px 0}
+.back{font-size:16px;text-decoration:none;border:1px solid var(--line);background:var(--card);padding:8px 14px;border-radius:999px;min-height:40px;display:inline-flex;align-items:center}
+.banner{background:var(--green-soft);border:1px solid #c9dccf;border-radius:12px;padding:10px 14px;margin:10px 0 14px;font-size:15px}
+.lede{color:var(--muted);font-size:17px;margin:4px 0 16px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:14px 0}
+.panel h2{font-size:21px;margin:0 0 10px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.vcard{position:relative;background:#fff;border:1px solid var(--border);border-radius:6px;padding:12px 10px;text-align:center;cursor:pointer;font:inherit;color:inherit;min-height:84px}
+.vcard:hover,.vcard:focus-visible{border-color:var(--forest);outline:none;box-shadow:0 0 0 2px #1b433222}
+.vcard[aria-pressed="true"]{border-color:var(--forest);background:var(--green-soft)}
+.vcard .nm{font-weight:600;font-size:17px;display:block}
+.vcard .rl{font-size:13px;color:var(--slate);display:block;margin-top:2px}
+.vcard .tg{font-size:12px;color:var(--muted);display:inline-block;margin-top:5px;border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.vcard .tease{display:none;position:absolute;left:50%;bottom:calc(100% + 6px);transform:translateX(-50%);width:240px;background:var(--ink);color:#fff;font-size:13px;line-height:1.35;padding:7px 9px;border-radius:6px;z-index:20;pointer-events:none;text-align:left}
+@media (hover:hover){.vcard:hover .tease{display:block}}
+.vcard:focus-visible .tease{display:block}
+.detail-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:baseline}
+.detail-head h2{margin:0}
+.teaser-line{font-style:italic;color:var(--muted);margin:4px 0 8px}
+.note{font-size:14px;color:var(--muted);background:#faf6ee;border-left:3px solid var(--clay);padding:6px 10px;border-radius:4px;margin:8px 0}
+.quotes{margin:8px 0;padding:0;list-style:none}
+.quotes li{margin:6px 0;padding-left:12px;border-left:3px solid var(--line)}
+.quotes cite{display:block;font-size:13px;font-style:normal;color:var(--muted)}
+.srcs{font-size:14px;color:var(--muted);margin:6px 0 0;padding-left:18px}
+.dials{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.dial{background:#FFF;border:1px solid var(--border);border-radius:6px;padding:12px}
+.dlabel{font-size:18px;font-weight:600;display:flex;justify-content:center;align-items:center;gap:6px}
+.ddesc{font-size:14px;color:var(--slate);display:flex;justify-content:space-between;margin-top:2px}
+.track{position:relative;height:6px;border-radius:3px;margin:12px 6px 6px;background:linear-gradient(to right,transparent 24%,var(--tick) 24%,var(--tick) 25%,transparent 25%,transparent 49%,var(--tick) 49%,var(--tick) 50%,transparent 50%,transparent 74%,var(--tick) 74%,var(--tick) 75%,transparent 75%),var(--track)}
+.knob{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:var(--forest);transform:translate(-50%,-50%);border:2px solid #fff;box-shadow:0 0 0 1px var(--forest)}
+.knob.you{background:var(--clay);box-shadow:0 0 0 1px var(--clay);width:14px;height:14px}
+.dval{text-align:center;font-size:14px;color:var(--ink);margin-top:4px}
+.help{position:relative;width:22px;height:22px;border-radius:50%;background:var(--forest);color:#fff;border:0;font:600 13px/22px Georgia,serif;cursor:pointer;padding:0;flex:none}
+.help .tip{display:none;position:absolute;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:230px;background:var(--ink);color:#fff;font:400 13px/1.35 Georgia,serif;padding:7px 9px;border-radius:6px;z-index:30;text-align:left}
+@media (hover:hover){.help:hover .tip{display:block}}
+.help:focus-visible .tip,.help.open .tip{display:block}
+.legend{font-size:13px;color:var(--muted);margin-top:8px;display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{font-size:13px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:2px 9px}
+textarea{width:100%;min-height:170px;font:16px/1.5 "Iowan Old Style",Palatino,Georgia,serif;border:1px solid var(--border);border-radius:10px;padding:10px;background:#fff;color:var(--ink);resize:vertical}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.btn{min-height:44px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:0 18px;font:600 16px Georgia,serif;cursor:pointer}
+.btn.primary{background:var(--clay);border-color:var(--clay);color:#fff}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.changes{margin:6px 0;padding-left:18px}
+.flags{margin:6px 0;padding-left:18px;color:var(--clay)}
+table.vs{width:100%;border-collapse:collapse;font-size:15px}
+table.vs th,table.vs td{padding:6px 6px;border-bottom:1px solid var(--line);text-align:right}
+table.vs th:first-child,table.vs td:first-child{text-align:left}
+table.vs th{font-size:13px;color:var(--muted);font-weight:600}
+.gaps{margin:8px 0;padding-left:18px}
+.warn{color:var(--clay);font-weight:600}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+footer{font-size:13px;color:var(--muted);margin-top:24px}
+@media (max-width:760px){.grid{grid-template-columns:1fr 1fr}.dials{grid-template-columns:1fr}.vcard .tease{width:190px}header.top h1{font-size:23px}}
+@media (max-width:380px){.vcard .nm{font-size:15px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>Dictio · Voices</h1>
+  <a class="back" href="/910/">← Back to Dictio</a>
+</header>
+<div class="banner"><strong>Test build.</strong> Style study based on public speech. Not affiliated with or endorsed by these people.</div>
+<p class="lede">Pick a voice. Paste your text. Dictio measures both, nudges a few habits (contractions, filler, word size) and flags sentences that run long for that voice. It does not rewrite you into them, and it never adds their phrases.</p>
+
+<section class="panel" aria-labelledby="pickh">
+  <h2 id="pickh">1. Pick a voice <span class="muted small" style="font-weight:400">· 20 voices · hover or focus a card for a fact</span></h2>
+  <div class="grid" id="grid" role="group" aria-label="Voices"></div>
+</section>
+
+<section class="panel" id="detail" hidden aria-live="polite"></section>
+
+<section class="panel" id="work" hidden>
+  <h2>2. Paste your text</h2>
+  <textarea id="input" placeholder="Paste a paragraph or more. 100+ words gives steadier numbers." aria-label="Your text"></textarea>
+  <div class="btns">
+    <button class="btn primary" id="process">Process</button>
+    <button class="btn" id="clear">Clear</button>
+    <span class="muted small" id="count" style="align-self:center"></span>
+  </div>
+  <div id="results" hidden>
+    <h2>3. Result</h2>
+    <textarea id="output" readonly aria-label="Processed text"></textarea>
+    <div class="btns">
+      <button class="btn" id="copy">Copy</button>
+      <button class="btn" id="download">Download .txt</button>
+      <span class="muted small" id="copied" style="align-self:center"></span>
+    </div>
+    <h2 style="margin-top:14px">What changed</h2>
+    <div id="changed"></div>
+    <h2 style="margin-top:14px">You vs. <span id="vsname"></span></h2>
+    <div id="vs"></div>
+  </div>
+</section>
+
+<footer>
+  <p>How it works: every number is computed by the same small script for you and for them (sentence split on . ? !, a vowel-group syllable estimate, word lists for hedges and pronouns). Adjective and adverb dials come from the spaCy <em>en_core_web_sm</em> part-of-speech tagger run offline on each corpus; your text is measured in the browser, so it gets an "-ly words" count instead. Corpora are small (about 2,000 to 13,600 words each), mostly prepared speeches or printed text, and say more about a few documents than about a whole person.</p>
+  <p>Sources are linked on each voice. Copyrighted sources are used only for statistics and a few short quotes. No full texts are stored in this page. Test build, <span id="ver"></span>.</p>
+</footer>
+</div>
+<script>
+/* textstats: shared by the build (node) and the page (browser) so both measure the same way. */
+const TS = (() => {
+  const ABBR = /\b(Mr|Mrs|Ms|Dr|St|Gen|Col|Capt|Lt|Rev|Hon|Jr|Sr|Prof|Gov|Sen|Rep|vs|etc|No|Mt|Ft|Messrs|i\.e|e\.g|U\.S|U\.S\.A|A\.M|P\.M|a\.m|p\.m)\./g;
+  const WORD_RE = /[A-Za-z\u00C0-\u024F]+(?:['’][A-Za-z\u00C0-\u024F]+)*/g;
+  const HEDGES = ["i think", "i believe", "i suppose", "i guess", "i feel that", "it seems", "seems to", "seemed to",
+    "perhaps", "maybe", "possibly", "probably", "somewhat", "fairly", "rather", "quite", "apparently", "arguably",
+    "sort of", "kind of", "more or less", "basically", "essentially", "in my opinion"];
+  const PRON_S = new Set(["it", "that", "there", "he", "she", "what", "who", "let", "here", "where", "how", "everybody", "everyone", "nobody", "one"]);
+  const PRON_D = new Set(["i", "you", "he", "she", "it", "we", "they", "who", "that", "there", "what", "where", "how", "why"]);
+  const FP_S = new Set(["i", "me", "my", "mine", "myself"]);
+  const FP_P = new Set(["we", "us", "our", "ours", "ourselves"]);
+  const SP = new Set(["you", "your", "yours", "yourself", "yourselves", "thee", "thou", "thy", "thine"]);
+  const LY_NOT = new Set(["only", "early", "family", "july", "italy", "reply", "supply", "apply", "fly", "july", "holy", "ugly", "lovely", "friendly", "likely", "lonely", "daily", "elderly", "orderly", "costly", "deadly", "lively", "worldly", "manly", "kindly", "silly", "jolly", "belly", "bully", "ally", "rally", "rely", "imply", "comply", "multiply", "assembly", "anomaly", "monopoly", "lily", "sly", "folly", "melancholy", "homely", "stately", "timely", "unlikely", "ugly", "ghastly", "beastly", "cowardly", "scholarly", "brotherly", "motherly", "fatherly", "sisterly", "heavenly", "earthly", "godly", "ungodly", "womanly", "comely", "jelly", "bodily", "hilly", "chilly", "curly", "surly", "burly", "oily", "wily", "unruly", "napoli", "emily", "sicily", "kelly", "billy", "willy", "sally", "molly", "dolly", "holly", "polly", "nelly", "lilly", "philly"]);
+
+  function norm(t) { return String(t || "").replace(/[’‘]/g, "'").replace(/[“”]/g, '"').replace(/\r/g, ""); }
+  function words(t) { return (norm(t).match(WORD_RE) || []); }
+  function sentences(t) {
+    let s = norm(t).replace(ABBR, (m) => m.replace(/\./g, "∯"));
+    s = s.replace(/([A-Z])\.(?=[A-Z]\.|\s[A-Z][a-z])/g, "$1∯"); // initials like "S. Grant"
+    const parts = [];
+    for (const para of s.split(/\n+/)) {
+      for (const p of para.split(/(?<=[.!?])["')\]]*\s+(?=["'(\[]?[A-Z0-9])/)) {
+        const clean = p.replace(/∯/g, ".").trim();
+        if (words(clean).length) parts.push(clean);
+      }
+    }
+    return parts;
+  }
+  function syllables(w) {
+    w = w.toLowerCase().replace(/[^a-z]/g, "");
+    if (!w) return 0;
+    if (w.length <= 3) return 1;
+    w = w.replace(/(?:[^laeiouy]es|[^laeiouy]e)$/, (m) => m[0]).replace(/([^td])ed$/, "$1").replace(/^y/, "");
+    const g = w.match(/[aeiouy]+/g);
+    return Math.max(1, g ? g.length : 1);
+  }
+  function isContraction(w) {
+    const l = w.toLowerCase();
+    if (l === "tis" || l === "twas") return true;
+    if (!l.includes("'")) return false;
+    if (/n't$|'ll$|'re$|'ve$|'m$/.test(l)) return true;
+    if (/'d$/.test(l)) return PRON_D.has(l.slice(0, -2)); // skip poetic elision like "remember'd"
+    if (/'s$/.test(l)) return PRON_S.has(l.slice(0, -2));
+    return false;
+  }
+  function countPhrase(lower, list) {
+    let n = 0;
+    for (const h of list) {
+      const re = new RegExp("\\b" + h.replace(/ /g, "\\s+") + "\\b", "g");
+      const m = lower.match(re); if (m) n += m.length;
+    }
+    return n;
+  }
+  function opener(s) { return words(s).slice(0, 2).map((x) => x.toLowerCase()).join(" "); }
+  function mean(a) { return a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0; }
+  function sd(a) { const m = mean(a); return a.length > 1 ? Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1)) : 0; }
+  function pct(a, p) { if (!a.length) return 0; const b = a.slice().sort((x, y) => x - y); return b[Math.min(b.length - 1, Math.floor(p * (b.length - 1) + 0.5))]; }
+  const PASSIVE = /\b(?:am|is|are|was|were|be|been|being)\s+(?:\w+ly\s+)?(?:\w+ed|built|chosen|done|given|known|made|seen|shown|taken|told|written)\b/gi;
+
+  function stats(text) {
+    const t = norm(text);
+    const sents = sentences(t);
+    const W = words(t);
+    const n = W.length || 1;
+    const lens = sents.map((s) => words(s).length);
+    const syl = W.map(syllables);
+    const lower = " " + W.map((w) => w.toLowerCase()).join(" ") + " ";
+    let fps = 0, fpp = 0, sp = 0, con = 0, ly = 0;
+    for (const w of W) {
+      const l = w.toLowerCase();
+      if (FP_S.has(l)) fps++;
+      if (FP_P.has(l)) fpp++;
+      if (SP.has(l)) sp++;
+      if (isContraction(w)) con++;
+      if (l.length > 4 && l.endsWith("ly") && !LY_NOT.has(l)) ly++;
+    }
+    let rep = 0;
+    const ops = sents.map(opener);
+    for (let i = 1; i < ops.length; i++) {
+      if (ops[i].includes(" ") && (ops[i] === ops[i - 1] || (i > 1 && ops[i] === ops[i - 2]))) rep++;
+    }
+    const q = sents.filter((s) => /\?["')\]]*$/.test(s)).length;
+    const ex = sents.filter((s) => /!["')\]]*$/.test(s)).length;
+    const commas = (t.match(/[,;]/g) || []).length;
+    const passive = (t.match(PASSIVE) || []).length;
+    const S = sents.length || 1;
+    const r = (x, d = 1) => Math.round(x * 10 ** d) / 10 ** d;
+    return {
+      words: W.length, sentences: sents.length,
+      sentAvg: r(mean(lens)), sentSd: r(sd(lens)), sentMedian: pct(lens, 0.5), sentP90: pct(lens, 0.9),
+      pctShort: r(100 * lens.filter((x) => x <= 8).length / S), pctLong: r(100 * lens.filter((x) => x >= 30).length / S),
+      letters: r(mean(W.map((w) => w.replace(/[^A-Za-z]/g, "").length)), 2),
+      syllables: r(mean(syl), 2), pctPoly: r(100 * syl.filter((x) => x >= 3).length / n),
+      contractions: r(1000 * con / n), hedges: r(1000 * countPhrase(lower, HEDGES) / n),
+      firstSing: r(1000 * fps / n), firstPlural: r(1000 * fpp / n), second: r(1000 * sp / n),
+      questions: r(100 * q / S), exclaims: r(100 * ex / S), repetition: r(100 * rep / S),
+      commas: r(commas / S, 2), lyAdverbs: r(1000 * ly / n), passive: r(1000 * passive / n)
+    };
+  }
+  return { norm, stats, sentences, words, syllables, isContraction, opener, HEDGES };
+})();
+
+
+</script>
+<script>
+const DATA = {"version": "test-1", "built": "2026-10-28", "posTagger": "spaCy 3 en_core_web_sm", "jargon": ["utilize", "leverage", "synergy", "stakeholders", "going forward", "circle back", "deep dive", "actionable", "bandwidth", "best-in-class", "paradigm", "robust", "seamless", "holistic", "impactful"], "voices": [{"id": "lincoln", "name": "Abraham Lincoln", "role": "US president, 1861–65", "kind": "speech", "country": "US", "teaser": "The Gettysburg Address here is 264 words. Edward Everett spoke for about two hours before it.", "note": "", "copyright": false, "words": 4601, "samples": [{"label": "First Inaugural Address, 1861", "url": "https://avalon.law.yale.edu/19th_century/lincoln1.asp", "words": 3633}, {"label": "Gettysburg Address, 1863", "url": "https://avalon.law.yale.edu/19th_century/gettyb.asp", "words": 267}, {"label": "Second Inaugural Address, 1865", "url": "https://avalon.law.yale.edu/19th_century/lincoln2.asp", "words": 701}], "quotes": [{"text": "We are not enemies, but friends. We must not be enemies.", "source": "First Inaugural Address, 1861", "url": "https://avalon.law.yale.edu/19th_century/lincoln1.asp"}, {"text": "With malice toward none, with charity for all", "source": "Second Inaugural Address, 1865", "url": "https://avalon.law.yale.edu/19th_century/lincoln2.asp"}, {"text": "government of the people, by the people, for the people shall not perish from the earth.", "source": "Gettysburg Address, 1863", "url": "https://avalon.law.yale.edu/19th_century/gettyb.asp"}], "stats": {"words": 4601, "sentences": 177, "sentAvg": 26, "sentSd": 17.3, "sentMedian": 22, "sentP90": 47, "pctShort": 13.6, "pctLong": 32.8, "letters": 4.62, "syllables": 1.53, "pctPoly": 14.7, "contractions": 0, "hedges": 2.6, "firstSing": 13, "firstPlural": 10.6, "second": 5.9, "questions": 13, "exclaims": 0, "repetition": 3.4, "commas": 1.49, "lyAdverbs": 17.2, "passive": 13.7}, "pos": {"adj": 7.8, "adv": 5.6, "tagged_words": 4601}, "signature": ["constitutional", "provision", "expressly", "government", "minority", "surrendered", "clause", "secede", "lawfully", "section"], "phrases": ["service or labor", "does not expressly say", "one section", "slavery in the", "of four years", "among the people"], "profile": {"contractions": "expand", "hedges": "full", "words": "plain", "maxSentenceWords": 47, "flagPassive": false}}, {"id": "douglass", "name": "Frederick Douglass", "role": "Abolitionist, writer, orator", "kind": "speech", "country": "US", "teaser": "Invited to speak for the Fourth of July, he spoke on the fifth (5 July 1852).", "note": "", "copyright": false, "words": 1957, "samples": [{"label": "'What to the Slave Is the Fourth of July?' extract, appendix of My Bondage and My Freedom (1855)", "url": "https://www.gutenberg.org/cache/epub/202/pg202.txt", "words": 1957}], "quotes": [{"text": "What to the American slave is your Fourth of July?", "source": "'What to the Slave Is the Fourth of July?' extract, appendix of My Bondage and My Freedom (1855)", "url": "https://www.gutenberg.org/cache/epub/202/pg202.txt"}, {"text": "for revolting barbarity and shameless hypocrisy, America reigns without a rival.", "source": "'What to the Slave Is the Fourth of July?' extract, appendix of My Bondage and My Freedom (1855)", "url": "https://www.gutenberg.org/cache/epub/202/pg202.txt"}], "stats": {"words": 1957, "sentences": 89, "sentAvg": 22, "sentSd": 20.7, "sentMedian": 15, "sentP90": 44, "pctShort": 21.3, "pctLong": 23.6, "letters": 4.43, "syllables": 1.44, "pctPoly": 11.6, "contractions": 0, "hedges": 0, "firstSing": 34.2, "firstPlural": 13.3, "second": 23, "questions": 23.6, "exclaims": 10.1, "repetition": 4.5, "commas": 2.61, "lyAdverbs": 6.6, "passive": 11.2}, "pos": {"adj": 6.6, "adv": 2.5, "tagged_words": 1959}, "signature": ["argue", "slave", "crimes", "slavery", "liberty", "forget", "independence", "nation", "day", "man"], "phrases": ["the nation must be", "of the nation must", "the slave is a", "that the slave is", "of the slave", "manhood of the"], "profile": {"contractions": "expand", "hedges": "full", "words": "plain+", "maxSentenceWords": 44, "flagPassive": false}}, {"id": "troosevelt", "name": "Theodore Roosevelt", "role": "US president, 1901–09", "kind": "speech", "country": "US", "teaser": "Longest average sentence of any president here: about 32 words.", "note": "", "copyright": false, "words": 13642, "samples": [{"label": "'The Strenuous Life', speech, Chicago 1899 (in The Strenuous Life)", "url": "https://www.gutenberg.org/cache/epub/58821/pg58821.txt", "words": 4812}, {"label": "'Citizenship in a Republic', Sorbonne 1910", "url": "https://en.wikisource.org/wiki/Citizenship_in_a_Republic", "words": 8830}], "quotes": [{"text": "It is not the critic who counts", "source": "'Citizenship in a Republic', Sorbonne 1910", "url": "https://en.wikisource.org/wiki/Citizenship_in_a_Republic"}, {"text": "I wish to preach, not the doctrine of ignoble ease, but the doctrine of the strenuous life", "source": "'The Strenuous Life', speech, Chicago 1899 (in The Strenuous Life)", "url": "https://www.gutenberg.org/cache/epub/58821/pg58821.txt"}, {"text": "The poorest way to face life is to face it with a sneer.", "source": "'Citizenship in a Republic', Sorbonne 1910", "url": "https://en.wikisource.org/wiki/Citizenship_in_a_Republic"}], "stats": {"words": 13642, "sentences": 427, "sentAvg": 31.9, "sentSd": 20.6, "sentMedian": 27, "sentP90": 58, "pctShort": 5.6, "pctLong": 43.1, "letters": 4.41, "syllables": 1.45, "pctPoly": 11.1, "contractions": 0.3, "hedges": 1.5, "firstSing": 4.9, "firstPlural": 18.4, "second": 4.1, "questions": 1.2, "exclaims": 0.9, "repetition": 4.4, "commas": 2.28, "lyAdverbs": 11, "passive": 8}, "pos": {"adj": 9.1, "adv": 4.6, "tagged_words": 13638}, "signature": ["man", "citizen", "men", "qualities", "individual", "good", "strife", "civilization", "average", "republic"], "phrases": ["the man who", "the men who", "the man of", "good citizen", "shrink from", "men of"], "profile": {"contractions": "expand", "hedges": "full", "words": "plain+", "maxSentenceWords": 58, "flagPassive": false}}, {"id": "churchill", "name": "Winston Churchill", "role": "UK prime minister, 1940–45, 1951–55", "kind": "speech", "country": "UK", "teaser": "The 'blood, toil, tears and sweat' speech of 13 May 1940 is about 730 words in Hansard.", "note": "Hansard record of Commons speeches.", "copyright": true, "words": 8596, "samples": [{"label": "House of Commons, 13 May 1940 (Hansard)", "url": "https://api.parliament.uk/historic-hansard/commons/1940/may/13/his-majestys-government-1", "words": 735}, {"label": "House of Commons, 4 June 1940 (Hansard)", "url": "https://api.parliament.uk/historic-hansard/commons/1940/jun/04/war-situation", "words": 3794}, {"label": "House of Commons, 18 June 1940 (Hansard)", "url": "https://api.parliament.uk/historic-hansard/commons/1940/jun/18/war-situation", "words": 4067}], "quotes": [{"text": "I have nothing to offer but blood, toil, tears and sweat.", "source": "House of Commons, 13 May 1940 (Hansard)", "url": "https://api.parliament.uk/historic-hansard/commons/1940/may/13/his-majestys-government-1"}, {"text": "we shall never surrender", "source": "House of Commons, 4 June 1940 (Hansard)", "url": "https://api.parliament.uk/historic-hansard/commons/1940/jun/04/war-situation"}], "stats": {"words": 8596, "sentences": 324, "sentAvg": 26.5, "sentSd": 17.8, "sentMedian": 22, "sentP90": 54, "pctShort": 11.1, "pctLong": 34.6, "letters": 4.47, "syllables": 1.44, "pctPoly": 10.6, "contractions": 0, "hedges": 2.6, "firstSing": 11.3, "firstPlural": 30.9, "second": 0.5, "questions": 2.5, "exclaims": 0, "repetition": 2.8, "commas": 1.77, "lyAdverbs": 10.2, "passive": 11.6}, "pos": {"adj": 8.0, "adv": 5.2, "tagged_words": 8586}, "signature": ["british", "air", "french", "battle", "force", "enemy", "troops", "divisions", "large", "island"], "phrases": ["air force", "this island", "we shall fight", "british and", "in the air", "very large"], "profile": {"contractions": "expand", "hedges": "full", "words": "plain+", "maxSentenceWords": 54, "flagPassive": false}}, {"id": "jfk", "name": "John F. Kennedy", "role": "US president, 1961–63", "kind": "speech", "country": "US", "teaser": "At Rice he asked why Rice plays Texas, then answered with the Moon.", "note": "", "copyright": false, "words": 6983, "samples": [{"label": "Inaugural Address, 1961", "url": "https://avalon.law.yale.edu/20th_century/kennedy.asp", "words": 1363}, {"label": "Address at Rice University on the Nation's Space Effort, 1962", "url": "https://www.presidency.ucsb.edu/documents/address-rice-university-houston-the-nations-space-effort", "words": 2182}, {"label": "Commencement Address at American University, 1963", "url": "https://www.presidency.ucsb.edu/documents/commencement-address-american-university-washington", "words": 3438}], "quotes": [{"text": "ask not what your country can do for you--ask what you can do for your country.", "source": "Inaugural Address, 1961", "url": "https://avalon.law.yale.edu/20th_century/kennedy.asp"}, {"text": "We choose to go to the moon.", "source": "Address at Rice University on the Nation's Space Effort, 1962", "url": "https://www.presidency.ucsb.edu/documents/address-rice-university-houston-the-nations-space-effort"}, {"text": "we all inhabit this small planet.", "source": "Commencement Address at American University, 1963", "url": "https://www.presidency.ucsb.edu/documents/commencement-address-american-university-washington"}], "stats": {"words": 6983, "sentences": 290, "sentAvg": 24.1, "sentSd": 17.1, "sentMedian": 21, "sentP90": 44, "pctShort": 13.8, "pctLong": 26.6, "letters": 4.47, "syllables": 1.46, "pctPoly": 11.5, "contractions": 0.7, "hedges": 1.6, "firstSing": 7, "firstPlural": 37.1, "second": 2.6, "questions": 3.1, "exclaims": 0, "repetition": 5.9, "commas": 1.48, "lyAdverbs": 7.6, "passive": 8}, "pos": {"adj": 8.7, "adv": 4.8, "tagged_words": 6981}, "signature": ["peace", "space", "nuclear", "world", "new", "war", "nations", "treaty", "arms", "moon"], "phrases": ["let both sides", "to the moon", "our attitude toward", "for peace", "sense in an age", "no sense in an"], "profile": {"contractions": "expand", "hedges": "full", "words": "plain", "maxSentenceWords": 44, "flagPassive": false}}, {"id": "mlk", "name": "Martin Luther King Jr.", "role": "Minister, civil rights leader", "kind": "speech + letter", "country": "US", "teaser": "The 'I have a dream' passage was not in his prepared text for the March on Washington.", "note": "Speech sample is a partial National Archives transcript (last part of the March on Washington). Most words come from the Birmingham letter, which is writing, not speech. Copyrighted: short quotes only.", "copyright": true, "words": 7620, "samples": [{"label": "'I Have a Dream', March on Washington 1963 (National Archives transcript)", "url": "https://www.archives.gov/files/social-media/transcripts/transcript-march-pt3-of-3-2602934.pdf", "words": 725}, {"label": "'Letter from Birmingham Jail', 1963", "url": "https://www.africa.upenn.edu/Articles_Gen/Letter_Birmingham.html", "words": 6895}], "quotes": [{"text": "Injustice anywhere is a threat to justice everywhere.", "source": "'Letter from Birmingham Jail', 1963", "url": "https://www.africa.upenn.edu/Articles_Gen/Letter_Birmingham.html"}], "stats": {"words": 7620, "sentences": 356, "sentAvg": 21.4, "sentSd": 21, "sentMedian": 17, "sentP90": 36, "pctShort": 12.4, "pctLong": 18.3, "letters": 4.65, "syllables": 1.52, "pctPoly": 13.3, "contractions": 1, "hedges": 4.1, "firstSing": 23.8, "firstPlural": 16.8, "second": 11.7, "questions": 7.9, "exclaims": 1.4, "repetition": 11.2, "commas": 0.99, "lyAdverbs": 12.5, "passive": 11}, "pos": {"adj": 9.0, "adv": 4.7, "tagged_words": 7609}, "signature": ["nonviolent", "unjust", "church", "segregation", "white", "tension", "ring", "freedom", "direct", "action"], "phrases": ["direct action", "let freedom ring", "i have a dream", "freedom ring from", "will be able to", "that the white"], "profile": {"contractions": "expand", "hedges": "filler", "words": "plain", "maxSentenceWords": 36, "flagPassive": false}}, {"id": "reagan", "name": "Ronald Reagan", "role": "US president, 1981–89", "kind": "speech", "country": "US", "teaser": "Some advisers wanted 'tear down this wall' cut from the Berlin speech. It stayed.", "note": "", "copyright": false, "words": 5765, "samples": [{"label": "Inaugural Address, 1981", "url": "https://www.reaganlibrary.gov/archives/speech/inaugural-address-1981", "words": 2424}, {"label": "Address to the Nation on the Challenger explosion, 1986", "url": "https://www.reaganlibrary.gov/archives/speech/address-nation-explosion-space-shuttle-challenger", "words": 646}, {"label": "Remarks at the Brandenburg Gate, 1987", "url": "https://www.reaganlibrary.gov/archives/speech/remarks-east-west-relations-brandenburg-gate-west-berlin", "words": 2695}], "quotes": [{"text": "Mr. Gorbachev, tear down this wall!", "source": "Remarks at the Brandenburg Gate, 1987", "url": "https://www.reaganlibrary.gov/archives/speech/remarks-east-west-relations-brandenburg-gate-west-berlin"}, {"text": "government is not the solution to our problem; government is the problem.", "source": "Inaugural Address, 1981", "url": "https://www.reaganlibrary.gov/archives/speech/inaugural-address-1981"}], "stats": {"words": 5765, "sentences": 316, "sentAvg": 18.2, "sentSd": 10, "sentMedian": 16, "sentP90": 33, "pctShort": 15.8, "pctLong": 13.3, "letters": 4.56, "syllables": 1.48, "pctPoly": 11.7, "contractions": 9.2, "hedges": 2.6, "firstSing": 14.7, "firstPlural": 35.2, "second": 8.8, "questions": 2.8, "exclaims": 0.9, "repetition": 5.4, "commas": 1.43, "lyAdverbs": 4.3, "passive": 7.6}, "pos": {"adj": 7.0, "adv": 4.0, "tagged_words": 5753}, "signature": ["today", "city", "freedom", "western", "wall", "economic", "shuttle", "world", "we've", "decades"], "phrases": ["this city", "this wall", "the western sectors", "it is time", "if you seek", "will fall"], "profile": {"contractions": "negatives", "hedges": "full", "words": "plain", "maxSentenceWords": 33, "flagPassive": true}}, {"id": "obama", "name": "Barack Obama", "role": "US president, 2009–17", "kind": "speech", "country": "US", "teaser": "About 9 contractions per 1,000 words here, almost exactly Reagan's rate.", "note": "", "copyright": false, "words": 6067, "samples": [{"label": "Inaugural Address, 2009", "url": "https://obamawhitehouse.archives.gov/blog/2009/01/21/president-barack-obamas-inaugural-address", "words": 2388}, {"label": "Remarks at the 50th Anniversary of the Selma to Montgomery Marches, 2015", "url": "https://obamawhitehouse.archives.gov/the-press-office/2015/03/07/remarks-president-50th-anniversary-selma-montgomery-marches", "words": 3679}], "quotes": [{"text": "the single-most powerful word in our democracy is the word \"We.\"", "source": "Remarks at the 50th Anniversary of the Selma to Montgomery Marches, 2015", "url": "https://obamawhitehouse.archives.gov/the-press-office/2015/03/07/remarks-president-50th-anniversary-selma-montgomery-marches"}], "stats": {"words": 6067, "sentences": 324, "sentAvg": 18.7, "sentSd": 13.2, "sentMedian": 16, "sentP90": 35, "pctShort": 23.1, "pctLong": 17.3, "letters": 4.47, "syllables": 1.43, "pctPoly": 10.1, "contractions": 9.4, "hedges": 1, "firstSing": 2, "firstPlural": 51.3, "second": 4.6, "questions": 2.8, "exclaims": 0, "repetition": 13.3, "commas": 1.28, "lyAdverbs": 5.3, "passive": 6.6}, "pos": {"adj": 6.8, "adv": 4.9, "tagged_words": 6065}, "signature": ["that's", "marched", "young", "we're", "generation", "gather", "women", "bridge", "american", "founding"], "phrases": ["we're the", "that's what", "men and women", "the same instinct that", "this bridge", "we can make sure"], "profile": {"contractions": "negatives", "hedges": "full", "words": "plain+", "maxSentenceWords": 35, "flagPassive": true}}, {"id": "twain", "name": "Mark Twain", "role": "Writer, humorist, after-dinner speaker", "kind": "speech", "country": "US", "teaser": "'The Babies' was a toast at an 1879 banquet for General Grant.", "note": "", "copyright": false, "words": 4050, "samples": [{"label": "Mark Twain's Speeches (1910), selected speeches", "url": "https://www.gutenberg.org/cache/epub/3188/pg3188.txt", "words": 4050}], "quotes": [{"text": "I reverently believe that the Maker who made us all makes everything in New England but the weather.", "source": "Mark Twain's Speeches (1910), selected speeches", "url": "https://www.gutenberg.org/cache/epub/3188/pg3188.txt"}, {"text": "We have not all had the good fortune to be ladies.", "source": "Mark Twain's Speeches (1910), selected speeches", "url": "https://www.gutenberg.org/cache/epub/3188/pg3188.txt"}], "stats": {"words": 4050, "sentences": 193, "sentAvg": 21, "sentSd": 17.1, "sentMedian": 15, "sentP90": 42, "pctShort": 20.7, "pctLong": 23.3, "letters": 4.36, "syllables": 1.39, "pctPoly": 9.5, "contractions": 6.4, "hedges": 3, "firstSing": 21.7, "firstPlural": 5.7, "second": 34.3, "questions": 7.3, "exclaims": 9.8, "repetition": 4.7, "commas": 1.72, "lyAdverbs": 6.9, "passive": 3.5}, "pos": {"adj": 7.3, "adv": 4.5, "tagged_words": 4040}, "signature": ["weather", "ancestors", "celebrating", "baby", "lot", "celebrate", "ancestor", "gentlemen", "spring", "landing"], "phrases": ["your ancestors", "i ask it", "weather to", "you want to celebrate", "what do you want", "were a hard lot"], "profile": {"contractions": "negatives", "hedges": "full", "words": "plain+", "maxSentenceWords": 42, "flagPassive": true}}, {"id": "hemingway", "name": "Ernest Hemingway", "role": "Novelist", "kind": "fiction (narration)", "country": "US", "teaser": "Six in ten sentences in these chapters are 8 words or fewer.", "note": "Novel narration (Jake Barnes), not Hemingway's speech.", "copyright": false, "words": 5709, "samples": [{"label": "The Sun Also Rises (1926), Book I, chapters I-III", "url": "https://www.gutenberg.org/cache/epub/67138/pg67138.txt", "words": 5709}], "quotes": [{"text": "Robert Cohn was once middleweight boxing champion of Princeton.", "source": "The Sun Also Rises (1926), Book I, chapters I-III", "url": "https://www.gutenberg.org/cache/epub/67138/pg67138.txt"}, {"text": "I never met any one of his class who remembered him.", "source": "The Sun Also Rises (1926), Book I, chapters I-III", "url": "https://www.gutenberg.org/cache/epub/67138/pg67138.txt"}], "stats": {"words": 5709, "sentences": 587, "sentAvg": 9.7, "sentSd": 9.1, "sentMedian": 7, "sentP90": 20, "pctShort": 60.3, "pctLong": 3.9, "letters": 3.99, "syllables": 1.27, "pctPoly": 5.2, "contractions": 24, "hedges": 5.3, "firstSing": 38.2, "firstPlural": 8.2, "second": 19.6, "questions": 12.4, "exclaims": 1.5, "repetition": 1.7, "commas": 0.63, "lyAdverbs": 7.4, "passive": 3.9}, "pos": {"adj": 5.6, "adv": 5.3, "tagged_words": 5685}, "signature": ["went", "dancing", "nice", "looked", "mrs", "don't", "dance", "asked", "girl", "going"], "phrases": ["went out", "we went", "don't you", "to the café", "doesn't make any difference", "it doesn't make any"], "profile": {"contractions": "full", "hedges": "filler", "words": "plain+", "maxSentenceWords": 20, "flagPassive": true}}, {"id": "jobs", "name": "Steve Jobs", "role": "Co-founder of Apple", "kind": "speech", "country": "US", "teaser": "He built the Stanford talk around 'just three stories'.", "note": "Copyrighted: short quotes only.", "copyright": true, "words": 2257, "samples": [{"label": "Stanford Commencement Address, 2005 (Stanford Report text)", "url": "https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says", "words": 2257}], "quotes": [{"text": "Stay hungry. Stay foolish.", "source": "Stanford Commencement Address, 2005 (Stanford Report text)", "url": "https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says"}, {"text": "Again, you can't connect the dots looking forward.", "source": "Stanford Commencement Address, 2005 (Stanford Report text)", "url": "https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says"}], "stats": {"words": 2257, "sentences": 160, "sentAvg": 14.1, "sentSd": 8.5, "sentMedian": 13, "sentP90": 26, "pctShort": 29.4, "pctLong": 4.4, "letters": 4.14, "syllables": 1.36, "pctPoly": 8.3, "contractions": 17.7, "hedges": 1.8, "firstSing": 58.5, "firstPlural": 5.8, "second": 21.7, "questions": 2.5, "exclaims": 0, "repetition": 3.1, "commas": 0.78, "lyAdverbs": 9.3, "passive": 6.6}, "pos": {"adj": 6.5, "adv": 7.5, "tagged_words": 2256}, "signature": ["college", "dropped", "dots", "connect", "fired", "later", "looking", "company", "didn't", "parents"], "phrases": ["to follow your heart", "stay hungry stay foolish", "dropped out", "story is about", "never graduated from", "ten years"], "profile": {"contractions": "full", "hedges": "full", "words": "plain+", "maxSentenceWords": 26, "flagPassive": true}}, {"id": "thatcher", "name": "Margaret Thatcher", "role": "UK prime minister, 1979–90", "kind": "speech", "country": "UK", "teaser": "The line puns on Christopher Fry's play 'The Lady's Not for Burning'.", "note": "Copyrighted: short quotes only.", "copyright": true, "words": 4137, "samples": [{"label": "Speech to Conservative Party Conference, 1980 ('The lady's not for turning')", "url": "https://www.margaretthatcher.org/document/104431", "words": 4137}], "quotes": [{"text": "You turn if you want to. The lady's not for turning.", "source": "Speech to Conservative Party Conference, 1980 ('The lady's not for turning')", "url": "https://www.margaretthatcher.org/document/104431"}], "stats": {"words": 4137, "sentences": 231, "sentAvg": 17.9, "sentSd": 9.5, "sentMedian": 16, "sentP90": 33, "pctShort": 16.5, "pctLong": 14.7, "letters": 4.56, "syllables": 1.49, "pctPoly": 12.4, "contractions": 0, "hedges": 2.7, "firstSing": 13.5, "firstPlural": 35.3, "second": 5.1, "questions": 3, "exclaims": 0.4, "repetition": 4.3, "commas": 0.64, "lyAdverbs": 7.7, "passive": 8.7}, "pos": {"adj": 8.3, "adv": 4.4, "tagged_words": 4133}, "signature": ["unemployment", "inflation", "sector", "policy", "unemployed", "recovery", "million", "people", "society", "government"], "phrases": ["our people", "a great nation", "the public sector", "a healthy society", "the defeat of inflation", "people feel that they"], "profile": {"contractions": "expand", "hedges": "full", "words": "plain", "maxSentenceWords": 33, "flagPassive": false}}, {"id": "ptrudeau", "name": "Pierre Elliott Trudeau", "role": "Canadian prime minister, 1968–79, 1980–84", "kind": "broadcast", "country": "Canada", "teaser": "Three days before this broadcast he told a reporter, 'Just watch me.'", "note": "From a newspaper printing of the broadcast. Copyrighted: short quotes only.", "copyright": true, "words": 2545, "samples": [{"label": "National broadcast on the War Measures Act, 16 Oct 1970 (newspaper text, historyofrights.ca)", "url": "https://historyofrights.ca/wp-content/uploads/documents/OC_Trudeau_TV.pdf", "words": 2545}], "quotes": [{"text": "But not by kidnappings and bombings. By hard work.", "source": "National broadcast on the War Measures Act, 16 Oct 1970 (newspaper text, historyofrights.ca)", "url": "https://historyofrights.ca/wp-content/uploads/documents/OC_Trudeau_TV.pdf"}], "stats": {"words": 2545, "sentences": 126, "sentAvg": 20.2, "sentSd": 11.7, "sentMedian": 18, "sentP90": 38, "pctShort": 14.3, "pctLong": 20.6, "letters": 4.8, "syllables": 1.58, "pctPoly": 16.3, "contractions": 0, "hedges": 1.2, "firstSing": 10.2, "firstPlural": 11, "second": 5.9, "questions": 4, "exclaims": 0, "repetition": 4.8, "commas": 0.6, "lyAdverbs": 6.3, "passive": 15.3}, "pos": {"adj": 7.8, "adv": 3.6, "tagged_words": 2536}, "signature": ["government", "kidnappers", "persons", "violence", "governments", "understandable", "revolutionaries", "hostages", "acting", "organizations"], "phrases": ["the government of", "is acting", "the government is", "two innocent men", "the lives of", "you that the government"], "profile": {"contractions": "expand", "hedges": "full", "words": "plain", "maxSentenceWords": 38, "flagPassive": false}}, {"id": "leacock", "name": "Stephen Leacock", "role": "Canadian humorist, McGill economist", "kind": "fiction (narration)", "country": "Canada", "teaser": "Mariposa is widely read as a portrait of Orillia, Ontario.", "note": "Fiction narration, not a speech.", "copyright": false, "words": 9685, "samples": [{"label": "Sunshine Sketches of a Little Town (1912), preface and chapter I", "url": "https://www.gutenberg.org/cache/epub/3533/pg3533.txt", "words": 9685}], "quotes": [{"text": "I don't know whether you know Mariposa.", "source": "Sunshine Sketches of a Little Town (1912), preface and chapter I", "url": "https://www.gutenberg.org/cache/epub/3533/pg3533.txt"}], "stats": {"words": 9685, "sentences": 475, "sentAvg": 20.4, "sentSd": 14.8, "sentMedian": 17, "sentP90": 37, "pctShort": 20.6, "pctLong": 22.5, "letters": 4.3, "syllables": 1.39, "pctPoly": 9.2, "contractions": 6.9, "hedges": 3.9, "firstSing": 11.4, "firstPlural": 0, "second": 7.6, "questions": 3.2, "exclaims": 1.3, "repetition": 1.9, "commas": 1.41, "lyAdverbs": 8.7, "passive": 5.4}, "pos": {"adj": 6.5, "adv": 5.2, "tagged_words": 9529}, "signature": ["hotel", "smith's", "caff", "town", "street", "bar", "license", "rats", "lake", "round"], "phrases": ["the hotel business", "smith's hotel", "the main street", "the desk clerk", "in the city", "of the hotel"], "profile": {"contractions": "negatives", "hedges": "filler", "words": "plain+", "maxSentenceWords": 37, "flagPassive": true}}, {"id": "anthony", "name": "Susan B. Anthony", "role": "Suffragist", "kind": "speech", "country": "US", "teaser": "Fined $100 for voting in 1872. She said she would never pay it, and she didn't.", "note": "From History of Woman Suffrage vol. II (1881), edited by Stanton, Anthony and Gage: printed versions, not tape.", "copyright": false, "words": 2233, "samples": [{"label": "Report to the American Equal Rights Association, New York, May 1867", "url": "https://www.gutenberg.org/cache/epub/28039/pg28039.txt", "words": 417}, {"label": "Address to the Senate Judiciary Committee, Washington, January 1872", "url": "https://www.gutenberg.org/cache/epub/28039/pg28039.txt", "words": 661}, {"label": "Opening address, National Woman Suffrage Association convention, Washington, January 1873", "url": "https://www.gutenberg.org/cache/epub/28039/pg28039.txt", "words": 276}, {"label": "Statement to the court at her sentencing, Canandaigua, June 1873", "url": "https://www.gutenberg.org/cache/epub/28039/pg28039.txt", "words": 879}], "quotes": [{"text": "May it please your honor, I shall never pay a dollar of your unjust penalty.", "source": "Statement to the court at her sentencing, Canandaigua, June 1873", "url": "https://www.gutenberg.org/cache/epub/28039/pg28039.txt"}, {"text": "We can wait no longer.", "source": "Address to the Senate Judiciary Committee, Washington, January 1872", "url": "https://www.gutenberg.org/cache/epub/28039/pg28039.txt"}], "stats": {"words": 2233, "sentences": 65, "sentAvg": 34.4, "sentSd": 24.2, "sentMedian": 29, "sentP90": 64, "pctShort": 10.8, "pctLong": 47.7, "letters": 4.43, "syllables": 1.48, "pctPoly": 12.4, "contractions": 0, "hedges": 0.4, "firstSing": 28.2, "firstPlural": 17.9, "second": 19.7, "questions": 4.6, "exclaims": 0, "repetition": 1.5, "commas": 3.52, "lyAdverbs": 9.9, "passive": 6.3}, "pos": {"adj": 5.6, "adv": 4.2, "tagged_words": 2222}, "signature": ["jury", "suffrage", "women", "vote", "denial", "republican", "rights", "honor", "male", "word"], "phrases": ["your honor", "denial of my", "right to vote", "the word male", "the denial of", "forms of law"], "profile": {"contractions": "expand", "hedges": "full", "words": "plain", "maxSentenceWords": 64, "flagPassive": true}}, {"id": "wilde", "name": "Oscar Wilde", "role": "Playwright, critic", "kind": "essay (dialogue)", "country": "Ireland/UK", "teaser": "The two speakers, Cyril and Vivian, share names with Wilde's sons, Cyril and Vyvyan.", "note": "A dialogue essay; speaker labels removed, both voices pooled.", "copyright": false, "words": 12437, "samples": [{"label": "'The Decay of Lying' in Intentions (1891), opening", "url": "https://www.gutenberg.org/cache/epub/887/pg887.txt", "words": 12437}], "quotes": [{"text": "Life imitates Art far more than Art imitates Life.", "source": "'The Decay of Lying' in Intentions (1891), opening", "url": "https://www.gutenberg.org/cache/epub/887/pg887.txt"}, {"text": "Enjoy Nature! I am glad to say that I have entirely lost that faculty.", "source": "'The Decay of Lying' in Intentions (1891), opening", "url": "https://www.gutenberg.org/cache/epub/887/pg887.txt"}], "stats": {"words": 12437, "sentences": 634, "sentAvg": 19.6, "sentSd": 16.3, "sentMedian": 15, "sentP90": 40, "pctShort": 22.9, "pctLong": 18.9, "letters": 4.44, "syllables": 1.47, "pctPoly": 11.7, "contractions": 1, "hedges": 4.5, "firstSing": 11.8, "firstPlural": 14.7, "second": 6.4, "questions": 5, "exclaims": 2.2, "repetition": 1.9, "commas": 1.47, "lyAdverbs": 16.6, "passive": 5.9}, "pos": {"adj": 9.3, "adv": 5.8, "tagged_words": 12403}, "signature": ["art", "nature", "life", "entirely", "style", "artistic", "lying", "literature", "imaginative", "realism"], "phrases": ["art is", "life and nature", "nature is", "modernity of", "things that", "to life and"], "profile": {"contractions": "expand", "hedges": "filler", "words": "plain", "maxSentenceWords": 40, "flagPassive": true}}, {"id": "franklin", "name": "Benjamin Franklin", "role": "Printer, scientist, founder", "kind": "essay", "country": "US", "teaser": "Father Abraham keeps quoting Poor Richard. Poor Richard was Franklin.", "note": "Mostly the fictional Father Abraham quoting Poor Richard's sayings.", "copyright": false, "words": 3437, "samples": [{"label": "'The Way to Wealth' (1758)", "url": "https://en.wikisource.org/wiki/Way_to_wealth,_or,_Poor_Richard%27s_maxims_improved/Way_to_Wealth,_or,_Poor_Richard%27s_Maxims_Improved", "words": 3437}], "quotes": [{"text": "God helps them that helps themselves", "source": "'The Way to Wealth' (1758)", "url": "https://en.wikisource.org/wiki/Way_to_wealth,_or,_Poor_Richard%27s_maxims_improved/Way_to_Wealth,_or,_Poor_Richard%27s_Maxims_Improved"}, {"text": "Lost time is never found again", "source": "'The Way to Wealth' (1758)", "url": "https://en.wikisource.org/wiki/Way_to_wealth,_or,_Poor_Richard%27s_maxims_improved/Way_to_Wealth,_or,_Poor_Richard%27s_Maxims_Improved"}], "stats": {"words": 3437, "sentences": 101, "sentAvg": 34, "sentSd": 27.2, "sentMedian": 28, "sentP90": 64, "pctShort": 5.9, "pctLong": 48.5, "letters": 4.19, "syllables": 1.32, "pctPoly": 6.8, "contractions": 3.2, "hedges": 3.8, "firstSing": 15.4, "firstPlural": 11.6, "second": 32.9, "questions": 10.9, "exclaims": 3, "repetition": 1, "commas": 4.84, "lyAdverbs": 7, "passive": 9.3}, "pos": {"adj": 9.1, "adv": 6.0, "tagged_words": 3443}, "signature": ["says", "poor", "industry", "taxes", "thy", "almanack", "thou", "want", "sloth", "times"], "phrases": ["as poor", "says and", "for want of", "be ashamed", "want of a", "says it is"], "profile": {"contractions": "leave", "hedges": "filler", "words": "plain+", "maxSentenceWords": 64, "flagPassive": false}}, {"id": "shakespeare", "name": "William Shakespeare", "role": "Playwright (characters' speeches)", "kind": "drama (verse + prose)", "country": "England", "teaser": "None of this is Shakespeare speaking for himself: 13 speeches by 11 characters, 5 in prose.", "note": "Dramatic verse and prose spoken by characters (Hamlet, Brutus, Falstaff, Shylock...). Not Shakespeare's own speech. Public domain (Project Gutenberg #100).", "copyright": false, "words": 3057, "samples": [{"label": "Hamlet, 3.1: 'To be, or not to be' (verse)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 278}, {"label": "Hamlet, 2.2: 'I have of late lost all my mirth' (prose)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 168}, {"label": "Julius Caesar, 3.2: Brutus, 'Romans, countrymen, and lovers' (prose)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 234}, {"label": "Julius Caesar, 3.2: Antony, 'Friends, Romans, countrymen' (verse)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 268}, {"label": "Henry V, 3.1: 'Once more unto the breach' (verse)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 275}, {"label": "Henry V, 4.3: St Crispin's Day (verse)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 409}, {"label": "1 Henry IV, 5.1: Falstaff on honour (prose)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 151}, {"label": "Merchant of Venice, 3.1: Shylock, 'Hath not a Jew eyes?' (prose)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 194}, {"label": "Merchant of Venice, 4.1: Portia, 'The quality of mercy' (verse)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 172}, {"label": "As You Like It, 2.7: Jaques, 'All the world's a stage' (verse)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 211}, {"label": "Much Ado About Nothing, 2.3: Benedick's soliloquy (prose)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 298}, {"label": "Macbeth, 5.5: 'Tomorrow, and tomorrow' (verse)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 90}, {"label": "Richard III, 1.1: 'Now is the winter of our discontent' (verse)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt", "words": 309}], "quotes": [{"text": "To be, or not to be, that is the question:", "source": "Hamlet, 3.1: 'To be, or not to be' (verse)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt"}, {"text": "If you prick us, do we not bleed?", "source": "Merchant of Venice, 3.1: Shylock, 'Hath not a Jew eyes?' (prose)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt"}, {"text": "What is honour? A word.", "source": "1 Henry IV, 5.1: Falstaff on honour (prose)", "url": "https://www.gutenberg.org/cache/epub/100/pg100.txt"}], "stats": {"words": 3057, "sentences": 161, "sentAvg": 19, "sentSd": 17.5, "sentMedian": 14, "sentP90": 42, "pctShort": 34.8, "pctLong": 21.1, "letters": 4.11, "syllables": 1.28, "pctPoly": 5.8, "contractions": 5.9, "hedges": 2, "firstSing": 38.6, "firstPlural": 13.7, "second": 14.1, "questions": 24.8, "exclaims": 7.5, "repetition": 8.1, "commas": 2.34, "lyAdverbs": 4.9, "passive": 3.6}, "pos": {"adj": 7.5, "adv": 4.5, "tagged_words": 3037}, "signature": ["honour", "hath", "ambitious", "mercy", "fair", "tis", "honourable", "revenge", "sans", "die"], "phrases": ["is an honourable man", "he was ambitious", "speak for him have", "if any speak for", "him have i offended", "any speak for him"], "profile": {"contractions": "leave", "hedges": "full", "words": "plain+", "maxSentenceWords": 42, "flagPassive": true}}, {"id": "kirk", "name": "Captain James T. Kirk", "role": "Fictional character, Star Trek (1966–69)", "kind": "fictional character (TV dialogue)", "country": "fiction", "teaser": "Three in four sentences here are 8 words or fewer. The famous pauses live in the delivery; a transcript can't hear them.", "note": "Fictional character voice. Star Trek is owned by Paramount; scripts are copyrighted. Stats come from Kirk's lines in two fan transcripts of aired episodes (chakoteya.net). Punctuation is the transcriber's. Only short quotes are shown.", "copyright": true, "words": 2540, "samples": [{"label": "The Galileo Seven (Star Trek, 1967), Kirk's lines, fan transcript", "url": "http://www.chakoteya.net/StarTrek/14.htm", "words": 969}, {"label": "A Taste of Armageddon (Star Trek, 1967), Kirk's lines, fan transcript", "url": "http://www.chakoteya.net/StarTrek/23.htm", "words": 1571}], "quotes": [{"text": "Sometimes a feeling, Mister Spock, is all we humans have to go on.", "source": "A Taste of Armageddon (Star Trek, 1967), Kirk's lines, fan transcript", "url": "http://www.chakoteya.net/StarTrek/23.htm"}, {"text": "We can admit that we're killers, but we're not going to kill today.", "source": "A Taste of Armageddon (Star Trek, 1967), Kirk's lines, fan transcript", "url": "http://www.chakoteya.net/StarTrek/23.htm"}, {"text": "Foot by foot, inch by inch, by candlelight if necessary, until the last possible moment.", "source": "The Galileo Seven (Star Trek, 1967), Kirk's lines, fan transcript", "url": "http://www.chakoteya.net/StarTrek/14.htm"}], "stats": {"words": 2540, "sentences": 377, "sentAvg": 6.7, "sentSd": 5.1, "sentMedian": 5, "sentP90": 14, "pctShort": 74.5, "pctLong": 0, "letters": 4.5, "syllables": 1.45, "pctPoly": 11.1, "contractions": 44.9, "hedges": 4.3, "firstSing": 33.1, "firstPlural": 16.1, "second": 35.8, "questions": 14.6, "exclaims": 1.1, "repetition": 1.1, "commas": 0.43, "lyAdverbs": 6.7, "passive": 2.4}, "pos": {"adj": 5.7, "adv": 4.9, "tagged_words": 2538}, "signature": ["i'm", "ship", "captain's", "planet", "you're", "log", "search", "stardate", "enterprise", "surface"], "phrases": ["captain's log", "general order twenty four", "log stardate", "thank you", "transporter room", "the planet's surface"], "profile": {"contractions": "full", "hedges": "filler", "words": "plain+", "maxSentenceWords": 14, "flagPassive": true}}, {"id": "keller", "name": "Helen Keller", "role": "Writer, activist", "kind": "memoir", "country": "US", "teaser": "She wrote this as a Radcliffe student. It came out in 1903.", "note": "", "copyright": false, "words": 5805, "samples": [{"label": "The Story of My Life (1903), chapters I-IV", "url": "https://www.gutenberg.org/cache/epub/2397/pg2397.txt", "words": 5805}], "quotes": [{"text": "It is with a kind of fear that I begin to write the history of my life.", "source": "The Story of My Life (1903), chapters I-IV", "url": "https://www.gutenberg.org/cache/epub/2397/pg2397.txt"}, {"text": "I knew then that \"w-a-t-e-r\" meant the wonderful cool something that was flowing over my hand.", "source": "The Story of My Life (1903), chapters I-IV", "url": "https://www.gutenberg.org/cache/epub/2397/pg2397.txt"}], "stats": {"words": 5805, "sentences": 279, "sentAvg": 20.8, "sentSd": 10, "sentMedian": 19, "sentP90": 34, "pctShort": 7.2, "pctLong": 17.2, "letters": 4.18, "syllables": 1.35, "pctPoly": 8.1, "contractions": 0.2, "hedges": 2.2, "firstSing": 83.4, "firstPlural": 5, "second": 0.5, "questions": 1.4, "exclaims": 0.7, "repetition": 0.7, "commas": 1.41, "lyAdverbs": 9.3, "passive": 6.9}, "pos": {"adj": 6.7, "adv": 4.4, "tagged_words": 5791}, "signature": ["doll", "mother", "teacher", "father", "mother's", "illness", "felt", "blind", "knew", "deaf"], "phrases": ["my mother", "my father", "my teacher", "i knew", "my hand", "i felt"], "profile": {"contractions": "expand", "hedges": "full", "words": "plain+", "maxSentenceWords": 34, "flagPassive": true}}]};
+</script>
+<script>
+"use strict";
+/* ---- Dictio engine (copied from /910/ index.html, unchanged logic, plus a change log) ---- */
+const HEDGE_RULES = [
+  { label: "Strip “it is important to note that”", re: "\\bit is important to note that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “it should be noted that”", re: "\\bit should be noted that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “it is worth noting that”", re: "\\bit is worth noting that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “I think that”", re: "\\bi think that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “I believe that”", re: "\\bi believe that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “basically”", re: "\\bbasically\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “essentially”", re: "\\bessentially\\b[,:]?\\s*", flags: "gi", to: "" }
+];
+const FILLER_ONLY = HEDGE_RULES.filter((r) => !/I think|I believe/.test(r.label));
+const CONTRACTION_RULES = [
+  { label: "we are going to → we'll", re: "\\bwe are going to\\b", flags: "gi", to: "we'll" },
+  { label: "do we not → don't we", re: "\\bdo we not\\b", flags: "gi", to: "don't we" },
+  { label: "does not → doesn't", re: "\\bdoes not\\b", flags: "gi", to: "doesn't" },
+  { label: "do not → don't", re: "\\bdo not\\b", flags: "gi", to: "don't" },
+  { label: "did not → didn't", re: "\\bdid not\\b", flags: "gi", to: "didn't" },
+  { label: "cannot → can't", re: "\\bcannot\\b", flags: "gi", to: "can't" },
+  { label: "can not → can't", re: "\\bcan not\\b", flags: "gi", to: "can't" },
+  { label: "will not → won't", re: "\\bwill not\\b", flags: "gi", to: "won't" },
+  { label: "would not → wouldn't", re: "\\bwould not\\b", flags: "gi", to: "wouldn't" },
+  { label: "should not → shouldn't", re: "\\bshould not\\b", flags: "gi", to: "shouldn't" },
+  { label: "could not → couldn't", re: "\\bcould not\\b", flags: "gi", to: "couldn't" },
+  { label: "is not → isn't", re: "\\bis not\\b", flags: "gi", to: "isn't" },
+  { label: "are not → aren't", re: "\\bare not\\b", flags: "gi", to: "aren't" },
+  { label: "was not → wasn't", re: "\\bwas not\\b", flags: "gi", to: "wasn't" },
+  { label: "were not → weren't", re: "\\bwere not\\b", flags: "gi", to: "weren't" },
+  { label: "I will → I'll", re: "\\bI will\\b", flags: "g", to: "I'll" },
+  { label: "we will → we'll", re: "\\bwe will\\b", flags: "gi", to: "we'll" },
+  { label: "you will → you'll", re: "\\byou will\\b", flags: "gi", to: "you'll" },
+  { label: "I am → I'm", re: "\\bI am\\b", flags: "g", to: "I'm" },
+  { label: "you are → you're", re: "\\byou are\\b", flags: "gi", to: "you're" },
+  { label: "we are → we're", re: "\\bwe are\\b", flags: "gi", to: "we're" },
+  { label: "they are → they're", re: "\\bthey are\\b", flags: "gi", to: "they're" },
+  { label: "there is → there's", re: "\\bthere is\\b", flags: "gi", to: "there's" },
+  { label: "that is → that's", re: "\\bthat is\\b", flags: "gi", to: "that's" },
+  { label: "it is → it's", re: "\\bit is\\b", flags: "gi", to: "it's" },
+  { label: "let us → let's", re: "\\blet us\\b", flags: "gi", to: "let's" }
+];
+const NEG_ONLY = CONTRACTION_RULES.filter((r) => /\bnot\b|cannot/.test(r.label) && !/do we not/.test(r.label));
+const A = "['’]";
+const EXPAND_RULES = [
+  ["it's (been|got)", "it has $1", "it's been → it has been"], ["that's (been|got)", "that has $1", "that's been → that has been"],
+  ["don't", "do not"], ["doesn't", "does not"], ["didn't", "did not"], ["can't", "cannot"], ["won't", "will not"],
+  ["wouldn't", "would not"], ["shouldn't", "should not"], ["couldn't", "could not"], ["isn't", "is not"], ["aren't", "are not"],
+  ["wasn't", "was not"], ["weren't", "were not"], ["haven't", "have not"], ["hasn't", "has not"], ["hadn't", "had not"],
+  ["I'm", "I am"], ["I'll", "I will"], ["I've", "I have"], ["we'll", "we will"], ["we're", "we are"], ["we've", "we have"],
+  ["you'll", "you will"], ["you're", "you are"], ["you've", "you have"], ["they'll", "they will"], ["they're", "they are"],
+  ["they've", "they have"], ["it's", "it is"], ["that's", "that is"], ["there's", "there is"]
+].map(([from, to, label]) => ({ label: label || (from + " → " + to), re: "\\b" + from.replace(/'/g, A) + "\\b", flags: from.startsWith("I") ? "g" : "gi", to }));
+const PLAIN_SWAPS = [["utilize","use"],["utilizes","uses"],["utilized","used"],["utilizing","using"],["utilization","use"],["leverage","use"],["leveraged","used"],["leveraging","using"],["in order to","to"],["at this point in time","now"],["at the present time","now"],["very unique","unique"],["due to the fact that","because"],["a wide variety of","many"],["in the event that","if"],["has the ability to","can"],["is able to","can"],["the fact that","that"],["prior to","before"],["a large number of","many"],["in addition to","and"],["with respect to","about"],["in terms of","for"],["each and every","every"],["at the end of the day",""]];
+const SMALL_WORD_SWAPS = [["approximately","about"],["purchase","buy"],["assist","help"],["sufficient","enough"],["numerous","many"],["individuals","people"],["commence","begin"],["terminate","end"],["demonstrate","show"],["facilitate","help"],["endeavor","try"],["subsequently","later"],["additional","more"],["regarding","about"],["obtain","get"],["require","need"]];
+const PASSIVE_RE = /\b(?:am|is|are|was|were|be|been|being)\s+(?:\w+ly\s+)?(?:\w+ed|built|chosen|done|given|known|made|seen|shown|taken|told|written)\b/gi;
+function swaps(pairs) { return pairs.map(([from, to]) => ({ from, to })); }
+function preserveCase(match, replacement) {
+  if (!replacement) return "";
+  const letters = match.replace(/[^A-Za-z]/g, "");
+  if (letters && letters.length > 1 && letters === letters.toUpperCase()) return replacement.toUpperCase();
+  const first = match.match(/[A-Za-z]/);
+  if (first && first[0] === first[0].toUpperCase()) return replacement.replace(/[A-Za-z]/, (ch) => ch.toUpperCase());
+  return replacement;
+}
+function bump(counter, label) { counter.log[label] = (counter.log[label] || 0) + 1; }
+function applySwaps(text, list, counter) {
+  const ordered = list.slice().sort((a, b) => b.from.length - a.from.length);
+  for (const swap of ordered) {
+    const escaped = swap.from.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp("\\b" + escaped + "\\b[,;:]?", "gi");
+    text = text.replace(re, (match) => {
+      counter.swaps += 1; bump(counter, swap.from + " → " + (swap.to || "(cut)"));
+      const punct = /[,;:]$/.test(match) ? match.slice(-1) : "";
+      const words = punct ? match.slice(0, -1) : match;
+      if (!swap.to) return "";
+      return preserveCase(words, swap.to) + punct;
+    });
+  }
+  return text;
+}
+function applyRulesCase(text, rules, counter) {
+  for (const rule of rules) {
+    const re = new RegExp(rule.re, rule.flags || "g");
+    text = text.replace(re, (...args) => {
+      const match = args[0];
+      counter.rules += 1; bump(counter, rule.label);
+      if (!rule.to) return "";
+      let to = rule.to.replace(/\$(\d)/g, (m, n) => args[Number(n)] || "");
+      if (/['’]/.test(to) && /’/.test(match)) to = to.replace(/'/g, "’");
+      return preserveCase(match, to);
+    });
+  }
+  return text;
+}
+function cleanup(text) {
+  let t = text.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([,.;!?])/g, "$1").replace(/([a-z])([.!?])(?=[A-Z])/g, "$1$2 ");
+  t = t.replace(/^[ \t,;:]+/gm, "");
+  t = t.replace(/(^|[.!?]\s+|\n+)([a-z])/g, (m, lead, ch) => lead + ch.toUpperCase());
+  return t.trim();
+}
+function finalCheck(text, profile) {
+  const flags = [];
+  const max = profile.check.maxSentenceWords || 25;
+  const sentences = TS.sentences(text);
+  const long = [];
+  sentences.forEach((s, i) => { const w = TS.words(s).length; if (w > max) long.push("Sentence " + (i + 1) + " is " + w + " words (" + profile.short + "'s long end here: " + max + ")."); });
+  flags.push(...long.slice(0, 4));
+  if (long.length > 4) flags.push((long.length - 4) + " more long sentences.");
+  if (profile.check.passive !== false) {
+    const found = []; const re = new RegExp(PASSIVE_RE.source, "gi"); let m;
+    while ((m = re.exec(text)) && found.length < 4) found.push(m[0]);
+    if (found.length) flags.push("Possible passive (" + profile.short + " rarely uses it): " + found.map((s) => "“" + s + "”").join(", ") + ".");
+  }
+  const hits = [];
+  for (const term of profile.check.banned || []) {
+    const esc = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp("\\b" + esc + "\\b", "i").test(text)) hits.push(term);
+  }
+  if (hits.length) flags.push("Office jargon still in the draft: " + hits.join(", ") + ".");
+  return flags;
+}
+function polish(text, profile) {
+  const counter = { swaps: 0, rules: 0, log: {} };
+  let next = applySwaps(text, profile.swaps, counter);
+  next = applyRulesCase(next, profile.rules, counter);
+  next = cleanup(next);
+  return { text: next, swaps: counter.swaps, rules: counter.rules, log: counter.log, flags: finalCheck(next, profile) };
+}
+
+/* ---- Voice → Dictio profile ---- */
+function shortName(v) { return v.id === "kirk" ? "Kirk" : v.name.replace(/ Jr\.$/, "").split(" ").slice(-1)[0]; }
+function buildProfile(v) {
+  const p = v.profile, rules = [], sw = [], notes = [];
+  if (p.hedges === "full") { rules.push(...HEDGE_RULES); notes.push("Cuts filler and “I think that / I believe that”: " + shortName(v) + " hedges " + fmt(v.stats.hedges, 1) + " times per 1,000 words."); }
+  else { rules.push(...FILLER_ONLY); notes.push("Cuts office filler only. Keeps “I think / I believe”: " + shortName(v) + " hedges fairly often (" + fmt(v.stats.hedges, 1) + " per 1,000)."); }
+  if (p.contractions === "full") { rules.push(...CONTRACTION_RULES); notes.push("Contracts freely (" + fmt(v.stats.contractions, 0) + " contractions per 1,000 words)."); }
+  else if (p.contractions === "negatives") { rules.push(...NEG_ONLY); notes.push("Contracts negatives only, like don't and isn't (" + fmt(v.stats.contractions, 0) + " per 1,000 words)."); }
+  else if (p.contractions === "expand") { rules.push(...EXPAND_RULES); notes.push("Spells contractions out: " + shortName(v) + " uses about " + fmt(v.stats.contractions, 1) + " per 1,000 words."); }
+  else notes.push("Leaves contractions alone (" + fmt(v.stats.contractions, 1) + " per 1,000 words, in between).");
+  if (p.words === "plain+") { sw.push(...PLAIN_SWAPS, ...SMALL_WORD_SWAPS); notes.push("Plain-English swaps plus big-word → small-word swaps (" + fmt(v.stats.syllables, 2) + " syllables per word)."); }
+  else if (p.words === "plain") { sw.push(...PLAIN_SWAPS); notes.push("Plain-English phrase swaps."); }
+  else { sw.push(...PLAIN_SWAPS); notes.push("Plain-English phrase swaps only. " + shortName(v) + " uses longer words (" + fmt(v.stats.syllables, 2) + " syllables per word), so it won't shrink yours."); }
+  notes.push("Flags sentences over " + p.maxSentenceWords + " words: 9 in 10 of " + shortName(v) + "'s sentences here are that length or shorter.");
+  return { id: v.id, name: v.name, short: shortName(v), swaps: swaps(sw), rules, notes, check: { maxSentenceWords: p.maxSentenceWords, passive: p.flagPassive, banned: DATA.jargon } };
+}
+
+/* ---- UI ---- */
+const $ = (s) => document.querySelector(s);
+const el = (tag, attrs, ...kids) => { const n = document.createElement(tag); for (const [k, v] of Object.entries(attrs || {})) { if (k === "class") n.className = v; else if (k === "text") n.textContent = v; else n.setAttribute(k, v); } for (const c of kids) n.append(c); return n; };
+function fmt(x, d) { return (Math.round(x * Math.pow(10, d)) / Math.pow(10, d)).toLocaleString("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }); }
+const DIALS = [
+  { key: "sentAvg", label: "Sentence length", lo: "short", hi: "long", d: 1, unit: " words", help: "Average words per sentence." },
+  { key: "pctShort", label: "Short sentences", lo: "few", hi: "many", d: 0, unit: "%", help: "Share of sentences 8 words or fewer. The staccato dial." },
+  { key: "sentSd", label: "Sentence variety", lo: "even", hi: "mixed", d: 1, unit: "", help: "Spread of sentence lengths (standard deviation, in words). High means short and long mixed." },
+  { key: "syllables", label: "Word size", lo: "small", hi: "big", d: 2, unit: " syl/word", help: "Average syllables per word, estimated by counting vowel groups." },
+  { key: "contractions", label: "Contractions", lo: "none", hi: "lots", d: 1, unit: " /1k", help: "Contractions like don't, we'll, it's, per 1,000 words." },
+  { key: "hedges", label: "Hedging", lo: "blunt", hi: "hedgy", d: 1, unit: " /1k", help: "Words like perhaps, probably, I think, rather, quite, per 1,000 words." },
+  { key: "firstSing", label: "“I”", lo: "rare", hi: "often", d: 1, unit: " /1k", help: "I, me, my, mine, myself per 1,000 words." },
+  { key: "firstPlural", label: "“We”", lo: "rare", hi: "often", d: 1, unit: " /1k", help: "We, us, our per 1,000 words." },
+  { key: "questions", label: "Questions", lo: "few", hi: "many", d: 1, unit: "%", help: "Share of sentences that end with a question mark." },
+  { key: "repetition", label: "Repetition", lo: "rare", hi: "often", d: 1, unit: "%", help: "Share of sentences that open with the same two words as one of the two before (“We shall… We shall…”)." },
+  { key: "adj", pos: true, label: "Adjectives", lo: "few", hi: "many", d: 1, unit: " /100", help: "Adjectives per 100 words, tagged by spaCy en_core_web_sm. Not measured on your text." },
+  { key: "adv", pos: true, label: "Adverbs", lo: "few", hi: "many", d: 1, unit: " /100", help: "Adverbs per 100 words, tagged by spaCy en_core_web_sm. Not measured on your text." }
+];
+const val = (v, d) => d.pos ? v.pos[d.key] : v.stats[d.key];
+const RANGE = {};
+for (const d of DIALS) { const xs = DATA.voices.map((v) => val(v, d)); RANGE[d.key] = [Math.min(...xs), Math.max(...xs)]; }
+const pct = (x, k) => { const [a, b] = RANGE[k]; return Math.max(0, Math.min(100, b > a ? (x - a) / (b - a) * 100 : 50)); };
+function helpDot(text, name) {
+  const b = el("button", { class: "help", type: "button", "aria-label": "What is " + name + "?", "aria-expanded": "false" }, "?");
+  const t = el("span", { class: "tip", role: "tooltip", text }); b.append(t);
+  b.addEventListener("click", (e) => { e.stopPropagation(); const open = !b.classList.contains("open"); closeTips(); b.classList.toggle("open", open); b.setAttribute("aria-expanded", String(open)); });
+  return b;
+}
+function closeTips() { document.querySelectorAll(".help.open").forEach((h) => { h.classList.remove("open"); h.setAttribute("aria-expanded", "false"); }); }
+document.addEventListener("click", closeTips);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeTips(); });
+
+let current = null, profile = null, lastOut = "";
+function renderGrid() {
+  const g = $("#grid");
+  for (const v of DATA.voices) {
+    const b = el("button", { class: "vcard", type: "button", "aria-pressed": "false", "data-id": v.id, "aria-describedby": "t-" + v.id },
+      el("span", { class: "nm", text: v.name }), el("span", { class: "rl", text: v.role }), el("span", { class: "tg", text: v.kind }),
+      el("span", { class: "tease", id: "t-" + v.id, role: "tooltip", text: v.teaser }));
+    b.addEventListener("click", () => select(v.id, true));
+    g.append(b);
+  }
+}
+function select(id, scroll) {
+  current = DATA.voices.find((v) => v.id === id); profile = buildProfile(current);
+  document.querySelectorAll(".vcard").forEach((c) => c.setAttribute("aria-pressed", String(c.dataset.id === id)));
+  renderDetail(); $("#work").hidden = false; $("#vsname").textContent = current.name;
+  if ($("#input").value.trim()) run(); else $("#results").hidden = true;
+  if (scroll) $("#detail").scrollIntoView({ behavior: "smooth", block: "start" });
+  history.replaceState(null, "", "#" + id);
+}
+function dialCard(d, v, you) {
+  const x = val(v, d);
+  const track = el("div", { class: "track" }, el("span", { class: "knob", style: "left:" + pct(x, d.key) + "%", title: v.name + ": " + fmt(x, d.d) + d.unit }));
+  if (you != null) track.append(el("span", { class: "knob you", style: "left:" + pct(you, d.key) + "%", title: "You: " + fmt(you, d.d) + d.unit }));
+  const [a, b] = RANGE[d.key];
+  return el("div", { class: "dial" },
+    el("div", { class: "dlabel" }, el("span", { text: d.label }), helpDot(d.help, d.label)),
+    el("div", { class: "ddesc" }, el("span", { text: d.lo }), el("span", { text: d.hi })), track,
+    el("div", { class: "dval", text: fmt(x, d.d) + d.unit + (you != null ? "  ·  you " + fmt(you, d.d) : "") + "  (20 voices: " + fmt(a, d.d) + "–" + fmt(b, d.d) + ")" }));
+}
+function renderDetail(youStats) {
+  const v = current, box = $("#detail"); box.hidden = false; box.textContent = "";
+  box.append(el("div", { class: "detail-head" }, el("h2", { text: v.name }), el("span", { class: "muted small", text: v.role + " · " + v.kind })));
+  box.append(el("p", { class: "teaser-line", text: v.teaser }));
+  if (v.note) box.append(el("div", { class: "note", text: v.note }));
+  const ql = el("ul", { class: "quotes" });
+  for (const q of v.quotes) ql.append(el("li", {}, el("span", { text: "“" + q.text + "”" }), el("cite", {}, el("a", { href: q.url, target: "_blank", rel: "noopener", text: q.source }))));
+  box.append(el("h3", { text: "In their words", style: "margin:10px 0 0;font-size:17px" }), ql);
+  const sl = el("ul", { class: "srcs" });
+  for (const s of v.samples) sl.append(el("li", {}, el("a", { href: s.url, target: "_blank", rel: "noopener", text: s.label }), document.createTextNode(s.words ? " · " + s.words.toLocaleString("en-US") + " words" : "")));
+  box.append(el("p", { class: "small", style: "margin:10px 0 0" }, el("strong", { text: "Corpus: " + v.words.toLocaleString("en-US") + " words" }), document.createTextNode(" from " + v.samples.length + (v.samples.length === 1 ? " source" : " sources") + (v.copyright ? ". Copyrighted: statistics and short quotes only." : "."))), sl);
+  const dials = el("div", { class: "dials" });
+  for (const d of DIALS) dials.append(dialCard(d, v, youStats && !d.pos ? youStats[d.key] : null));
+  box.append(el("h3", { text: "Fingerprint", style: "margin:14px 0 0;font-size:17px" }), dials);
+  box.append(el("div", { class: "legend" }, el("span", {}, el("i", { style: "background:#1b4332" }), document.createTextNode(v.name)),
+    youStats ? el("span", {}, el("i", { style: "background:#8d341c" }), document.createTextNode("You (before processing)")) : document.createTextNode("Read-only. Ticks mark quarters of the range across all 20 voices.")));
+  const chips = el("div", { class: "chips" }); for (const w of v.signature.slice(0, 8)) chips.append(el("span", { class: "chip", text: w }));
+  const ph = el("div", { class: "chips" }); for (const w of v.phrases.slice(0, 6)) ph.append(el("span", { class: "chip", text: w }));
+  box.append(el("h3", { text: "Words and phrases they lean on", style: "margin:14px 0 0;font-size:17px" }),
+    el("p", { class: "small muted", style: "margin:2px 0", text: "Compared with the other 19 voices (log-likelihood). Mostly topic, not style. Shown for reference; Dictio never inserts them." }), chips, ph);
+  const how = el("ul", { class: "changes small" }); for (const n of profile.notes) how.append(el("li", { text: n }));
+  box.append(el("h3", { text: "What Processing will do", style: "margin:14px 0 0;font-size:17px" }), how);
+}
+const VS = [
+  ["sentAvg", "Avg sentence length (words)", 1], ["sentSd", "Sentence variety (SD)", 1], ["pctShort", "Short sentences (≤8 words) %", 0], ["pctLong", "Long sentences (≥30 words) %", 0],
+  ["syllables", "Syllables per word", 2], ["pctPoly", "Words of 3+ syllables %", 1], ["contractions", "Contractions /1k", 1], ["hedges", "Hedges /1k", 1],
+  ["firstSing", "I / me / my /1k", 1], ["firstPlural", "We / us / our /1k", 1], ["second", "You / your /1k", 1], ["questions", "Questions %", 1],
+  ["exclaims", "Exclamations %", 1], ["repetition", "Repeated openers %", 1], ["lyAdverbs", "-ly words /1k", 1]];
+const GAPTXT = {
+  sentAvg: (y, t, n) => "Your sentences average " + fmt(y, 0) + " words; " + n + "'s here average " + fmt(t, 0) + ".",
+  pctShort: (y, t, n) => fmt(y, 0) + "% of your sentences are 8 words or fewer; for " + n + " it's " + fmt(t, 0) + "%.",
+  pctLong: (y, t, n) => fmt(y, 0) + "% of your sentences run 30+ words; for " + n + " it's " + fmt(t, 0) + "%.",
+  sentSd: (y, t, n) => (y < t ? "Your sentence lengths are more even than " : "Your sentence lengths swing more than ") + n + "'s (spread " + fmt(y, 1) + " vs " + fmt(t, 1) + ").",
+  syllables: (y, t, n) => (y > t ? "Your words run longer than " : "Your words run shorter than ") + n + "'s (" + fmt(y, 2) + " vs " + fmt(t, 2) + " syllables).",
+  pctPoly: (y, t, n) => fmt(y, 0) + "% of your words have 3+ syllables; " + n + ": " + fmt(t, 0) + "%.",
+  contractions: (y, t, n) => "You use " + fmt(y, 0) + " contractions per 1,000 words; " + n + " uses " + fmt(t, 0) + ".",
+  hedges: (y, t, n) => "You hedge " + fmt(y, 1) + " times per 1,000 words; " + n + ": " + fmt(t, 1) + ".",
+  firstSing: (y, t, n) => "You say I/me/my " + fmt(y, 0) + " times per 1,000 words; " + n + ": " + fmt(t, 0) + ".",
+  firstPlural: (y, t, n) => "You say we/us/our " + fmt(y, 0) + " times per 1,000 words; " + n + ": " + fmt(t, 0) + ".",
+  second: (y, t, n) => "You address the reader (you/your) " + fmt(y, 0) + " times per 1,000 words; " + n + ": " + fmt(t, 0) + ".",
+  questions: (y, t, n) => fmt(y, 0) + "% of your sentences are questions; " + n + ": " + fmt(t, 0) + "%.",
+  exclaims: (y, t, n) => fmt(y, 0) + "% of your sentences end in !; " + n + ": " + fmt(t, 0) + "%.",
+  repetition: (y, t, n) => fmt(y, 0) + "% of your sentences repeat a recent opener; " + n + ": " + fmt(t, 0) + "%.",
+  lyAdverbs: (y, t, n) => "You use " + fmt(y, 0) + " -ly words per 1,000; " + n + ": " + fmt(t, 0) + "."
+};
+function spread(k) { const xs = DATA.voices.map((v) => v.stats[k]); const m = xs.reduce((a, b) => a + b, 0) / xs.length; return Math.sqrt(xs.reduce((a, b) => a + (b - m) * (b - m), 0) / xs.length) || 1; }
+const SPREAD = {}; for (const [k] of VS) SPREAD[k] = spread(k);
+function run() {
+  const text = $("#input").value;
+  if (!text.trim()) { $("#results").hidden = true; return; }
+  const before = TS.stats(text); const res = polish(text, profile); const after = TS.stats(res.text);
+  lastOut = res.text; $("#output").value = res.text; $("#results").hidden = false;
+  const ch = $("#changed"); ch.textContent = "";
+  const entries = Object.entries(res.log);
+  if (entries.length) { const ul = el("ul", { class: "changes" }); for (const [k, n] of entries) ul.append(el("li", { text: k + (n > 1 ? " ×" + n : "") })); ch.append(el("p", { text: (res.swaps + res.rules) + " change" + (res.swaps + res.rules === 1 ? "" : "s") + ": " + res.swaps + " word swap" + (res.swaps === 1 ? "" : "s") + ", " + res.rules + " rule hit" + (res.rules === 1 ? "" : "s") + "." }), ul); }
+  else ch.append(el("p", { text: "No changes. Nothing in your text matched " + profile.short + "'s rules, which is normal: the rules are small on purpose." }));
+  if (res.flags.length) { const fl = el("ul", { class: "flags" }); for (const f of res.flags) fl.append(el("li", { text: f })); ch.append(el("p", { class: "small muted", text: "Flags (not changed, your call):" }), fl); }
+  const t = current.stats, n = profile.short, vs = $("#vs"); vs.textContent = "";
+  if (before.words < 100) vs.append(el("p", { class: "warn", text: "Only " + before.words + " words. Numbers this small swing a lot; treat them as rough." }));
+  const gaps = VS.map(([k]) => [k, Math.abs(before[k] - t[k]) / SPREAD[k]]).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const gl = el("ul", { class: "gaps" }); for (const [k] of gaps) gl.append(el("li", { text: GAPTXT[k](before[k], t[k], n) }));
+  vs.append(el("p", { class: "small muted", text: "Biggest gaps, before processing (the rules above can't close most of these; sentence length and word choice are yours to change):" }), gl);
+  const tb = el("table", { class: "vs" }); const hd = el("tr", {}, el("th", { text: "Measure" }), el("th", { text: "You (before)" }), el("th", { text: "You (after)" }), el("th", { text: current.name }));
+  tb.append(hd);
+  tb.append(el("tr", {}, el("td", { text: "Words" }), el("td", { text: String(before.words) }), el("td", { text: String(after.words) }), el("td", { text: current.words.toLocaleString("en-US") })));
+  for (const [k, lab, d] of VS) tb.append(el("tr", {}, el("td", { text: lab }), el("td", { text: fmt(before[k], d) }), el("td", { text: fmt(after[k], d) }), el("td", { text: fmt(t[k], d) })));
+  vs.append(el("div", { style: "overflow-x:auto" }, tb));
+  renderDetail(before);
+}
+function init() {
+  renderGrid(); $("#ver").textContent = DATA.version + ", data built " + DATA.built;
+  $("#process").addEventListener("click", run);
+  $("#clear").addEventListener("click", () => { $("#input").value = ""; $("#results").hidden = true; $("#count").textContent = ""; if (current) renderDetail(); });
+  $("#input").addEventListener("input", () => { const w = TS.words($("#input").value).length; $("#count").textContent = w ? w + " words" : ""; });
+  $("#copy").addEventListener("click", async () => { try { await navigator.clipboard.writeText(lastOut); $("#copied").textContent = "Copied."; } catch (e) { $("#output").select(); document.execCommand && document.execCommand("copy"); $("#copied").textContent = "Selected. Press Ctrl+C if it didn't copy."; } });
+  $("#download").addEventListener("click", () => { const blob = new Blob([lastOut], { type: "text/plain" }); const a = el("a", { href: URL.createObjectURL(blob), download: "dictio-voices-" + current.id + ".txt" }); document.body.append(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500); });
+  const fromHash = () => { const h = location.hash.slice(1); if (h && DATA.voices.some((v) => v.id === h) && (!current || current.id !== h)) select(h, false); };
+  window.addEventListener("hashchange", fromHash); fromHash();
+}
+init();
+
+</script>
+</body>
+</html>
