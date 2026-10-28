@@ -1,8 +1,9 @@
-name: Deploy to DigitalOcean
+name: Deploy Dictio to pinkhouse.tech/910
 
 on:
   push:
     branches:
+      - cursor/dictio-910-ship-4370
       - main
 
 jobs:
@@ -10,17 +11,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Deploy to DigitalOcean
-        uses: appleboy/ssh-action@master
+      - name: Copy Dictio into the 910 folder
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_USER }}
           key: ${{ secrets.DEPLOY_KEY }}
+          script_stop: true
           script: |
-            cd /var/www/html/tokenscope
-            git fetch origin
-            git checkout main
-            git pull origin main
-            echo "Deploy completed at $(date)"
+            set -eu
+            BRANCH="${{ github.ref_name }}"
+            case "$BRANCH" in
+              *[!A-Za-z0-9._/-]*|"") echo "Refusing branch name: $BRANCH"; exit 1 ;;
+            esac
+            BASE="https://raw.githubusercontent.com/philcheevers-pixel/tokenscope/${BRANCH}"
+            mkdir -p /tmp/dictio-910-deploy
+            curl -fsSL "$BASE/dictio/index.html" -o /tmp/dictio-910-deploy/index.html
+            curl -fsSL "$BASE/dictio/translate.php" -o /tmp/dictio-910-deploy/translate.php
+            grep -q "<title>Dictio</title>" /tmp/dictio-910-deploy/index.html
+            DEST=""
+            for candidate in \
+              /var/www/html/910 \
+              /var/www/pinkhouse/910 \
+              /var/www/pinkhouse.tech/910 \
+              /var/www/910 \
+              /srv/www/html/910
+            do
+              if [ -d "$candidate" ]; then
+                DEST="$candidate"
+                break
+              fi
+            done
+            if [ -z "$DEST" ]; then
+              echo "No known 910 directory. Web roots:"
+              ls -la /var/www /var/www/html /etc/apache2/sites-enabled 2>&1 || true
+              found=$(grep -R -l --include='index.html' '<title>Dictio</title>' /var/www /srv /home 2>/dev/null | head -n 1 || true)
+              if [ -n "$found" ]; then
+                DEST=$(dirname "$found")
+              fi
+            fi
+            if [ -z "$DEST" ]; then
+              echo "Could not find the pinkhouse.tech/910 directory"
+              exit 1
+            fi
+            cp -a /tmp/dictio-910-deploy/index.html /tmp/dictio-910-deploy/translate.php "$DEST/"
+            echo "Updated $DEST from $BRANCH"
