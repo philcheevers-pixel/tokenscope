@@ -239,6 +239,33 @@
   .pay p { margin: 8px 0 0; color: var(--muted); }
   code { font-size: 0.92em; }
   .hint { margin: 8px 0 0; color: var(--muted); font-size: 0.88rem; }
+  .style-block { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .style-block h3 {
+    margin: 0 0 8px;
+    font-family: var(--serif);
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .presets button[aria-pressed="true"] {
+    background: var(--green-soft);
+    border-color: var(--green);
+    font-weight: 700;
+  }
+  .sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+  .slider label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.9rem; }
+  .slider input[type="range"] { width: 100%; accent-color: var(--green); }
+  #citation-wrap { margin-top: 10px; }
+  #citation-wrap select {
+    min-height: 44px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    padding: 8px 10px;
+  }
+  .pay { display: none !important; }
   @media (min-width: 860px) {
     .workspace { grid-template-columns: 1fr 1fr; align-items: start; }
     textarea { min-height: 320px; }
@@ -280,6 +307,52 @@
         <span class="profile-name">Phil's polished voice</span>
         <span class="profile-desc"></span>
       </label>
+    </div>
+    <div class="style-block">
+      <h3>Writer presets</h3>
+      <div class="presets" role="group" aria-label="Writer presets">
+        <button type="button" data-writer="custom" aria-pressed="true">Custom sliders</button>
+        <button type="button" data-writer="hemingway" aria-pressed="false">Hemingway</button>
+        <button type="button" data-writer="shakespeare" aria-pressed="false">Shakespeare</button>
+        <button type="button" data-writer="thompson" aria-pressed="false">Hunter S. Thompson</button>
+        <button type="button" data-writer="thesis" aria-pressed="false">Thesis</button>
+      </div>
+      <div class="sliders">
+        <div class="slider">
+          <label for="slider-wordSize">Word size <span id="val-wordSize">40</span></label>
+          <input id="slider-wordSize" type="range" min="0" max="100" value="40">
+        </div>
+        <div class="slider">
+          <label for="slider-formality">Formality <span id="val-formality">40</span></label>
+          <input id="slider-formality" type="range" min="0" max="100" value="40">
+        </div>
+        <div class="slider">
+          <label for="slider-sentenceLength">Sentence length <span id="val-sentenceLength">40</span></label>
+          <input id="slider-sentenceLength" type="range" min="0" max="100" value="40">
+        </div>
+        <div class="slider">
+          <label for="slider-contractions">Contractions <span id="val-contractions">70</span></label>
+          <input id="slider-contractions" type="range" min="0" max="100" value="70">
+        </div>
+        <div class="slider">
+          <label for="slider-hedging">Hedging <span id="val-hedging">20</span></label>
+          <input id="slider-hedging" type="range" min="0" max="100" value="20">
+        </div>
+        <div class="slider">
+          <label for="slider-tone">Tone <span id="val-tone">40</span></label>
+          <input id="slider-tone" type="range" min="0" max="100" value="40">
+        </div>
+      </div>
+      <div id="citation-wrap" hidden>
+        <label class="field-label" for="citation-format">Citation format</label>
+        <select id="citation-format">
+          <option value="apa7">APA 7</option>
+          <option value="mla9">MLA 9</option>
+          <option value="chicago">Chicago</option>
+          <option value="harvard">Harvard</option>
+          <option value="ieee">IEEE</option>
+        </select>
+      </div>
     </div>
   </section>
 
@@ -328,12 +401,13 @@
     </div>
   </div>
 
-  <aside class="pay">
+  <aside class="pay" hidden>
     <a class="stripe" id="stripe" href="#">Pay $5 – Stripe placeholder, not live</a>
     <p>PLACEHOLDER. No payment is processed. When you have a real Stripe Payment Link, paste it into <code>STRIPE_PAYMENT_LINK</code> at the top of the script.</p>
   </aside>
 </div>
 <noscript><p style="padding:16px">Dictio needs JavaScript. It runs entirely in the page.</p></noscript>
+<script src="style-core.js"></script>
 <script>
 /* Paste a Stripe Payment Link here when you have one. Leave it empty until then. */
 const STRIPE_PAYMENT_LINK = "";
@@ -1807,12 +1881,34 @@ function finalCheck(text, profile) {
   return flags;
 }
 
-function polish(text, profile) {
+function readStyle() {
+  const S = window.DictioStyle;
+  const style = {
+    writer: document.querySelector('.presets button[aria-pressed="true"]')?.dataset.writer || "custom",
+    wordSize: Number(document.getElementById("slider-wordSize").value),
+    formality: Number(document.getElementById("slider-formality").value),
+    sentenceLength: Number(document.getElementById("slider-sentenceLength").value),
+    contractions: Number(document.getElementById("slider-contractions").value),
+    hedging: Number(document.getElementById("slider-hedging").value),
+    tone: Number(document.getElementById("slider-tone").value),
+    citation: document.getElementById("citation-format").value
+  };
+  return Object.assign({}, S ? S.DEFAULT_STYLE : {}, style);
+}
+
+function polish(text, profile, style) {
   const counter = { swaps: 0, rules: 0 };
   let next = applySwaps(text, profile.swaps, counter);
   next = applyRulesCase(next, profile.rules, counter);
   next = cleanup(next);
-  return { text: next, swaps: counter.swaps, rules: counter.rules, flags: finalCheck(next, profile) };
+  const styled = window.DictioStyle ? window.DictioStyle.applyStyle(next, style || readStyle()) : { text: next, notes: [] };
+  return {
+    text: styled.text,
+    swaps: counter.swaps,
+    rules: counter.rules,
+    flags: finalCheck(styled.text, profile),
+    styleNotes: styled.notes || []
+  };
 }
 
 function byteLen(value) {
@@ -2292,15 +2388,18 @@ async function run() {
   }
   if (mode === "diction") {
     const profile = selectedProfile();
-    const result = polish(text, profile);
+    const style = readStyle();
+    const result = polish(text, profile, style);
     outputEl.value = result.text;
     lastDownloadName = "dictio-" + slug(profile.name) + ".txt";
     const items = [
       { text: "Profile: " + profile.name },
+      { text: "Style: word size " + style.wordSize + ", formality " + style.formality + ", sentence length " + style.sentenceLength + ", contractions " + style.contractions + ", hedging " + style.hedging + ", tone " + style.tone },
       { text: result.swaps + (result.swaps === 1 ? " phrase swap" : " phrase swaps") },
       { text: result.rules + (result.rules === 1 ? " rule edit" : " rule edits") },
       { text: result.flags.length + (result.flags.length === 1 ? " final-check flag" : " final-check flags") }
     ];
+    (result.styleNotes || []).forEach((note) => items.push({ text: note }));
     if (!result.flags.length) items.push({ text: "Final check: nothing to flag." });
     result.flags.forEach((flag) => items.push({ text: flag, flag: true }));
     setReport("What changed", items);
@@ -2359,9 +2458,66 @@ async function run() {
   }
 }
 
+const STYLE_STORE = "dictio-style-v1";
+
+function paintStyle(style) {
+  const keys = ["wordSize", "formality", "sentenceLength", "contractions", "hedging", "tone"];
+  keys.forEach((key) => {
+    const slider = document.getElementById("slider-" + key);
+    slider.value = style[key];
+    document.getElementById("val-" + key).textContent = String(style[key]);
+  });
+  document.getElementById("citation-format").value = style.citation || "apa7";
+  document.getElementById("citation-wrap").hidden = style.writer !== "thesis";
+  document.querySelectorAll(".presets button").forEach((btn) => {
+    btn.setAttribute("aria-pressed", btn.dataset.writer === style.writer ? "true" : "false");
+  });
+}
+
+function saveStyle() {
+  try { localStorage.setItem(STYLE_STORE, JSON.stringify(readStyle())); } catch (e) {}
+}
+
+function loadStyle() {
+  const S = window.DictioStyle;
+  let style = S ? Object.assign({}, S.DEFAULT_STYLE) : {};
+  try {
+    const raw = localStorage.getItem(STYLE_STORE);
+    if (raw) Object.assign(style, JSON.parse(raw));
+  } catch (e) {}
+  paintStyle(style);
+}
+
+function wireStyle() {
+  loadStyle();
+  ["wordSize", "formality", "sentenceLength", "contractions", "hedging", "tone"].forEach((key) => {
+    document.getElementById("slider-" + key).addEventListener("input", () => {
+      document.querySelectorAll(".presets button").forEach((btn) => {
+        btn.setAttribute("aria-pressed", btn.dataset.writer === "custom" ? "true" : "false");
+      });
+      document.getElementById("val-" + key).textContent = document.getElementById("slider-" + key).value;
+      saveStyle();
+    });
+  });
+  document.getElementById("citation-format").addEventListener("change", saveStyle);
+  document.querySelectorAll(".presets button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const writer = btn.dataset.writer;
+      const S = window.DictioStyle;
+      const next = Object.assign({}, readStyle(), { writer: writer });
+      if (writer !== "custom" && S && S.WRITER_PRESETS[writer]) {
+        Object.assign(next, S.WRITER_PRESETS[writer], { writer: writer });
+      }
+      paintStyle(next);
+      saveStyle();
+    });
+  });
+}
+
 function init() {
   renderProfiles();
   wireStripe();
+  wireStyle();
   document.getElementById("engine-note").textContent = "test translation engine. MyMemory, no key in this page. About 5,000 characters a day from this network, and 500 characters per request. Longer passages are split. " + LANGUAGES.length + " languages are listed; some rare ones have no data.";
   const sourceCombo = setupCombo("source-field", "source-search", "source-list", true, "auto");
   const targetCombo = setupCombo("target-field", "target-search", "target-list", false, "fr");
@@ -2393,7 +2549,7 @@ function init() {
   document.getElementById("download").addEventListener("click", downloadResult);
   countMeta();
   setMode("diction");
-  window.Dictio = { polish, planChunks, translateText, translateDirect, LANGUAGES, PROFILES, byteLen, SAMPLE_DRAFT };
+  window.Dictio = { polish, planChunks, translateText, translateDirect, LANGUAGES, PROFILES, byteLen, SAMPLE_DRAFT, readStyle };
 }
 
 init();
