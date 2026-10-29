@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Dictio is a test page: polish a draft in one of three voices, or translate it with a test translation engine.">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#f3efe6">
+<title>Dictio</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231f4a38'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-family='Georgia' font-size='16' fill='white'%3ED%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f3efe6;
+    --card: #fffdf8;
+    --ink: #1e1a16;
+    --muted: #5c5348;
+    --line: #e3d8c8;
+    --green: #1f4a38;
+    --green-soft: #e6f0ea;
+    --clay: #8d341c;
+    --clay-dark: #732a16;
+    --amber-soft: #f8f1e0;
+    --amber: #7a5410;
+    --shadow: 0 1px 0 rgba(30, 26, 22, 0.04), 0 14px 36px rgba(30, 26, 22, 0.06);
+    --serif: "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: light; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 400px at 10% -10%, #efe4d2 0%, transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 16px 72px; }
+  header.top { margin-bottom: 22px; }
+  .kicker {
+    margin: 0 0 6px;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--clay);
+    font-weight: 700;
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(2.4rem, 6vw, 3.5rem);
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+  }
+  .tagline { margin: 10px 0 0; font-size: 1.15rem; max-width: 38rem; }
+  .note { margin: 8px 0 0; color: var(--muted); max-width: 40rem; }
+  .tabs {
+    display: flex;
+    gap: 4px;
+    width: fit-content;
+    max-width: 100%;
+    padding: 4px;
+    background: #e7dfd2;
+    border-radius: 999px;
+    margin: 0 0 16px;
+  }
+  .tabs button {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--ink);
+    font: inherit;
+    font-weight: 650;
+    padding: 10px 18px;
+    border-radius: 999px;
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .tabs button[aria-selected="true"] { background: var(--card); box-shadow: 0 1px 2px rgba(30, 26, 22, 0.08); }
+  .tabs button:focus-visible, .profile:focus-within, button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--green);
+    outline-offset: 2px;
+  }
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  .profiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .profile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-height: 44px;
+    padding: 12px 12px 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    cursor: pointer;
+  }
+  .profile input { position: absolute; opacity: 0; pointer-events: none; }
+  .profile:has(input:checked) { border-color: var(--green); background: var(--green-soft); }
+  .profile-name { font-weight: 700; }
+  .profile-desc { color: var(--muted); font-size: 0.92rem; }
+  .lang-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .lang-field { position: relative; }
+  .lang-field label, .field-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .lang-field input, textarea {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ink);
+    font: inherit;
+    font-size: 16px;
+  }
+  .lang-field input { min-height: 48px; padding: 10px 12px; }
+  .lang-list {
+    position: absolute;
+    z-index: 20;
+    left: 0; right: 0;
+    top: calc(100% + 4px);
+    max-height: min(280px, 46vh);
+    overflow: auto;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+  }
+  .lang-list li[role="option"] {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  .lang-list li[aria-selected="true"], .lang-list li[role="option"]:hover { background: var(--green-soft); }
+  .lang-list .native { color: var(--muted); }
+  .lang-empty { padding: 8px 10px; color: var(--muted); }
+  .engine-note {
+    margin: 12px 0 0;
+    padding: 10px 12px;
+    background: var(--amber-soft);
+    color: var(--amber);
+    border-radius: 12px;
+    font-size: 0.95rem;
+  }
+  .workspace { display: grid; gap: 16px; }
+  .col {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    min-width: 0;
+  }
+  .col-head, .pay {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  h2 { margin: 0; font-family: var(--serif); font-size: 1.45rem; font-weight: 600; }
+  textarea {
+    display: block;
+    min-height: 240px;
+    padding: 12px;
+    line-height: 1.55;
+    resize: vertical;
+  }
+  #output { background: #fcfbf7; }
+  .meta { margin: 8px 0 0; color: var(--muted); font-size: 0.9rem; }
+  button, .stripe {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 999px;
+    min-height: 44px;
+  }
+  button {
+    border: 1px solid var(--line);
+    background: #fff;
+    padding: 8px 14px;
+  }
+  button.primary {
+    width: 100%;
+    margin-top: 12px;
+    border: 0;
+    background: var(--clay);
+    color: white;
+    font-weight: 700;
+    padding: 12px 16px;
+  }
+  button.primary:hover { background: var(--clay-dark); }
+  button:disabled { opacity: 0.6; cursor: progress; }
+  .ghost { background: transparent; }
+  #report { margin-top: 14px; }
+  #report h2 { font-size: 1.15rem; margin-bottom: 6px; }
+  #report ul { margin: 0; padding-left: 1.1rem; }
+  #report li { margin: 4px 0; }
+  #report li.flag { color: var(--amber); }
+  .pay {
+    display: block;
+    margin-top: 18px;
+    padding: 14px;
+    border: 1.5px dashed #b7ab9b;
+    border-radius: 18px;
+    background: transparent;
+  }
+  .stripe {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 16px;
+    border: 1.5px dashed var(--clay);
+    color: var(--clay);
+    background: #fff;
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .pay p { margin: 8px 0 0; color: var(--muted); }
+  code { font-size: 0.92em; }
+  .hint { margin: 8px 0 0; color: var(--muted); font-size: 0.88rem; }
+  .trial-line { margin: 10px 0 0; color: var(--green); font-weight: 650; }
+  .trial-mail { margin: 8px 0 0; color: var(--muted); max-width: 36rem; }
+  #trial-email {
+    display: block;
+    margin-top: 6px;
+    width: min(100%, 320px);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font: inherit;
+    background: #fff;
+  }
+  .trial-due {
+    position: fixed;
+    inset: 0;
+    background: rgba(30, 26, 22, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 30;
+  }
+  .trial-due[hidden] { display: none; }
+  .trial-card {
+    width: min(100%, 440px);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: var(--shadow);
+  }
+  .trial-card h2 {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    line-height: 1.15;
+    margin: 0 0 10px;
+  }
+  .trial-card p { margin: 0 0 10px; }
+  .trial-card .fine { color: var(--muted); font-size: 0.92rem; }
+  .trial-card button {
+    appearance: none;
+    border: 0;
+    background: var(--clay);
+    color: #fff;
+    font: inherit;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 12px 18px;
+    min-height: 44px;
+    cursor: pointer;
+  }
+  @media (min-width: 860px) {
+    .workspace { grid-template-columns: 1fr 1fr; align-items: start; }
+    textarea { min-height: 320px; }
+  }
+  @media (max-width: 720px) {
+    .profiles, .lang-row { grid-template-columns: 1fr; }
+    .col-head { align-items: flex-start; flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="kicker">Test build</p>
+    <h1>Dictio</h1>
+    <p class="tagline">Paste a draft. Pick a voice or a language. Read the result.</p>
+    <p class="note">Test build for Phil Cheevers. Diction rules are starters, and translation runs on a test engine. The page does not store the draft.</p>
+    <p class="trial-line" id="trial-line">Play now. No sign-up. Seven days on the house.</p>
+    <p class="trial-mail">Want a reminder when the week ends? Leave an email. You don't have to.</p>
+    <input id="trial-email" type="email" autocomplete="email" placeholder="Email, optional">
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="Mode">
+    <button type="button" id="tab-diction" role="tab" aria-selected="true" aria-controls="panel-diction">Diction</button>
+    <button type="button" id="tab-translate" role="tab" aria-selected="false" aria-controls="panel-translate" tabindex="-1">Translate</button>
+  </div>
+
+  <section class="panel" id="panel-diction" role="tabpanel" aria-labelledby="tab-diction">
+    <div class="profiles" role="radiogroup" aria-label="Diction profile">
+      <label class="profile">
+        <input type="radio" name="profile" value="food" checked>
+        <span class="profile-name">Food book voice</span>
+        <span class="profile-desc"></span>
+      </label>
+      <label class="profile">
+        <input type="radio" name="profile" value="dtc">
+        <span class="profile-name">DTC book voice</span>
+        <span class="profile-desc"></span>
+      </label>
+      <label class="profile">
+        <input type="radio" name="profile" value="phil">
+        <span class="profile-name">Phil's polished voice</span>
+        <span class="profile-desc"></span>
+      </label>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-translate" role="tabpanel" aria-labelledby="tab-translate" hidden>
+    <div class="lang-row">
+      <div class="lang-field" id="source-field">
+        <label for="source-search">Source language</label>
+        <input id="source-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="source-list" autocomplete="off" autocorrect="off" spellcheck="false">
+        <ul id="source-list" class="lang-list" role="listbox" hidden></ul>
+      </div>
+      <div class="lang-field" id="target-field">
+        <label for="target-search">Target language</label>
+        <input id="target-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="target-list" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Search languages">
+        <ul id="target-list" class="lang-list" role="listbox" hidden></ul>
+      </div>
+    </div>
+    <p class="engine-note" id="engine-note"></p>
+  </section>
+
+  <div class="workspace">
+    <div class="col">
+      <div class="col-head">
+        <h2>Draft</h2>
+        <button type="button" class="ghost" id="load-sample">Load a test draft</button>
+      </div>
+      <label class="field-label" for="source">Text to polish or translate</label>
+      <textarea id="source" placeholder="Paste a draft here."></textarea>
+      <p class="meta" id="source-meta"></p>
+      <button type="button" class="primary" id="process">Polish this draft</button>
+      <p class="hint">Ctrl+Enter or ⌘+Enter runs it.</p>
+    </div>
+    <div class="col">
+      <div class="col-head">
+        <h2 id="result-title">Polished draft</h2>
+        <div>
+          <button type="button" id="copy">Copy</button>
+          <button type="button" id="download">Download .txt</button>
+        </div>
+      </div>
+      <label class="field-label" for="output">Result</label>
+      <textarea id="output" readonly placeholder="The result shows up here."></textarea>
+      <div id="report" aria-live="polite">
+        <h2 id="report-title">What changed</h2>
+        <ul id="report-list"></ul>
+      </div>
+    </div>
+  </div>
+
+  <aside class="pay">
+    <a class="stripe" id="stripe" href="#">Pay $5 – Stripe placeholder, not live</a>
+    <p>PLACEHOLDER. No payment is processed. When you have a real Stripe Payment Link, paste it into <code>STRIPE_PAYMENT_LINK</code> at the top of the script.</p>
+  </aside>
+</div>
+<div id="trial-due" class="trial-due" hidden>
+  <div class="trial-card" role="dialog" aria-modal="true" aria-labelledby="trial-due-title">
+    <h2 id="trial-due-title">Seven days. That was the free part.</h2>
+    <p>You've enjoyed Dictio for seven days. Now it's time to pay. Five bucks a week, or twenty bucks a month.</p>
+    <p class="fine">Nothing is charged from this page. Payment stays off until it is wired back in.</p>
+    <button type="button" id="trial-continue">Keep going today</button>
+  </div>
+</div>
+<noscript><p style="padding:16px">Dictio needs JavaScript. It runs entirely in the page.</p></noscript>
+<script>
+/* Paste a Stripe Payment Link here when you have one. Leave it empty until then. */
+const STRIPE_PAYMENT_LINK = "";
+const STRIPE_BUTTON_LABEL = "Pay $5 – Stripe placeholder, not live";
+
+const TRANSLATE_PROXY = "translate.php";
+const MYMEMORY_URL = "https://api.mymemory.translated.net/get";
+const ENGINE_NAME = "MyMemory";
+const ENGINE_LABEL = "test translation engine";
+const MAX_PASSAGE_CHARS = 4500;
+const CHUNK_BYTES = 450;
+
+/* ============================================================
+   PROFILES — edit the voices here.
+   Order of work for each profile:
+     1. swaps (longest phrase first, automatic)
+     2. rules, top to bottom
+     3. final check (flags only — it does not rewrite)
+   A swap or rule with to: "" deletes the match.
+   ============================================================ */
+const HEDGE_RULES = [
+  { label: "Strip “it is important to note that”", re: "\\bit is important to note that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “it should be noted that”", re: "\\bit should be noted that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “it is worth noting that”", re: "\\bit is worth noting that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “I think that”", re: "\\bi think that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “I believe that”", re: "\\bi believe that\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “basically”", re: "\\bbasically\\b[,:]?\\s*", flags: "gi", to: "" },
+  { label: "Strip “essentially”", re: "\\bessentially\\b[,:]?\\s*", flags: "gi", to: "" }
+];
+
+const CONTRACTION_RULES = [
+  { label: "we are going to → we'll", re: "\\bwe are going to\\b", flags: "gi", to: "we'll" },
+  { label: "do we not → don't we", re: "\\bdo we not\\b", flags: "gi", to: "don't we" },
+  { label: "does not → doesn't", re: "\\bdoes not\\b", flags: "gi", to: "doesn't" },
+  { label: "do not → don't", re: "\\bdo not\\b", flags: "gi", to: "don't" },
+  { label: "did not → didn't", re: "\\bdid not\\b", flags: "gi", to: "didn't" },
+  { label: "cannot → can't", re: "\\bcannot\\b", flags: "gi", to: "can't" },
+  { label: "can not → can't", re: "\\bcan not\\b", flags: "gi", to: "can't" },
+  { label: "will not → won't", re: "\\bwill not\\b", flags: "gi", to: "won't" },
+  { label: "would not → wouldn't", re: "\\bwould not\\b", flags: "gi", to: "wouldn't" },
+  { label: "should not → shouldn't", re: "\\bshould not\\b", flags: "gi", to: "shouldn't" },
+  { label: "could not → couldn't", re: "\\bcould not\\b", flags: "gi", to: "couldn't" },
+  { label: "is not → isn't", re: "\\bis not\\b", flags: "gi", to: "isn't" },
+  { label: "are not → aren't", re: "\\bare not\\b", flags: "gi", to: "aren't" },
+  { label: "was not → wasn't", re: "\\bwas not\\b", flags: "gi", to: "wasn't" },
+  { label: "were not → weren't", re: "\\bwere not\\b", flags: "gi", to: "weren't" },
+  { label: "I will → I'll", re: "\\bI will\\b", flags: "g", to: "I'll" },
+  { label: "we will → we'll", re: "\\bwe will\\b", flags: "gi", to: "we'll" },
+  { label: "you will → you'll", re: "\\byou will\\b", flags: "gi", to: "you'll" },
+  { label: "I am → I'm", re: "\\bI am\\b", flags: "g", to: "I'm" },
+  { label: "you are → you're", re: "\\byou are\\b", flags: "gi", to: "you're" },
+  { label: "we are → we're", re: "\\bwe are\\b", flags: "gi", to: "we're" },
+  { label: "they are → they're", re: "\\bthey are\\b", flags: "gi", to: "they're" },
+  { label: "there is → there's", re: "\\bthere is\\b", flags: "gi", to: "there's" },
+  { label: "that is → that's", re: "\\bthat is\\b", flags: "gi", to: "that's" },
+  { label: "it is → it's", re: "\\bit is\\b", flags: "gi", to: "it's" },
+  { label: "let us → let's", re: "\\blet us\\b", flags: "gi", to: "let's" }
+];
+
+const PROFANITY_RULES = [
+  { label: "what the hell → what the heck", re: "\\bwhat the hell\\b", flags: "gi", to: "what the heck" },
+  { label: "holy shit → wow", re: "\\bholy shit\\b", flags: "gi", to: "wow" },
+  { label: "pain in the ass → pain in the neck", re: "\\bpain in the ass\\b", flags: "gi", to: "pain in the neck" },
+  { label: "bullshit → nonsense", re: "\\bbullshit\\b", flags: "gi", to: "nonsense" },
+  { label: "fucking → really", re: "\\bfucking\\b", flags: "gi", to: "really" },
+  { label: "fucked → messed up", re: "\\bfucked\\b", flags: "gi", to: "messed up" },
+  { label: "fucker → jerk", re: "\\bfucker\\b", flags: "gi", to: "jerk" },
+  { label: "fuck → heck", re: "\\bfuck\\b", flags: "gi", to: "heck" },
+  { label: "shitty → lousy", re: "\\bshitty\\b", flags: "gi", to: "lousy" },
+  { label: "shit → stuff", re: "\\bshit\\b", flags: "gi", to: "stuff" },
+  { label: "goddamn → darn", re: "\\bgoddamn\\b", flags: "gi", to: "darn" },
+  { label: "damned → darned", re: "\\bdamned\\b", flags: "gi", to: "darned" },
+  { label: "damn → darn", re: "\\bdamn\\b", flags: "gi", to: "darn" },
+  { label: "asshole → jerk", re: "\\basshole\\b", flags: "gi", to: "jerk" },
+  { label: "bitching → complaining", re: "\\bbitching\\b", flags: "gi", to: "complaining" },
+  { label: "bitch → jerk", re: "\\bbitch\\b", flags: "gi", to: "jerk" },
+  { label: "bastard → jerk", re: "\\bbastard\\b", flags: "gi", to: "jerk" },
+  { label: "hell → heck", re: "\\bhell\\b", flags: "gi", to: "heck" },
+  { label: "ass → butt", re: "\\bass\\b", flags: "gi", to: "butt" }
+];
+
+const PLAIN_SWAPS = [
+  ["utilize", "use"],
+  ["utilizes", "uses"],
+  ["utilized", "used"],
+  ["utilizing", "using"],
+  ["utilization", "use"],
+  ["leverage", "use"],
+  ["leveraged", "used"],
+  ["leveraging", "using"],
+  ["in order to", "to"],
+  ["at this point in time", "now"],
+  ["at the present time", "now"],
+  ["very unique", "unique"],
+  ["due to the fact that", "because"],
+  ["a wide variety of", "many"],
+  ["in the event that", "if"],
+  ["has the ability to", "can"],
+  ["is able to", "can"],
+  ["the fact that", "that"],
+  ["prior to", "before"],
+  ["a large number of", "many"],
+  ["in addition to", "and"],
+  ["with respect to", "about"],
+  ["in terms of", "for"],
+  ["each and every", "every"],
+  ["at the end of the day", ""]
+];
+
+const SWEAR_FLAGS = ["fuck", "fucking", "fucked", "shit", "bullshit", "damn", "goddamn", "hell", "asshole", "bitch", "bastard"];
+
+const PASSIVE_RE = /\b(?:am|is|are|was|were|be|been|being)\s+(?:\w+ly\s+)?(?:\w+ed|built|chosen|done|given|known|made|seen|shown|taken|told|written)\b/gi;
+
+function swaps(pairs) {
+  return pairs.map(([from, to]) => ({ from, to }));
+}
+
+const PROFILES = [
+  {
+    id: "food",
+    name: "Food book voice",
+    description: "Warm, plain, and written for someone buying food. Short sentences, concrete words, second person is fine, no jargon.",
+    swaps: swaps(PLAIN_SWAPS.concat([
+      ["consumers", "people"],
+      ["stakeholders", "people"],
+      ["synergy", "working together"],
+      ["paradigm", "way"],
+      ["ensure that", "make sure"],
+      ["purchase", "buy"],
+      ["approximately", "about"],
+      ["sufficient", "enough"],
+      ["numerous", "many"],
+      ["assist", "help"],
+      ["individuals", "people"],
+      ["food product", "food"],
+      ["circle back", "come back"],
+      ["deep dive", "close look"],
+      ["best-in-class", "strong"],
+      ["best in class", "strong"],
+      ["move the needle", "matter"],
+      ["actionable insights", "useful details"],
+      ["actionable", "useful"],
+      ["learnings", "lessons"],
+      ["going forward", "from here"]
+    ])),
+    rules: HEDGE_RULES.concat(CONTRACTION_RULES),
+    check: {
+      maxSentenceWords: 25,
+      passive: true,
+      banned: ["utilize", "utilizes", "leverage", "leveraged", "synergy", "paradigm", "stakeholders", "basically", "essentially"].concat(SWEAR_FLAGS)
+    }
+  },
+  {
+    id: "dtc",
+    name: "DTC book voice",
+    description: "Direct-to-consumer business book. Punchy, confident, practical, active verbs. Hedges and corporate filler get cut.",
+    swaps: swaps(PLAIN_SWAPS.concat([
+      ["stakeholders", "customers"],
+      ["synergy", "fit"],
+      ["paradigm", "way"],
+      ["circle back", "follow up"],
+      ["touch base", "talk"],
+      ["reach out", "contact"],
+      ["deep dive", "close look"],
+      ["low-hanging fruit", "easy win"],
+      ["low hanging fruit", "easy win"],
+      ["move the needle", "change the result"],
+      ["going forward", "next"],
+      ["best-in-class", "strong"],
+      ["best in class", "strong"],
+      ["thought leadership", "a clear point of view"],
+      ["thought leader", "expert"],
+      ["learnings", "lessons"],
+      ["actionable insights", "what to do"],
+      ["actionable", "useful"],
+      ["bandwidth", "time"],
+      ["double-click", "look closer"],
+      ["double click", "look closer"],
+      ["net-net", "the point"]
+    ])),
+    rules: HEDGE_RULES.concat([
+      { label: "Strip “to be honest”", re: "\\bto be honest\\b[,:]?\\s*", flags: "gi", to: "" },
+      { label: "Strip “the reality is that”", re: "\\bthe reality is that\\b\\s*", flags: "gi", to: "" },
+      { label: "Strip “needless to say”", re: "\\bneedless to say\\b[,:]?\\s*", flags: "gi", to: "" },
+      { label: "Strip “kind of”", re: "\\bkind of\\b\\s*", flags: "gi", to: "" },
+      { label: "Strip “sort of”", re: "\\bsort of\\b\\s*", flags: "gi", to: "" },
+      { label: "are going to → will", re: "\\bare going to\\b", flags: "gi", to: "will" },
+      { label: "is going to → will", re: "\\bis going to\\b", flags: "gi", to: "will" }
+    ], CONTRACTION_RULES),
+    check: {
+      maxSentenceWords: 25,
+      passive: true,
+      banned: ["utilize", "leverage", "synergy", "circle back", "low-hanging fruit", "learnings", "best-in-class", "thought leader", "basically"].concat(SWEAR_FLAGS)
+    }
+  },
+  {
+    id: "phil",
+    name: "Phil's polished voice",
+    description: "Phil's casual rhythm and punch, without the profanity and without turning stiff. Contractions, plain words, short lines.",
+    swaps: swaps(PLAIN_SWAPS.concat([
+      ["consumers", "people"],
+      ["stakeholders", "people"],
+      ["synergy", "working together"],
+      ["therefore", "so"],
+      ["furthermore", "and"],
+      ["moreover", "and"],
+      ["additionally", "also"],
+      ["nevertheless", "still"],
+      ["consequently", "so"],
+      ["in conclusion", "so"],
+      ["with regard to", "about"],
+      ["in my opinion", ""],
+      ["I would like to", "I want to"]
+    ])),
+    rules: HEDGE_RULES.concat([
+      { label: "however → but", re: "\\bhowever\\b[,:]?", flags: "gi", to: "but" }
+    ], PROFANITY_RULES, CONTRACTION_RULES),
+    check: {
+      maxSentenceWords: 25,
+      passive: true,
+      banned: ["therefore", "furthermore", "moreover", "utilize", "leverage", "additionally", "nevertheless"].concat(SWEAR_FLAGS)
+    }
+  }
+];
+
+const SAMPLE_DRAFT = [
+  "It is important to note that we utilize a wide variety of suppliers in order to leverage the supply chain at this point in time.",
+  "Basically, I think that the product is very unique and it was designed for consumers who want trust.",
+  "This sentence is intentionally long so the final check will flag it because it keeps going and going with extra clauses about stakeholders and synergy and the fact that people do not always trust what they cannot see on a label when they shop for food.",
+  "What the hell is this bullshit process, and why the fuck do we not just say what is in the food?"
+].join(" ");
+
+/* ============================================================
+   LANGUAGES — ISO 639-1, plus a few variants people search for.
+   Each row is [code, english name, native name, extra search words].
+   ============================================================ */
+const LANGUAGES = [
+  [
+    "ab",
+    "Abkhaz",
+    "аҧсуа бызшәа",
+    ""
+  ],
+  [
+    "aa",
+    "Afar",
+    "Afaraf",
+    ""
+  ],
+  [
+    "af",
+    "Afrikaans",
+    "Afrikaans",
+    ""
+  ],
+  [
+    "ak",
+    "Akan",
+    "Akan",
+    ""
+  ],
+  [
+    "sq",
+    "Albanian",
+    "Shqip",
+    ""
+  ],
+  [
+    "am",
+    "Amharic",
+    "አማርኛ",
+    ""
+  ],
+  [
+    "ar",
+    "Arabic",
+    "العربية",
+    ""
+  ],
+  [
+    "an",
+    "Aragonese",
+    "aragonés",
+    ""
+  ],
+  [
+    "hy",
+    "Armenian",
+    "Հայերեն",
+    ""
+  ],
+  [
+    "as",
+    "Assamese",
+    "অসমীয়া",
+    ""
+  ],
+  [
+    "av",
+    "Avaric",
+    "авар мацӀ",
+    ""
+  ],
+  [
+    "ae",
+    "Avestan",
+    "avesta",
+    ""
+  ],
+  [
+    "ay",
+    "Aymara",
+    "aymar aru",
+    ""
+  ],
+  [
+    "az",
+    "Azerbaijani",
+    "azərbaycan dili",
+    ""
+  ],
+  [
+    "bm",
+    "Bambara",
+    "bamanankan",
+    ""
+  ],
+  [
+    "ba",
+    "Bashkir",
+    "башҡорт теле",
+    ""
+  ],
+  [
+    "eu",
+    "Basque",
+    "euskara",
+    ""
+  ],
+  [
+    "be",
+    "Belarusian",
+    "беларуская мова",
+    ""
+  ],
+  [
+    "bn",
+    "Bengali",
+    "বাংলা",
+    "Bangla"
+  ],
+  [
+    "bh",
+    "Bihari",
+    "भोजपुरी",
+    ""
+  ],
+  [
+    "bi",
+    "Bislama",
+    "Bislama",
+    ""
+  ],
+  [
+    "bs",
+    "Bosnian",
+    "bosanski jezik",
+    ""
+  ],
+  [
+    "br",
+    "Breton",
+    "brezhoneg",
+    ""
+  ],
+  [
+    "bg",
+    "Bulgarian",
+    "български език",
+    ""
+  ],
+  [
+    "my",
+    "Burmese",
+    "ဗမာစာ",
+    ""
+  ],
+  [
+    "ca",
+    "Catalan",
+    "català",
+    ""
+  ],
+  [
+    "ceb",
+    "Cebuano",
+    "Binisaya",
+    "bisaya"
+  ],
+  [
+    "ch",
+    "Chamorro",
+    "Chamoru",
+    ""
+  ],
+  [
+    "ce",
+    "Chechen",
+    "нохчийн мотт",
+    ""
+  ],
+  [
+    "ny",
+    "Chichewa",
+    "chiCheŵa",
+    "Chewa Nyanja"
+  ],
+  [
+    "zh",
+    "Chinese",
+    "中文",
+    ""
+  ],
+  [
+    "zh-CN",
+    "Chinese (Simplified)",
+    "简体中文",
+    "mandarin simplified"
+  ],
+  [
+    "zh-TW",
+    "Chinese (Traditional)",
+    "繁體中文",
+    "mandarin traditional"
+  ],
+  [
+    "cu",
+    "Church Slavonic",
+    "ѩзыкъ словѣньскъ",
+    "Old Bulgarian Old Church Slavonic"
+  ],
+  [
+    "cv",
+    "Chuvash",
+    "чӑваш чӗлхи",
+    ""
+  ],
+  [
+    "kw",
+    "Cornish",
+    "Kernewek",
+    ""
+  ],
+  [
+    "co",
+    "Corsican",
+    "corsu",
+    ""
+  ],
+  [
+    "cr",
+    "Cree",
+    "ᓀᐦᐃᔭᐍᐏᐣ",
+    ""
+  ],
+  [
+    "hr",
+    "Croatian",
+    "hrvatski jezik",
+    ""
+  ],
+  [
+    "cs",
+    "Czech",
+    "čeština",
+    ""
+  ],
+  [
+    "da",
+    "Danish",
+    "dansk",
+    ""
+  ],
+  [
+    "dv",
+    "Divehi",
+    "ދިވެހި",
+    "Dhivehi Maldivian"
+  ],
+  [
+    "nl",
+    "Dutch",
+    "Nederlands",
+    ""
+  ],
+  [
+    "dz",
+    "Dzongkha",
+    "རྫོང་ཁ",
+    ""
+  ],
+  [
+    "en",
+    "English",
+    "English",
+    ""
+  ],
+  [
+    "eo",
+    "Esperanto",
+    "Esperanto",
+    ""
+  ],
+  [
+    "et",
+    "Estonian",
+    "eesti",
+    ""
+  ],
+  [
+    "ee",
+    "Ewe",
+    "Eʋegbe",
+    ""
+  ],
+  [
+    "fo",
+    "Faroese",
+    "føroyskt",
+    ""
+  ],
+  [
+    "fj",
+    "Fijian",
+    "vosa Vakaviti",
+    ""
+  ],
+  [
+    "fil",
+    "Filipino",
+    "Filipino",
+    "tagalog"
+  ],
+  [
+    "fi",
+    "Finnish",
+    "suomi",
+    ""
+  ],
+  [
+    "fr",
+    "French",
+    "français",
+    ""
+  ],
+  [
+    "ff",
+    "Fulah",
+    "Fulfulde",
+    "Pulaar Pular Fula"
+  ],
+  [
+    "gl",
+    "Galician",
+    "galego",
+    ""
+  ],
+  [
+    "lg",
+    "Ganda",
+    "Luganda",
+    ""
+  ],
+  [
+    "ka",
+    "Georgian",
+    "ქართული",
+    ""
+  ],
+  [
+    "de",
+    "German",
+    "Deutsch",
+    ""
+  ],
+  [
+    "el",
+    "Greek",
+    "ελληνικά",
+    "modern"
+  ],
+  [
+    "gn",
+    "Guaraní",
+    "Avañe'ẽ",
+    ""
+  ],
+  [
+    "gu",
+    "Gujarati",
+    "ગુજરાતી",
+    ""
+  ],
+  [
+    "ht",
+    "Haitian Creole",
+    "Kreyòl ayisyen",
+    "Haitian"
+  ],
+  [
+    "ha",
+    "Hausa",
+    "",
+    ""
+  ],
+  [
+    "haw",
+    "Hawaiian",
+    "ʻŌlelo Hawaiʻi",
+    ""
+  ],
+  [
+    "he",
+    "Hebrew",
+    "עברית",
+    "modern"
+  ],
+  [
+    "hz",
+    "Herero",
+    "Otjiherero",
+    ""
+  ],
+  [
+    "hi",
+    "Hindi",
+    "हिन्दी",
+    ""
+  ],
+  [
+    "ho",
+    "Hiri Motu",
+    "Hiri Motu",
+    ""
+  ],
+  [
+    "hmn",
+    "Hmong",
+    "Hmoob",
+    ""
+  ],
+  [
+    "hu",
+    "Hungarian",
+    "magyar",
+    ""
+  ],
+  [
+    "is",
+    "Icelandic",
+    "Íslenska",
+    ""
+  ],
+  [
+    "io",
+    "Ido",
+    "Ido",
+    ""
+  ],
+  [
+    "ig",
+    "Igbo",
+    "Asụsụ Igbo",
+    ""
+  ],
+  [
+    "id",
+    "Indonesian",
+    "Bahasa Indonesia",
+    ""
+  ],
+  [
+    "ia",
+    "Interlingua",
+    "Interlingua",
+    ""
+  ],
+  [
+    "ie",
+    "Interlingue",
+    "Originally called Occidental; then Interlingue after WWII",
+    ""
+  ],
+  [
+    "iu",
+    "Inuktitut",
+    "ᐃᓄᒃᑎᑐᑦ",
+    ""
+  ],
+  [
+    "ik",
+    "Inupiaq",
+    "Iñupiaq",
+    ""
+  ],
+  [
+    "ga",
+    "Irish",
+    "Gaeilge",
+    ""
+  ],
+  [
+    "it",
+    "Italian",
+    "Italiano",
+    ""
+  ],
+  [
+    "ja",
+    "Japanese",
+    "日本語",
+    ""
+  ],
+  [
+    "jv",
+    "Javanese",
+    "ꦧꦱꦗꦮ",
+    ""
+  ],
+  [
+    "kl",
+    "Kalaallisut",
+    "kalaallisut",
+    "Greenlandic"
+  ],
+  [
+    "kn",
+    "Kannada",
+    "ಕನ್ನಡ",
+    ""
+  ],
+  [
+    "kr",
+    "Kanuri",
+    "Kanuri",
+    ""
+  ],
+  [
+    "ks",
+    "Kashmiri",
+    "कश्मीरी",
+    ""
+  ],
+  [
+    "kk",
+    "Kazakh",
+    "қазақ тілі",
+    ""
+  ],
+  [
+    "km",
+    "Khmer",
+    "ខ្មែរ",
+    ""
+  ],
+  [
+    "ki",
+    "Kikuyu",
+    "Gĩkũyũ",
+    "Gikuyu"
+  ],
+  [
+    "rw",
+    "Kinyarwanda",
+    "Ikinyarwanda",
+    ""
+  ],
+  [
+    "rn",
+    "Kirundi",
+    "Ikirundi",
+    ""
+  ],
+  [
+    "kv",
+    "Komi",
+    "коми кыв",
+    ""
+  ],
+  [
+    "kg",
+    "Kongo",
+    "Kikongo",
+    ""
+  ],
+  [
+    "ko",
+    "Korean",
+    "한국어",
+    ""
+  ],
+  [
+    "kj",
+    "Kuanyama",
+    "Kuanyama",
+    "Kwanyama"
+  ],
+  [
+    "ku",
+    "Kurdish",
+    "Kurdî",
+    ""
+  ],
+  [
+    "ky",
+    "Kyrgyz",
+    "Кыргызча",
+    ""
+  ],
+  [
+    "lo",
+    "Lao",
+    "ພາສາລາວ",
+    ""
+  ],
+  [
+    "la",
+    "Latin",
+    "latine",
+    ""
+  ],
+  [
+    "lv",
+    "Latvian",
+    "latviešu valoda",
+    ""
+  ],
+  [
+    "li",
+    "Limburgish",
+    "Limburgs",
+    "Limburgan Limburger"
+  ],
+  [
+    "ln",
+    "Lingala",
+    "Lingála",
+    ""
+  ],
+  [
+    "lt",
+    "Lithuanian",
+    "lietuvių kalba",
+    ""
+  ],
+  [
+    "lu",
+    "Luba-Katanga",
+    "Tshiluba",
+    ""
+  ],
+  [
+    "lb",
+    "Luxembourgish",
+    "Lëtzebuergesch",
+    "Letzeburgesch"
+  ],
+  [
+    "mk",
+    "Macedonian",
+    "македонски јазик",
+    ""
+  ],
+  [
+    "mg",
+    "Malagasy",
+    "fiteny malagasy",
+    ""
+  ],
+  [
+    "ms",
+    "Malay",
+    "bahasa Melayu",
+    ""
+  ],
+  [
+    "ml",
+    "Malayalam",
+    "മലയാളം",
+    ""
+  ],
+  [
+    "mt",
+    "Maltese",
+    "Malti",
+    ""
+  ],
+  [
+    "gv",
+    "Manx",
+    "Gaelg",
+    ""
+  ],
+  [
+    "mr",
+    "Marathi",
+    "मराठी",
+    "Marāṭhī"
+  ],
+  [
+    "mh",
+    "Marshallese",
+    "Kajin M̧ajeļ",
+    ""
+  ],
+  [
+    "mn",
+    "Mongolian",
+    "Монгол хэл",
+    ""
+  ],
+  [
+    "mi",
+    "Māori",
+    "te reo Māori",
+    ""
+  ],
+  [
+    "na",
+    "Nauruan",
+    "Dorerin Naoero",
+    ""
+  ],
+  [
+    "nv",
+    "Navajo",
+    "Diné bizaad",
+    "Navaho"
+  ],
+  [
+    "ng",
+    "Ndonga",
+    "Owambo",
+    ""
+  ],
+  [
+    "ne",
+    "Nepali",
+    "नेपाली",
+    ""
+  ],
+  [
+    "nd",
+    "Northern Ndebele",
+    "isiNdebele",
+    ""
+  ],
+  [
+    "se",
+    "Northern Sami",
+    "Davvisámegiella",
+    ""
+  ],
+  [
+    "no",
+    "Norwegian",
+    "Norsk",
+    ""
+  ],
+  [
+    "nb",
+    "Norwegian Bokmål",
+    "Norsk bokmål",
+    ""
+  ],
+  [
+    "nn",
+    "Norwegian Nynorsk",
+    "Norsk nynorsk",
+    ""
+  ],
+  [
+    "ii",
+    "Nuosu",
+    "ꆈꌠ꒿ Nuosuhxop",
+    ""
+  ],
+  [
+    "oc",
+    "Occitan",
+    "occitan",
+    ""
+  ],
+  [
+    "oj",
+    "Ojibwe",
+    "ᐊᓂᔑᓈᐯᒧᐎᓐ",
+    "Ojibwa"
+  ],
+  [
+    "or",
+    "Oriya",
+    "ଓଡ଼ିଆ",
+    ""
+  ],
+  [
+    "om",
+    "Oromo",
+    "Afaan Oromoo",
+    ""
+  ],
+  [
+    "os",
+    "Ossetian",
+    "ирон æвзаг",
+    "Ossetic"
+  ],
+  [
+    "ps",
+    "Pashto",
+    "پښتو",
+    "Pushto"
+  ],
+  [
+    "fa",
+    "Persian",
+    "فارسی",
+    "Farsi"
+  ],
+  [
+    "pl",
+    "Polish",
+    "język polski",
+    ""
+  ],
+  [
+    "pt",
+    "Portuguese",
+    "Português",
+    ""
+  ],
+  [
+    "pt-BR",
+    "Portuguese (Brazil)",
+    "Português (Brasil)",
+    "brazilian"
+  ],
+  [
+    "pt-PT",
+    "Portuguese (Portugal)",
+    "Português (Portugal)",
+    "european portuguese"
+  ],
+  [
+    "pa",
+    "Punjabi",
+    "ਪੰਜਾਬੀ",
+    "(Eastern) Punjabi"
+  ],
+  [
+    "pi",
+    "Pāli",
+    "पाऴि",
+    ""
+  ],
+  [
+    "qu",
+    "Quechua",
+    "Runa Simi",
+    ""
+  ],
+  [
+    "ro",
+    "Romanian",
+    "Română",
+    ""
+  ],
+  [
+    "rm",
+    "Romansh",
+    "rumantsch grischun",
+    ""
+  ],
+  [
+    "ru",
+    "Russian",
+    "Русский",
+    ""
+  ],
+  [
+    "sm",
+    "Samoan",
+    "gagana fa'a Samoa",
+    ""
+  ],
+  [
+    "sg",
+    "Sango",
+    "yângâ tî sängö",
+    ""
+  ],
+  [
+    "sa",
+    "Sanskrit",
+    "संस्कृतम्",
+    "Saṁskṛta"
+  ],
+  [
+    "sc",
+    "Sardinian",
+    "sardu",
+    ""
+  ],
+  [
+    "gd",
+    "Scottish Gaelic",
+    "Gàidhlig",
+    "Gaelic"
+  ],
+  [
+    "sr",
+    "Serbian",
+    "српски језик",
+    ""
+  ],
+  [
+    "sn",
+    "Shona",
+    "chiShona",
+    ""
+  ],
+  [
+    "sd",
+    "Sindhi",
+    "सिन्धी",
+    ""
+  ],
+  [
+    "si",
+    "Sinhala",
+    "සිංහල",
+    "Sinhalese"
+  ],
+  [
+    "sk",
+    "Slovak",
+    "slovenčina",
+    ""
+  ],
+  [
+    "sl",
+    "Slovene",
+    "slovenski jezik",
+    ""
+  ],
+  [
+    "so",
+    "Somali",
+    "Soomaaliga",
+    ""
+  ],
+  [
+    "nr",
+    "Southern Ndebele",
+    "isiNdebele",
+    ""
+  ],
+  [
+    "st",
+    "Southern Sotho",
+    "Sesotho",
+    ""
+  ],
+  [
+    "es",
+    "Spanish",
+    "Español",
+    ""
+  ],
+  [
+    "su",
+    "Sundanese",
+    "Basa Sunda",
+    ""
+  ],
+  [
+    "sw",
+    "Swahili",
+    "Kiswahili",
+    ""
+  ],
+  [
+    "ss",
+    "Swati",
+    "SiSwati",
+    ""
+  ],
+  [
+    "sv",
+    "Swedish",
+    "svenska",
+    ""
+  ],
+  [
+    "tl",
+    "Tagalog",
+    "Wikang Tagalog",
+    ""
+  ],
+  [
+    "ty",
+    "Tahitian",
+    "Reo Tahiti",
+    ""
+  ],
+  [
+    "tg",
+    "Tajik",
+    "тоҷикӣ",
+    ""
+  ],
+  [
+    "ta",
+    "Tamil",
+    "தமிழ்",
+    ""
+  ],
+  [
+    "tt",
+    "Tatar",
+    "татар теле",
+    ""
+  ],
+  [
+    "te",
+    "Telugu",
+    "తెలుగు",
+    ""
+  ],
+  [
+    "th",
+    "Thai",
+    "ไทย",
+    ""
+  ],
+  [
+    "bo",
+    "Tibetan",
+    "བོད་ཡིག",
+    "Central Tibetan Standard"
+  ],
+  [
+    "ti",
+    "Tigrinya",
+    "ትግርኛ",
+    ""
+  ],
+  [
+    "to",
+    "Tongan",
+    "faka Tonga",
+    "Tonga Islands Tonga"
+  ],
+  [
+    "ts",
+    "Tsonga",
+    "Xitsonga",
+    ""
+  ],
+  [
+    "tn",
+    "Tswana",
+    "Setswana",
+    ""
+  ],
+  [
+    "tr",
+    "Turkish",
+    "Türkçe",
+    ""
+  ],
+  [
+    "tk",
+    "Turkmen",
+    "Türkmen",
+    ""
+  ],
+  [
+    "tw",
+    "Twi",
+    "Twi",
+    ""
+  ],
+  [
+    "uk",
+    "Ukrainian",
+    "Українська",
+    ""
+  ],
+  [
+    "ur",
+    "Urdu",
+    "اردو",
+    ""
+  ],
+  [
+    "ug",
+    "Uyghur",
+    "ئۇيغۇرچە‎",
+    ""
+  ],
+  [
+    "uz",
+    "Uzbek",
+    "Oʻzbek",
+    ""
+  ],
+  [
+    "ve",
+    "Venda",
+    "Tshivenḓa",
+    ""
+  ],
+  [
+    "vi",
+    "Vietnamese",
+    "Tiếng Việt",
+    ""
+  ],
+  [
+    "vo",
+    "Volapük",
+    "Volapük",
+    ""
+  ],
+  [
+    "wa",
+    "Walloon",
+    "walon",
+    ""
+  ],
+  [
+    "cy",
+    "Welsh",
+    "Cymraeg",
+    ""
+  ],
+  [
+    "fy",
+    "Western Frisian",
+    "Frysk",
+    ""
+  ],
+  [
+    "wo",
+    "Wolof",
+    "Wollof",
+    ""
+  ],
+  [
+    "xh",
+    "Xhosa",
+    "isiXhosa",
+    ""
+  ],
+  [
+    "yi",
+    "Yiddish",
+    "ייִדיש",
+    ""
+  ],
+  [
+    "yo",
+    "Yoruba",
+    "Yorùbá",
+    ""
+  ],
+  [
+    "za",
+    "Zhuang",
+    "Saɯ cueŋƅ",
+    "Chuang"
+  ],
+  [
+    "zu",
+    "Zulu",
+    "isiZulu",
+    ""
+  ]
+];
+
+const LANG_BY_CODE = new Map(LANGUAGES.map((row) => [row[0].toLowerCase(), row[1]]));
+
+function preserveCase(match, replacement) {
+  if (!replacement) return "";
+  const letters = match.replace(/[^A-Za-z]/g, "");
+  if (letters && letters === letters.toUpperCase()) return replacement.toUpperCase();
+  const first = match.match(/[A-Za-z]/);
+  if (first && first[0] === first[0].toUpperCase()) {
+    return replacement.replace(/[A-Za-z]/, (ch) => ch.toUpperCase());
+  }
+  return replacement;
+}
+
+function applySwaps(text, list, counter) {
+  const ordered = list.slice().sort((a, b) => b.from.length - a.from.length);
+  for (const swap of ordered) {
+    const escaped = swap.from.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const re = new RegExp("\\b" + escaped + "\\b[,;:]?", "gi");
+    text = text.replace(re, (match) => {
+      counter.swaps += 1;
+      const punct = /[,;:]$/.test(match) ? match.slice(-1) : "";
+      const words = punct ? match.slice(0, -1) : match;
+      if (!swap.to) return "";
+      return preserveCase(words, swap.to) + punct;
+    });
+  }
+  return text;
+}
+
+function applyRulesCase(text, rules, counter) {
+  for (const rule of rules) {
+    const re = new RegExp(rule.re, rule.flags || "g");
+    text = text.replace(re, (match) => {
+      counter.rules += 1;
+      if (!rule.to) return "";
+      return preserveCase(match, rule.to);
+    });
+  }
+  return text;
+}
+
+function cleanup(text) {
+  let t = text
+    .replace(/[ \t]+\n/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
+    .replace(/\s+([,.;!?])/g, "$1")
+    .replace(/([a-z])([.!?])(?=[A-Z])/g, "$1$2 ");
+  t = t.replace(/^[ \t,;:]+/gm, "");
+  t = t.replace(/(^|[.!?]\s+|\n+)([a-z])/g, (m, lead, ch) => lead + ch.toUpperCase());
+  return t.trim();
+}
+
+function finalCheck(text, profile) {
+  const flags = [];
+  const max = profile.check.maxSentenceWords || 25;
+  const sentences = text.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean);
+  const long = [];
+  sentences.forEach((sentence, index) => {
+    const words = sentence.split(/\s+/).filter(Boolean).length;
+    if (words > max) long.push("Sentence " + (index + 1) + " is " + words + " words (limit " + max + ").");
+  });
+  flags.push(...long.slice(0, 4));
+  if (long.length > 4) flags.push((long.length - 4) + " more long sentences.");
+
+  if (profile.check.passive !== false) {
+    const found = [];
+    const re = new RegExp(PASSIVE_RE.source, "gi");
+    let match;
+    while ((match = re.exec(text)) && found.length < 4) found.push(match[0]);
+    if (found.length) flags.push("Possible passive: " + found.map((s) => "“" + s + "”").join(", ") + ".");
+  }
+
+  const bannedHits = [];
+  for (const term of profile.check.banned || []) {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    if (new RegExp("\\b" + escaped + "\\b", "i").test(text)) bannedHits.push(term);
+  }
+  if (bannedHits.length) flags.push("Still in the draft: " + bannedHits.join(", ") + ".");
+  return flags;
+}
+
+function polish(text, profile) {
+  const counter = { swaps: 0, rules: 0 };
+  let next = applySwaps(text, profile.swaps, counter);
+  next = applyRulesCase(next, profile.rules, counter);
+  next = cleanup(next);
+  return { text: next, swaps: counter.swaps, rules: counter.rules, flags: finalCheck(next, profile) };
+}
+
+function byteLen(value) {
+  return new TextEncoder().encode(value).length;
+}
+
+function splitSentences(text) {
+  const parts = text.match(/.+?(?:[.!?。！？](?=\s|$)|$)/gsu) || [text];
+  const cleaned = parts.map((part) => part.trim()).filter(Boolean);
+  return cleaned.length ? cleaned : [text];
+}
+
+function takePrefix(value, maxBytes) {
+  let lo = 1;
+  let hi = value.length;
+  let best = 1;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    const slice = value.slice(0, mid);
+    const dangling = slice.charCodeAt(slice.length - 1) >= 0xD800 && slice.charCodeAt(slice.length - 1) <= 0xDBFF;
+    if (!dangling && byteLen(slice) <= maxBytes) {
+      best = mid;
+      lo = mid + 1;
+    } else {
+      hi = mid - 1;
+    }
+  }
+  return best;
+}
+
+function hardWrap(value, maxBytes) {
+  const out = [];
+  let rest = value.trim();
+  while (rest) {
+    if (byteLen(rest) <= maxBytes) {
+      out.push(rest);
+      break;
+    }
+    let cut = takePrefix(rest, maxBytes);
+    const window = rest.slice(0, cut);
+    const space = window.lastIndexOf(" ");
+    if (space > 40) cut = space;
+    const piece = rest.slice(0, cut).trim();
+    if (piece) out.push(piece);
+    rest = rest.slice(cut).trim();
+    if (!piece) break;
+  }
+  return out;
+}
+
+function packParagraph(paragraph, maxBytes) {
+  if (byteLen(paragraph) <= maxBytes) return [paragraph];
+  const sentences = splitSentences(paragraph);
+  const out = [];
+  let cur = "";
+  for (const sentence of sentences) {
+    if (byteLen(sentence) > maxBytes) {
+      if (cur) out.push(cur);
+      cur = "";
+      out.push(...hardWrap(sentence, maxBytes));
+      continue;
+    }
+    const next = cur ? cur + " " + sentence : sentence;
+    if (byteLen(next) <= maxBytes) cur = next;
+    else {
+      if (cur) out.push(cur);
+      cur = sentence;
+    }
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+function planChunks(text, maxBytes) {
+  return text.split(/\n{2,}/).map((part) => part.trim()).filter(Boolean).map((part) => packParagraph(part, maxBytes));
+}
+
+function languageName(code) {
+  if (!code || code === "auto") return "Auto-detect";
+  const exact = LANG_BY_CODE.get(String(code).toLowerCase());
+  if (exact) return exact;
+  const primary = LANG_BY_CODE.get(String(code).toLowerCase().split("-")[0]);
+  return primary || code;
+}
+
+function sameLanguage(a, b) {
+  if (!a || !b || a === "auto") return false;
+  const left = String(a).toLowerCase();
+  const right = String(b).toLowerCase();
+  if (left === right) return true;
+  if (left.includes("-") || right.includes("-")) return false;
+  return left.split("-")[0] === right.split("-")[0];
+}
+
+function engineProblem(data, httpStatus) {
+  const details = String((data && data.responseDetails) || "");
+  const translated = String((data && data.responseData && data.responseData.translatedText) || "");
+  const blob = details + " " + translated;
+  const status = Number(data && data.responseStatus);
+  const limited = Boolean(data && data.quotaFinished) || httpStatus === 429 || /MYMEMORY WARNING|YOU USED ALL|QUOTA|TOO MANY REQUESTS/i.test(blob);
+  if (/QUERY LENGTH/i.test(blob)) return "The test translation engine rejected a chunk as too long (max 500 characters).";
+  if (limited) return "The test translation engine hit its daily limit (about 5,000 characters from this network). Try a shorter passage later.";
+  if (status !== 200 || httpStatus >= 400) {
+    if (/INVALID SOURCE|INVALID TARGET|NO CONTENT|NOT SUPPORTED|IS AN INVALID/i.test(blob)) {
+      return "The test translation engine does not support that language pair. Pick a more common language.";
+    }
+    return details.trim() || "The test translation engine failed.";
+  }
+  if (!translated.trim()) return "The test translation engine returned an empty translation.";
+  return "";
+}
+
+async function translateChunk(chunk, source, target, signal) {
+  const pairSource = source === "auto" ? "Autodetect" : source;
+  const url = new URL(MYMEMORY_URL);
+  url.searchParams.set("q", chunk);
+  url.searchParams.set("langpair", pairSource + "|" + target);
+  url.searchParams.set("mt", "1");
+  let response;
+  try {
+    response = await fetch(url, { signal });
+  } catch (err) {
+    if (err && err.name === "AbortError") throw err;
+    throw new Error("Could not reach the test translation engine. Check the connection and try again.");
+  }
+  let data = null;
+  try { data = await response.json(); } catch (e) { data = null; }
+  const problem = engineProblem(data || {}, response.status);
+  if (problem) {
+    const error = new Error(problem);
+    error.limited = /daily limit|rate/i.test(problem);
+    throw error;
+  }
+  return {
+    text: data.responseData.translatedText,
+    detected: data.responseData.detectedLanguage || ""
+  };
+}
+
+async function translateDirect(text, source, target, signal) {
+  const groups = planChunks(text, CHUNK_BYTES);
+  const flat = groups.reduce((sum, group) => sum + group.length, 0);
+  if (flat > 16) throw new Error("That passage needs too many requests for the test translation engine. Shorten it.");
+  let detected = "";
+  let pairSource = source;
+  const paragraphs = [];
+  let done = 0;
+  for (const group of groups) {
+    const pieces = [];
+    for (const chunk of group) {
+      if (byteLen(chunk) > 480) throw new Error("The chunker built a piece over the test engine limit.");
+      if (done > 0) await delay(180, signal);
+      const result = await translateChunk(chunk, pairSource, target, signal);
+      if (!detected && result.detected) {
+        detected = result.detected;
+        if (sameLanguage(detected, target)) {
+          throw new Error("This text already looks like " + languageName(target) + ". Pick a different target.");
+        }
+        if (/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})?$/.test(detected)) pairSource = detected;
+      }
+      pieces.push(result.text);
+      done += 1;
+    }
+    paragraphs.push(pieces.join(" "));
+  }
+  return {
+    ok: true,
+    translation: paragraphs.join("\n\n"),
+    engine: ENGINE_NAME,
+    engineLabel: ENGINE_LABEL,
+    detectedSource: detected,
+    chunks: flat,
+    via: "browser"
+  };
+}
+
+function delay(ms, signal) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(resolve, ms);
+    if (signal) {
+      signal.addEventListener("abort", () => {
+        clearTimeout(timer);
+        reject(new DOMException("Aborted", "AbortError"));
+      }, { once: true });
+    }
+  });
+}
+
+async function translateViaProxy(text, source, target, signal) {
+  let response;
+  try {
+    response = await fetch(TRANSLATE_PROXY, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ text, source, target }),
+      signal
+    });
+  } catch (err) {
+    if (err && err.name === "AbortError") throw err;
+    return null;
+  }
+  if (response.status === 404) return null;
+  const type = response.headers.get("content-type") || "";
+  const raw = await response.text();
+  if (!type.includes("json") || raw.startsWith("<?php")) return null;
+  let data;
+  try { data = JSON.parse(raw); } catch (e) { return null; }
+  if (!response.ok || data.ok === false) {
+    throw new Error(data.error || "The translation proxy failed.");
+  }
+  data.via = data.via || "proxy";
+  data.engine = data.engine || ENGINE_NAME;
+  data.engineLabel = data.engineLabel || ENGINE_LABEL;
+  return data;
+}
+
+async function translateText(text, source, target, signal) {
+  const proxied = await translateViaProxy(text, source, target, signal);
+  if (proxied) return proxied;
+  return translateDirect(text, source, target, signal);
+}
+
+const sourceEl = document.getElementById("source");
+const outputEl = document.getElementById("output");
+const processBtn = document.getElementById("process");
+const reportList = document.getElementById("report-list");
+const reportTitle = document.getElementById("report-title");
+const resultTitle = document.getElementById("result-title");
+let mode = "diction";
+let busy = false;
+let abortCtl = null;
+let lastDownloadName = "dictio.txt";
+
+function selectedProfile() {
+  const checked = document.querySelector('input[name="profile"]:checked');
+  return PROFILES.find((profile) => profile.id === checked.value) || PROFILES[0];
+}
+
+function setReport(title, items, flags) {
+  reportTitle.textContent = title;
+  reportList.replaceChildren();
+  items.forEach((item) => {
+    const li = document.createElement("li");
+    li.textContent = item.text;
+    if (item.flag || (flags && flags.has(item.text))) li.className = "flag";
+    reportList.append(li);
+  });
+}
+
+function countMeta() {
+  const value = sourceEl.value;
+  const words = value.trim() ? value.trim().split(/\s+/).length : 0;
+  sourceEl.parentElement.querySelector("#source-meta").textContent = words + " words · " + value.length + " characters";
+}
+
+function setMode(next) {
+  mode = next;
+  const diction = next === "diction";
+  document.getElementById("tab-diction").setAttribute("aria-selected", diction ? "true" : "false");
+  document.getElementById("tab-translate").setAttribute("aria-selected", diction ? "false" : "true");
+  document.getElementById("tab-diction").tabIndex = diction ? 0 : -1;
+  document.getElementById("tab-translate").tabIndex = diction ? -1 : 0;
+  document.getElementById("panel-diction").hidden = !diction;
+  document.getElementById("panel-translate").hidden = diction;
+  processBtn.textContent = diction ? "Polish this draft" : "Translate";
+  resultTitle.textContent = diction ? "Polished draft" : "Translation";
+  outputEl.value = "";
+  setReport(diction ? "What changed" : "Translation notes", [
+    { text: diction
+      ? "Pick a voice, paste a draft, then polish it."
+      : "Paste a draft, then translate it. Auto-detect is fine for the source." }
+  ]);
+}
+
+function renderProfiles() {
+  document.querySelectorAll(".profile").forEach((label) => {
+    const id = label.querySelector("input").value;
+    const profile = PROFILES.find((item) => item.id === id);
+    label.querySelector(".profile-name").textContent = profile.name;
+    label.querySelector(".profile-desc").textContent = profile.description;
+  });
+}
+
+function setupCombo(fieldId, inputId, listId, withAuto, initialId) {
+  const field = document.getElementById(fieldId);
+  const input = document.getElementById(inputId);
+  const list = document.getElementById(listId);
+  const options = LANGUAGES.map((row) => ({
+    id: row[0],
+    name: row[1],
+    native: row[2] || "",
+    search: row.join(" ").toLowerCase()
+  }));
+  if (withAuto) {
+    options.unshift({ id: "auto", name: "Auto-detect", native: "", search: "auto detect automatic" });
+  }
+  let active = 0;
+
+  function labelFor(id) {
+    const found = options.find((opt) => opt.id.toLowerCase() === String(id).toLowerCase());
+    return found ? found.name : "";
+  }
+
+  function highlight() {
+    const items = [...list.querySelectorAll("[role='option']")];
+    items.forEach((item, index) => {
+      const on = index === active;
+      item.setAttribute("aria-selected", on ? "true" : "false");
+      if (on) {
+        input.setAttribute("aria-activedescendant", item.id);
+        item.scrollIntoView({ block: "nearest" });
+      }
+    });
+  }
+
+  function render(query) {
+    list.replaceChildren();
+    const q = query.trim().toLowerCase();
+    const matches = options.filter((opt) => !q || opt.search.includes(q));
+    if (!matches.length) {
+      const empty = document.createElement("li");
+      empty.className = "lang-empty";
+      empty.textContent = "No language matches.";
+      list.append(empty);
+      return;
+    }
+    matches.forEach((opt) => {
+      const li = document.createElement("li");
+      li.id = listId + "-" + opt.id;
+      li.setAttribute("role", "option");
+      li.dataset.id = opt.id;
+      const name = document.createElement("span");
+      name.textContent = opt.name;
+      li.append(name);
+      if (opt.native && opt.native.toLowerCase() !== opt.name.toLowerCase()) {
+        const native = document.createElement("span");
+        native.className = "native";
+        native.textContent = opt.native;
+        li.append(native);
+      }
+      li.addEventListener("mousedown", (event) => {
+        event.preventDefault();
+        choose(opt.id);
+      });
+      list.append(li);
+    });
+    active = Math.max(0, matches.findIndex((opt) => opt.id === input.dataset.value));
+    if (active < 0) active = 0;
+    highlight();
+  }
+
+  function open() {
+    list.hidden = false;
+    input.setAttribute("aria-expanded", "true");
+    render(input.value === labelFor(input.dataset.value) ? "" : input.value);
+  }
+
+  function close() {
+    list.hidden = true;
+    input.setAttribute("aria-expanded", "false");
+    input.value = labelFor(input.dataset.value);
+  }
+
+  function choose(id) {
+    input.dataset.value = id;
+    close();
+  }
+
+  input.addEventListener("focus", () => {
+    open();
+    input.select();
+  });
+  input.addEventListener("input", () => {
+    if (list.hidden) open();
+    render(input.value);
+  });
+  input.addEventListener("keydown", (event) => {
+    const items = [...list.querySelectorAll("[role='option']")];
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      if (list.hidden) open();
+      else active = Math.min(items.length - 1, active + 1);
+      highlight();
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      active = Math.max(0, active - 1);
+      highlight();
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      const chosen = items[active];
+      if (chosen) choose(chosen.dataset.id);
+    } else if (event.key === "Escape") {
+      close();
+    }
+  });
+  input.addEventListener("blur", () => {
+    setTimeout(() => {
+      if (!field.contains(document.activeElement)) close();
+    }, 120);
+  });
+  document.addEventListener("pointerdown", (event) => {
+    if (!field.contains(event.target)) close();
+  });
+  choose(initialId);
+  return {
+    value() { return input.dataset.value || ""; }
+  };
+}
+
+function wireStripe() {
+  const link = (STRIPE_PAYMENT_LINK || "").trim();
+  const anchor = document.getElementById("stripe");
+  anchor.textContent = STRIPE_BUTTON_LABEL;
+  if (/^https:\/\/\S+$/i.test(link)) {
+    anchor.href = link;
+    anchor.target = "_blank";
+    anchor.rel = "noopener";
+  } else {
+    anchor.href = "#";
+    anchor.addEventListener("click", (event) => event.preventDefault());
+  }
+}
+
+function currentTarget() {
+  return document.getElementById("target-search").dataset.value || "";
+}
+function currentSource() {
+  return document.getElementById("source-search").dataset.value || "auto";
+}
+
+function slug(value) {
+  return String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || "draft";
+}
+
+async function copyResult() {
+  const text = outputEl.value;
+  if (!text.trim()) {
+    setReport(reportTitle.textContent, [{ text: "Nothing to copy yet.", flag: true }]);
+    return;
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch (err) {
+    outputEl.focus();
+    outputEl.select();
+    document.execCommand("copy");
+  }
+  const items = [...reportList.children].map((li) => ({ text: li.textContent, flag: li.classList.contains("flag") }));
+  items.unshift({ text: "Copied." });
+  setReport(reportTitle.textContent, items);
+}
+
+function downloadResult() {
+  const text = outputEl.value;
+  if (!text.trim()) {
+    setReport(reportTitle.textContent, [{ text: "Nothing to download yet.", flag: true }]);
+    return;
+  }
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = lastDownloadName;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function run() {
+  if (busy) return;
+  const text = sourceEl.value;
+  if (!text.trim()) {
+    outputEl.value = "";
+    setReport(mode === "diction" ? "What changed" : "Translation notes", [{ text: "Paste some text first.", flag: true }]);
+    return;
+  }
+  if (mode === "diction") {
+    const profile = selectedProfile();
+    const result = polish(text, profile);
+    outputEl.value = result.text;
+    lastDownloadName = "dictio-" + slug(profile.name) + ".txt";
+    const items = [
+      { text: "Profile: " + profile.name },
+      { text: result.swaps + (result.swaps === 1 ? " phrase swap" : " phrase swaps") },
+      { text: result.rules + (result.rules === 1 ? " rule edit" : " rule edits") },
+      { text: result.flags.length + (result.flags.length === 1 ? " final-check flag" : " final-check flags") }
+    ];
+    if (!result.flags.length) items.push({ text: "Final check: nothing to flag." });
+    result.flags.forEach((flag) => items.push({ text: flag, flag: true }));
+    setReport("What changed", items);
+    return;
+  }
+
+  const target = currentTarget();
+  const source = currentSource();
+  if (!target) {
+    setReport("Translation notes", [{ text: "Pick a target language.", flag: true }]);
+    return;
+  }
+  if (sameLanguage(source, target)) {
+    setReport("Translation notes", [{ text: "Source and target are the same language. Pick a different target.", flag: true }]);
+    return;
+  }
+  if (text.length > MAX_PASSAGE_CHARS) {
+    setReport("Translation notes", [{
+      text: "This passage is " + text.length + " characters. The test translation engine allows about 5,000 characters a day and 500 per request. Keep this test under " + MAX_PASSAGE_CHARS + " characters.",
+      flag: true
+    }]);
+    return;
+  }
+
+  busy = true;
+  processBtn.disabled = true;
+  processBtn.textContent = "Translating…";
+  outputEl.value = "";
+  setReport("Translation notes", [{ text: "Asking the test translation engine…" }]);
+  abortCtl = new AbortController();
+  try {
+    const result = await translateText(text, source, target, abortCtl.signal);
+    outputEl.value = result.translation || "";
+    lastDownloadName = "dictio-" + slug(target) + ".txt";
+    const from = result.detectedSource && source === "auto"
+      ? "Detected " + languageName(result.detectedSource)
+      : languageName(source);
+    const via = result.via === "proxy"
+      ? "Called through translate.php on this server. No key is in the page."
+      : "Called from this browser because translate.php is not running here. No key is in the page.";
+    setReport("Translation notes", [
+      { text: ENGINE_LABEL + ": " + (result.engine || ENGINE_NAME) },
+      { text: from + " → " + languageName(target) },
+      { text: (result.chunks || 1) + ((result.chunks || 1) === 1 ? " request" : " requests") },
+      { text: via },
+      { text: "Limit: about 5,000 characters a day from this network, 500 characters per request." }
+    ]);
+  } catch (err) {
+    if (err && err.name === "AbortError") return;
+    outputEl.value = "";
+    setReport("Translation notes", [{ text: err.message || "The test translation engine failed.", flag: true }]);
+  } finally {
+    busy = false;
+    processBtn.disabled = false;
+    processBtn.textContent = mode === "diction" ? "Polish this draft" : "Translate";
+  }
+}
+
+function init() {
+  renderProfiles();
+  wireStripe();
+  document.getElementById("engine-note").textContent = "test translation engine. MyMemory, no key in this page. About 5,000 characters a day from this network, and 500 characters per request. Longer passages are split. " + LANGUAGES.length + " languages are listed; some rare ones have no data.";
+  const sourceCombo = setupCombo("source-field", "source-search", "source-list", true, "auto");
+  const targetCombo = setupCombo("target-field", "target-search", "target-list", false, "fr");
+  void sourceCombo;
+  void targetCombo;
+  document.getElementById("tab-diction").addEventListener("click", () => setMode("diction"));
+  document.getElementById("tab-translate").addEventListener("click", () => setMode("translate"));
+  document.querySelector(".tabs").addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    const next = mode === "diction" ? "translate" : "diction";
+    setMode(next);
+    document.getElementById(next === "diction" ? "tab-diction" : "tab-translate").focus();
+  });
+  document.getElementById("load-sample").addEventListener("click", () => {
+    sourceEl.value = SAMPLE_DRAFT;
+    countMeta();
+    sourceEl.focus();
+  });
+  sourceEl.addEventListener("input", countMeta);
+  sourceEl.addEventListener("keydown", (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
+      event.preventDefault();
+      run();
+    }
+  });
+  processBtn.addEventListener("click", run);
+  document.getElementById("copy").addEventListener("click", copyResult);
+  document.getElementById("download").addEventListener("click", downloadResult);
+  countMeta();
+  setMode("diction");
+  startTrial();
+  window.Dictio = { polish, planChunks, translateText, translateDirect, LANGUAGES, PROFILES, byteLen, SAMPLE_DRAFT };
+}
+
+function startTrial() {
+  const DAY = 24 * 60 * 60 * 1000;
+  const KEY = "dictio.trialStart";
+  const line = document.getElementById("trial-line");
+  const due = document.getElementById("trial-due");
+  const email = document.getElementById("trial-email");
+  let start = Date.now();
+  try {
+    const saved = localStorage.getItem(KEY);
+    if (saved && !Number.isNaN(Number(saved))) start = Number(saved);
+    else localStorage.setItem(KEY, String(start));
+    if (email) {
+      const savedEmail = localStorage.getItem("dictio.trialEmail") || "";
+      if (savedEmail) email.value = savedEmail;
+      email.addEventListener("change", () => {
+        try { localStorage.setItem("dictio.trialEmail", email.value.trim()); } catch (err) { /* private mode */ }
+      });
+    }
+  } catch (err) {
+    start = Date.now();
+  }
+  const forceDue = new URLSearchParams(location.search).get("trial") === "due";
+  const elapsed = Date.now() - start;
+  const daysUsed = Math.min(7, Math.floor(elapsed / DAY) + 1);
+  if (line && !forceDue) {
+    line.textContent = "Day " + daysUsed + " of 7. No sign-up. No charge.";
+  }
+  const keep = document.getElementById("trial-continue");
+  if (keep && due) keep.addEventListener("click", () => { due.hidden = true; });
+  if (due && (forceDue || elapsed >= 7 * DAY)) due.hidden = false;
+}
+
+init();
+</script>
+</body>
+</html>
