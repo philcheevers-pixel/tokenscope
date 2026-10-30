@@ -125,67 +125,131 @@
     return m ? m.length : 0;
   }
 
-  function readDraft(text) {
+  const FUNCTION_WORDS = /^(the|a|an|and|or|but|if|of|to|in|on|for|at|by|from|with|as|is|are|was|were|be|been|being|that|this|these|those|not|no|do|did|does|have|has|had)$/i;
+  const ADJ_SUFFIX = /(ous|ful|ive|able|ible|al|ic|ish|less|ary|ent|ant|like)$/i;
+  const JARGON_RE = /\b(?:utilize|leverage|synergy|paradigm|stakeholders|bandwidth|learnings|actionable|best-in-class|holistic|robust|scalable|optimize|ecosystem)\b/gi;
+  const HEDGE_RE = /\b(?:perhaps|maybe|might|may|could|suggests?|appears?|seems?|somewhat|kind of|sort of|I think|I believe|it is possible)\b/gi;
+  const FORMAL_RE = /\b(?:however|therefore|furthermore|moreover|thus|hence|subsequently|nevertheless|accordingly|demonstrate|obtain)\b/gi;
+  const CASUAL_RE = /\b(?:gonna|wanna|yeah|okay|ok|gotta)\b/gi;
+  const CONTRACTION_RE = /\b(?:[A-Za-z]+n't|I'm|I've|I'd|I'll|you're|you've|you'd|you'll|we're|we've|we'd|we'll|they're|they've|they'd|they'll|it's|that's|there's|who's|let's)\b/g;
+  const YOU_RE = /\b(?:you|your|yours|you're|yourself)\b/gi;
+  const WE_RE = /\b(?:we|our|ours|us|we're)\b/gi;
+  const I_RE = /\b(?:I|me|my|mine|I'm|I've|I'd|I'll)\b/g;
+  const THEY_RE = /\b(?:they|them|their|theirs|themselves)\b/gi;
+  const INTENS_RE = /\b(?:very|really|so|quite|extremely|incredibly|wildly)\b/gi;
+  const ABSTRACT_RE = /\b[A-Za-z]{6,}(?:tion|sion|ment|ness|ity|ization|isation)\b/g;
+  const CITE_RE = /\([A-Z][A-Za-z'`-]+(?:,?\s+)\d{4}[^)]*\)|\[[0-9]+\]/g;
+
+  function perThousand(n, wc) {
+    return (n / Math.max(wc, 1)) * 1000;
+  }
+
+  function tokens(raw) {
+    return raw.split(/\s+/).map(function (w) { return w.replace(/^[^\w']+|[^\w']+$/g, ""); }).filter(Boolean);
+  }
+
+  function countAdjectives(wordList) {
+    let n = 0;
+    for (let i = 0; i < wordList.length; i++) {
+      const w = wordList[i];
+      const letters = w.replace(/[^A-Za-z]/g, "");
+      if (letters.length < 3 || FUNCTION_WORDS.test(letters)) continue;
+      if (ADJ_SUFFIX.test(letters.toLowerCase())) n += 1;
+    }
+    return n;
+  }
+
+  function reviewDraft(text) {
     const raw = String(text || "").trim();
     if (!raw) {
       return {
         writer: "custom",
-        wordSize: 40, formality: 40, sentenceLength: 40, contractions: 40,
-        hedging: 20, tone: 40, concreteness: 50, person: 40,
-        punch: 40, jargon: 20, warmth: 40, citationDensity: 10,
+        wordSize: 40, formality: 40, sentenceLength: 40, contractions: 2,
+        hedging: 10, tone: 40, concreteness: 50, person: 20,
+        punch: 40, jargon: 10, warmth: 20, citationDensity: 2,
         citation: "apa7",
-        reading: "Paste a draft. The sliders will read how it is written."
+        counts: null,
+        reading: "Paste a draft. We count words, sentences, contractions, pronouns, likely adjectives, hedges, and citations, then set the dials from those counts. The draft on the left stays as you pasted it."
       };
     }
-    const words = raw.split(/\s+/).filter(Boolean);
-    const wc = words.length || 1;
-    const avgChars = words.reduce(function (s, w) { return s + w.replace(/[^A-Za-z]/g, "").length; }, 0) / wc;
+    const wordList = tokens(raw);
+    const wc = wordList.length || 1;
+    const letters = wordList.map(function (w) { return w.replace(/[^A-Za-z]/g, "").length; });
+    const avgChars = letters.reduce(function (s, n) { return s + n; }, 0) / wc;
     const sentences = raw.split(/(?<=[.!?])\s+/).filter(function (s) { return s.trim(); });
     const sc = sentences.length || 1;
     const avgSent = wc / sc;
-    const shortSent = sentences.filter(function (s) { return s.trim().split(/\s+/).length <= 10; }).length / sc;
-    const contractions = countMatches(raw, /\b\w+n't\b|\b(?:I'm|you're|we're|they're|it's|that's|there's|we'll|I'll|you'll)\b/gi);
-    const hedges = countMatches(raw, /\b(?:perhaps|maybe|might|may|suggests?|appears?|seems?|somewhat|kind of|sort of|I think|I believe)\b/gi);
-    const formal = countMatches(raw, /\b(?:however|therefore|furthermore|moreover|thus|hence|utilize|obtain|demonstrate|subsequently)\b/gi);
-    const casual = countMatches(raw, /\b(?:but|so|also|gonna|yeah|okay)\b/gi);
-    const intens = countMatches(raw, /\b(?:very|really|wildly|quite|most)\b|[!]{1,}/gi);
-    const you = countMatches(raw, /\b(?:you|your|you're)\b/gi);
-    const we = countMatches(raw, /\b(?:we|our|us)\b/gi);
-    const third = countMatches(raw, /\b(?:the researcher|the committee|one must|subjects|participants)\b/gi);
-    const jargon = countMatches(raw, /\b(?:utilize|leverage|synergy|paradigm|stakeholders|bandwidth|learnings|actionable|best-in-class)\b/gi);
-    const abstract = countMatches(raw, /\b\w{8,}(?:tion|ment|ness|ity|ization)\b/gi);
-    const cites = countMatches(raw, /\([A-Z][A-Za-z'`-]+(?:,?\s+)\d{4}/g) + countMatches(raw, /\[[0-9]+\]/g);
-    const warmth = you + we + countMatches(raw, /\b(?:please|thanks|together)\b/gi);
+    const shortN = sentences.filter(function (s) { return s.trim().split(/\s+/).length <= 12; }).length;
+    const contractions = countMatches(raw, CONTRACTION_RE);
+    const hedges = countMatches(raw, HEDGE_RE);
+    const formal = countMatches(raw, FORMAL_RE);
+    const casual = countMatches(raw, CASUAL_RE);
+    const intens = countMatches(raw, INTENS_RE) + countMatches(raw, /!/g);
+    const you = countMatches(raw, YOU_RE);
+    const we = countMatches(raw, WE_RE);
+    const first = countMatches(raw, I_RE);
+    const they = countMatches(raw, THEY_RE);
+    const pronouns = you + we + first + they;
+    const jargon = countMatches(raw, JARGON_RE);
+    const abstract = countMatches(raw, ABSTRACT_RE);
+    const adjectives = countAdjectives(wordList);
+    const cites = countMatches(raw, CITE_RE);
+    const please = countMatches(raw, /\b(?:please|thanks|thank you|together)\b/gi);
+
+    const counts = {
+      words: wc,
+      sentences: sc,
+      avgWordLetters: Math.round(avgChars * 10) / 10,
+      avgSentenceWords: Math.round(avgSent * 10) / 10,
+      shortSentences: shortN,
+      contractions: contractions,
+      adjectives: adjectives,
+      hedges: hedges,
+      pronouns: pronouns,
+      you: you,
+      we: we,
+      i: first,
+      they: they,
+      jargon: jargon,
+      abstracts: abstract,
+      intensifiers: intens,
+      citations: cites,
+      formalMarkers: formal,
+      casualMarkers: casual
+    };
 
     const style = {
       writer: "custom",
-      wordSize: clamp((avgChars - 3.2) * 28, 5, 95),
-      formality: clamp(40 + (formal - casual) * 8, 5, 95),
-      sentenceLength: clamp((avgSent - 8) * 5.5, 5, 95),
-      contractions: clamp((contractions / wc) * 900, 2, 95),
-      hedging: clamp((hedges / wc) * 1200, 2, 95),
-      tone: clamp(20 + intens * 6 + shortSent * 20, 5, 95),
-      concreteness: clamp(80 - (abstract / wc) * 600, 5, 95),
-      person: clamp((you / wc) * 1400, 5, 95),
-      punch: clamp(shortSent * 90 + (intens / sc) * 15, 5, 95),
-      jargon: clamp((jargon / wc) * 1800, 2, 95),
-      warmth: clamp((warmth / wc) * 900, 5, 95),
-      citationDensity: clamp((cites / Math.max(sc, 1)) * 120, 2, 95),
-      citation: "apa7"
+      wordSize: clamp(((avgChars - 3.4) / 3.2) * 100, 2, 98),
+      formality: clamp(35 + perThousand(formal, wc) * 8 - perThousand(casual, wc) * 10 + (avgChars - 4.5) * 12, 2, 98),
+      sentenceLength: clamp(((avgSent - 8) / 22) * 100, 2, 98),
+      contractions: clamp(perThousand(contractions, wc) / 0.45, 2, 98),
+      hedging: clamp(perThousand(hedges, wc) / 0.35, 2, 98),
+      tone: clamp(perThousand(adjectives + intens, wc) / 0.9, 2, 98),
+      concreteness: clamp(90 - perThousand(abstract, wc) / 0.5, 2, 98),
+      person: clamp(pronouns ? (you / pronouns) * 100 : 8, 2, 98),
+      punch: clamp((shortN / sc) * 100, 2, 98),
+      jargon: clamp(perThousand(jargon, wc) / 0.25, 2, 98),
+      warmth: clamp(perThousand(you + we + please, wc) / 0.5, 2, 98),
+      citationDensity: clamp((cites / sc) * 140, 2, 98),
+      citation: "apa7",
+      counts: counts
     };
-    style.reading = "This draft currently reads: word size " + style.wordSize +
-      ", formality " + style.formality +
-      ", sentence length " + style.sentenceLength +
-      ", contractions " + style.contractions +
-      ", hedging " + style.hedging +
-      ", tone " + style.tone +
-      ", concreteness " + style.concreteness +
-      ", second person " + style.person +
-      ", punch " + style.punch +
-      ", jargon " + style.jargon +
-      ", warmth " + style.warmth +
-      ", citations " + style.citationDensity + ".";
+    style.reading =
+      "Counted in this draft: " + wc + " words, " + sc + " sentences" +
+      " (average " + counts.avgSentenceWords + " words, words average " + counts.avgWordLetters + " letters). " +
+      contractions + " contractions, " +
+      adjectives + " likely adjectives (by ending: -ous, -ful, -ive, -able, -al, -ic… not a full parser), " +
+      pronouns + " pronouns (" + you + " you, " + we + " we, " + first + " I, " + they + " they), " +
+      hedges + " hedges, " +
+      jargon + " jargon hits, " +
+      cites + " citations. " +
+      "Dials are set from those counts so you can see how we read the page. The left draft is not rewritten until you choose to replace it.";
     return style;
+  }
+
+  function readDraft(text) {
+    return reviewDraft(text);
   }
 
   const CITATION_LABELS = {
@@ -364,6 +428,7 @@
   const api = {
     applyStyle: applyStyle,
     readDraft: readDraft,
+    reviewDraft: reviewDraft,
     SLIDER_KEYS: SLIDER_KEYS,
     WRITER_PRESETS: WRITER_PRESETS,
     CITATION_LABELS: CITATION_LABELS,

@@ -60,7 +60,8 @@ for (const fmt of CITE_FMTS) {
 }
 
 const read = DictioStyle.readDraft(SAMPLES[0]);
-assert.ok(read.reading && /word size/.test(read.reading), "readDraft explains the draft");
+assert.ok(read.reading && /Counted/.test(read.reading), "readDraft explains the counts");
+assert.ok(read.counts && read.counts.words > 0, "readDraft returns counts");
 assert.ok(DictioStyle.SLIDER_KEYS.length === 12, "twelve sliders");
 
 const hemingway = DictioStyle.applyStyle(SAMPLES[0], Object.assign({}, DictioStyle.WRITER_PRESETS.hemingway, { writer: "hemingway" }));

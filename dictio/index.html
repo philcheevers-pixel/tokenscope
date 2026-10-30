@@ -338,7 +338,7 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <p class="kicker">v1.4</p>
+    <p class="kicker">v1.5</p>
     <div class="title-row">
       <h1>Dictio</h1>
       <p class="advert">See how a draft is written. Then polish it.</p>
@@ -501,7 +501,7 @@
       <textarea id="source" placeholder="Paste a draft here."></textarea>
       <p class="meta" id="source-meta"></p>
       <button type="button" class="primary" id="process">Polish this draft</button>
-      <p class="hint">Ctrl+Enter or ⌘+Enter runs it. Ctrl+V paste also reads the sliders.</p>
+      <p class="hint">The left column stays as you pasted it. Polish writes only on the right. Ctrl+Enter runs it. Paste counts the draft and sets the dials.</p>
     </div>
     <div class="col">
       <div class="col-head">
@@ -510,6 +510,7 @@
           <button type="button" id="copy">Copy</button>
           <button type="button" id="download">Save</button>
           <button type="button" id="print-result">Print</button>
+          <button type="button" id="use-as-draft">Use polish as the new draft</button>
         </div>
       </div>
       <label class="field-label" for="output">Result</label>
@@ -2645,6 +2646,8 @@ function printText(title, text) {
   win.print();
 }
 
+let lockDials = false;
+
 function readDraftOntoSliders() {
   const S = window.DictioStyle;
   if (!S || !S.readDraft) return;
@@ -2654,7 +2657,6 @@ function readDraftOntoSliders() {
   document.body.classList.toggle("has-draft", Boolean(sourceEl.value.trim()));
   paintStyle(Object.assign({}, readStyle(), reading, { writer: "custom", citation: readStyle().citation }));
   saveStyle();
-  schedulePolish();
 }
 
 function wireStyle() {
@@ -2666,6 +2668,7 @@ function wireStyle() {
       });
       document.getElementById("val-" + key).textContent = document.getElementById("slider-" + key).value;
       saveStyle();
+      lockDials = true;
       schedulePolish();
     });
   });
@@ -2709,11 +2712,13 @@ function init() {
   document.getElementById("load-sample").addEventListener("click", () => {
     sourceEl.value = SAMPLE_DRAFT;
     countMeta();
+    lockDials = false;
     readDraftOntoSliders();
     sourceEl.focus();
   });
   sourceEl.addEventListener("input", countMeta);
   sourceEl.addEventListener("paste", () => {
+    lockDials = false;
     setTimeout(readDraftOntoSliders, 0);
   });
   sourceEl.addEventListener("keydown", (event) => {
@@ -2728,6 +2733,16 @@ function init() {
   document.getElementById("save-draft").addEventListener("click", () => downloadText(sourceEl.value, "dictio-draft.txt"));
   document.getElementById("print-draft").addEventListener("click", () => printText("Dictio draft", sourceEl.value));
   document.getElementById("print-result").addEventListener("click", () => printText("Dictio result", outputEl.value));
+  document.getElementById("use-as-draft").addEventListener("click", () => {
+    if (!outputEl.value.trim()) {
+      setReport("What changed", [{ text: "Polish a draft first, then you can replace the left column.", flag: true }]);
+      return;
+    }
+    sourceEl.value = outputEl.value;
+    countMeta();
+    lockDials = false;
+    readDraftOntoSliders();
+  });
   countMeta();
   setMode("diction");
   window.Dictio = { polish, planChunks, translateText, translateDirect, LANGUAGES, PROFILES, byteLen, SAMPLE_DRAFT, readStyle };
