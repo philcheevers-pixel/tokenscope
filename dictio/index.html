@@ -119,9 +119,10 @@
     box-shadow: var(--shadow);
     margin-bottom: 16px;
   }
+  .head-actions { margin-left: auto; }
   .shell {
     display: grid;
-    grid-template-columns: 230px minmax(0, 1fr);
+    grid-template-columns: 250px minmax(0, 1fr);
     gap: 14px;
     align-items: start;
   }
@@ -325,6 +326,57 @@
     padding: 8px 10px;
   }
   .pay { display: none !important; }
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin: 8px 0;
+    font-size: 1.05rem;
+    color: #111;
+  }
+  .stats span { white-space: nowrap; }
+  .legend { font-size: 0.95rem; color: #444; margin: 6px 0 8px; }
+  .legend mark { padding: 0 4px; }
+  .mark-view {
+    min-height: 220px;
+    max-height: 42vh;
+    overflow: auto;
+    padding: 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    font-size: 17px;
+    line-height: 1.6;
+    color: #111;
+  }
+  mark.mk-long { background: #f8e0b8; color: #111; }
+  mark.mk-passive { background: #dceee3; color: #111; }
+  mark.mk-hedge { background: #f6d4c8; color: #111; }
+  mark.mk-adverb { background: #dde4f5; color: #111; }
+  .word-list { margin: 8px 0 0; padding: 0; list-style: none; font-size: 0.95rem; }
+  .word-list button {
+    min-height: 32px;
+    margin: 2px 4px 2px 0;
+    border-radius: 8px;
+    padding: 4px 8px;
+  }
+  .registers { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+  .registers button { width: 100%; text-align: left; border-radius: 12px; }
+  .registers button[aria-pressed="true"] {
+    background: var(--green-soft);
+    border-color: var(--green);
+    font-weight: 700;
+  }
+  .sample-row { display: flex; gap: 6px; margin: 0 0 10px; }
+  #settings-panel {
+    margin: 10px 0 0;
+    padding: 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+  }
+  #settings-panel[hidden] { display: none; }
+  #settings-panel label { display: block; margin: 8px 0 4px; color: #111; }
   .col-actions { display: flex; flex-wrap: wrap; gap: 6px; }
   @media (min-width: 900px) {
     .workspace { grid-template-columns: 1fr 1fr; align-items: stretch; }
@@ -342,10 +394,11 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <p class="kicker">v1.6</p>
+    <p class="kicker">v1.7</p>
     <div class="title-row">
       <h1>Dictio</h1>
       <p class="advert">See how a draft is written. Then polish it.</p>
+      <button type="button" class="ghost head-actions" id="settings-btn">Settings</button>
     </div>
     <p class="tagline">Paste a draft. Read how it is written. Polish it.</p>
     <p class="reading" id="draft-reading">Paste a draft. The sliders will read how it is written.</p>
@@ -381,6 +434,12 @@
   <div class="shell">
   <aside class="rail" id="panel-diction">
     <div class="style-block">
+      <h3>Register</h3>
+      <div class="registers" role="group" aria-label="Document register" id="register-group"></div>
+      <div class="sample-row">
+        <button type="button" id="sample-a">Example 1</button>
+        <button type="button" id="sample-b">Example 2</button>
+      </div>
       <div class="preset-park">
       <h3>Writer presets</h3>
       <div class="presets" role="group" aria-label="Writer presets">
@@ -478,6 +537,8 @@
           </label>
         </div>
       </div>
+      <h3>Marked words</h3>
+      <ul class="word-list" id="word-list"></ul>
       <div id="citation-wrap" hidden>
         <label class="field-label" for="citation-format">Citation format</label>
         <select id="citation-format">
@@ -496,14 +557,16 @@
       <div class="col-head">
         <h2>Draft</h2>
         <div class="col-actions">
-          <button type="button" class="ghost" id="load-sample">Load a test draft</button>
           <button type="button" id="save-draft">Save</button>
           <button type="button" id="print-draft">Print</button>
         </div>
       </div>
       <label class="field-label" for="source">Text to polish</label>
-      <textarea id="source" placeholder="Paste a draft here."></textarea>
+      <textarea id="source" placeholder="Paste a draft here. This column is the source of record."></textarea>
       <p class="meta" id="source-meta"></p>
+      <div class="stats" id="check-stats"></div>
+      <p class="legend">Marks on the copy below (the paste above is not edited): <mark class="mk-long">long sentence</mark> <mark class="mk-passive">passive</mark> <mark class="mk-hedge">hedge</mark> <mark class="mk-adverb">-ly adverb</mark></p>
+      <div class="mark-view" id="mark-view" aria-label="Marked reading of the draft"></div>
       <button type="button" class="primary" id="process">Polish this draft</button>
       <p class="hint">The left column stays as you pasted it. Polish writes only on the right. Ctrl+Enter runs it. Paste counts the draft and sets the dials.</p>
     </div>
@@ -527,6 +590,29 @@
   </div>
   </div>
 
+  <div id="settings-panel" hidden>
+    <h3>Settings</h3>
+    <p class="hint">Citation format applies when you polish a thesis register, or when the citations dial is high. House voice is a parked book style under the polish. Highlights only mark the reading copy, never the source paste.</p>
+    <label class="field-label" for="citation-format-settings">Citation format</label>
+    <select id="citation-format-settings">
+      <option value="apa7">APA 7</option>
+      <option value="mla9">MLA 9</option>
+      <option value="chicago">Chicago</option>
+      <option value="harvard">Harvard</option>
+      <option value="ieee">IEEE</option>
+    </select>
+    <label class="field-label" for="house-voice">House voice (under the polish)</label>
+    <select id="house-voice">
+      <option value="food" selected>Food book voice</option>
+      <option value="dtc">DTC book voice</option>
+      <option value="phil">Phil's polished voice</option>
+    </select>
+    <label><input type="checkbox" id="hl-long" checked> Mark long sentences</label>
+    <label><input type="checkbox" id="hl-passive" checked> Mark possible passives</label>
+    <label><input type="checkbox" id="hl-hedge" checked> Mark hedges</label>
+    <label><input type="checkbox" id="hl-adverb" checked> Mark -ly adverbs</label>
+  </div>
+
   <aside class="pay" hidden>
     <a class="stripe" id="stripe" href="#">Pay $5 – Stripe placeholder, not live</a>
     <p>PLACEHOLDER. No payment is processed. When you have a real Stripe Payment Link, paste it into <code>STRIPE_PAYMENT_LINK</code> at the top of the script.</p>
@@ -534,6 +620,7 @@
 </div>
 <noscript><p style="padding:16px">Dictio needs JavaScript. It runs entirely in the page.</p></noscript>
 <script src="style-core.js"></script>
+<script src="affiliate.js"></script>
 <script>
 /* Paste a Stripe Payment Link here when you have one. Leave it empty until then. */
 const STRIPE_PAYMENT_LINK = "";
@@ -2015,7 +2102,11 @@ function readStyle() {
     const el = document.getElementById("slider-" + key);
     if (el) style[key] = Number(el.value);
   });
-  style.citation = document.getElementById("citation-format").value;
+  const citeA = document.getElementById("citation-format");
+  const citeB = document.getElementById("citation-format-settings");
+  style.citation = (citeB && citeB.value) || (citeA && citeA.value) || "apa7";
+  const pressed = document.querySelector('.registers button[aria-pressed="true"]');
+  if (pressed) style.writer = pressed.dataset.register;
   return style;
 }
 
@@ -2266,8 +2357,10 @@ let abortCtl = null;
 let lastDownloadName = "dictio.txt";
 
 function selectedProfile() {
-  const checked = document.querySelector('input[name="profile"]:checked');
-  const id = checked ? checked.value : "food";
+  const house = document.getElementById("house-voice");
+  const id = (house && house.value) || "food";
+  const radio = document.querySelector('input[name="profile"][value="' + id + '"]');
+  if (radio) radio.checked = true;
   return PROFILES.find((profile) => profile.id === id) || PROFILES[0];
 }
 
@@ -2605,8 +2698,15 @@ function paintStyle(style) {
     slider.value = style[key];
     document.getElementById("val-" + key).textContent = String(style[key]);
   });
-  document.getElementById("citation-format").value = style.citation || "apa7";
-  document.getElementById("citation-wrap").hidden = style.writer !== "thesis";
+  const cite = style.citation || "apa7";
+  const citeA = document.getElementById("citation-format");
+  const citeB = document.getElementById("citation-format-settings");
+  if (citeA) citeA.value = cite;
+  if (citeB) citeB.value = cite;
+  document.getElementById("citation-wrap").hidden = true;
+  document.querySelectorAll(".registers button").forEach((btn) => {
+    btn.setAttribute("aria-pressed", btn.dataset.register === style.writer ? "true" : "false");
+  });
   document.querySelectorAll(".presets button").forEach((btn) => {
     btn.setAttribute("aria-pressed", btn.dataset.writer === style.writer ? "true" : "false");
   });
@@ -2725,13 +2825,16 @@ function init() {
     setMode(next);
     document.getElementById(next === "diction" ? "tab-diction" : "tab-translate").focus();
   });
-  document.getElementById("load-sample").addEventListener("click", () => {
-    sourceEl.value = SAMPLE_DRAFT;
-    countMeta();
-    lockDials = false;
-    readDraftOntoSliders();
-    sourceEl.focus();
-  });
+  const loadSample = document.getElementById("load-sample");
+  if (loadSample) {
+    loadSample.addEventListener("click", () => {
+      sourceEl.value = SAMPLE_DRAFT;
+      countMeta();
+      lockDials = false;
+      readDraftOntoSliders();
+      sourceEl.focus();
+    });
+  }
   sourceEl.addEventListener("input", countMeta);
   sourceEl.addEventListener("paste", () => {
     lockDials = false;
@@ -2761,7 +2864,112 @@ function init() {
   });
   countMeta();
   setMode("diction");
-  window.Dictio = { polish, planChunks, translateText, translateDirect, LANGUAGES, PROFILES, byteLen, SAMPLE_DRAFT, readStyle };
+  const settingsBtn = document.getElementById("settings-btn");
+  const settingsPanel = document.getElementById("settings-panel");
+  if (settingsBtn && settingsPanel) {
+    settingsBtn.addEventListener("click", () => {
+      settingsPanel.hidden = !settingsPanel.hidden;
+    });
+  }
+  const citeSettings = document.getElementById("citation-format-settings");
+  if (citeSettings) {
+    citeSettings.addEventListener("change", () => {
+      const hidden = document.getElementById("citation-format");
+      if (hidden) hidden.value = citeSettings.value;
+      saveStyle();
+    });
+  }
+  const house = document.getElementById("house-voice");
+  if (house) house.addEventListener("change", saveStyle);
+
+  const S = window.DictioStyle;
+  const regBox = document.getElementById("register-group");
+  if (regBox && S && S.REGISTERS) {
+    S.REGISTERS.forEach((reg) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.dataset.register = reg.id;
+      btn.textContent = reg.name;
+      btn.setAttribute("aria-pressed", reg.id === "custom" ? "true" : "false");
+      btn.addEventListener("click", () => {
+        const next = Object.assign({}, readStyle(), { writer: reg.id });
+        if (reg.id !== "custom" && S.WRITER_PRESETS[reg.id]) {
+          Object.assign(next, S.WRITER_PRESETS[reg.id], { writer: reg.id });
+        }
+        paintStyle(next);
+        saveStyle();
+        lockDials = true;
+        schedulePolish();
+      });
+      regBox.append(btn);
+    });
+  }
+  function loadRegisterSample(index) {
+    const pressed = document.querySelector(".registers button[aria-pressed='true']");
+    const id = pressed ? pressed.dataset.register : "custom";
+    const samples = S && S.REGISTER_SAMPLES && S.REGISTER_SAMPLES[id];
+    if (!samples || !samples[index]) {
+      setReport("What changed", [{ text: "Pick Thesis, Diary, Dear Mom, or Travel log, then Example 1 or 2.", flag: true }]);
+      return;
+    }
+    sourceEl.value = samples[index];
+    countMeta();
+    lockDials = false;
+    readDraftOntoSliders();
+    paintMarks();
+  }
+  const sampleA = document.getElementById("sample-a");
+  const sampleB = document.getElementById("sample-b");
+  if (sampleA) sampleA.addEventListener("click", () => loadRegisterSample(0));
+  if (sampleB) sampleB.addEventListener("click", () => loadRegisterSample(1));
+
+  function highlightOpts() {
+    return {
+      long: !document.getElementById("hl-long") || document.getElementById("hl-long").checked,
+      passive: !document.getElementById("hl-passive") || document.getElementById("hl-passive").checked,
+      hedge: !document.getElementById("hl-hedge") || document.getElementById("hl-hedge").checked,
+      adverb: !document.getElementById("hl-adverb") || document.getElementById("hl-adverb").checked
+    };
+  }
+  function paintMarks() {
+    const view = document.getElementById("mark-view");
+    const list = document.getElementById("word-list");
+    const stats = document.getElementById("check-stats");
+    if (!view || !S || !S.markDraft) return;
+    const marked = S.markDraft(sourceEl.value, highlightOpts());
+    view.innerHTML = marked.html || "";
+    if (list) {
+      list.replaceChildren();
+      function addGroup(label, items) {
+        if (!items.length) return;
+        const li = document.createElement("li");
+        li.textContent = label + ": " + items.slice(0, 24).join(", ") + (items.length > 24 ? "…" : "");
+        list.append(li);
+      }
+      addGroup("Long sentences", marked.longs.map((x) => x.words + " words"));
+      addGroup("Passives", marked.passives);
+      addGroup("Hedges", marked.hedges);
+      addGroup("-ly adverbs", marked.adverbs);
+    }
+    const review = S.reviewDraft(sourceEl.value);
+    if (stats && review.counts) {
+      const c = review.counts;
+      stats.textContent = c.words + " words · " + c.sentences + " sentences · avg sentence " + c.avgSentenceWords + " · avg word " + c.avgWordLetters + " letters · grade ~" + (c.grade != null ? c.grade : "—");
+    } else if (stats) stats.textContent = "";
+  }
+  ["hl-long", "hl-passive", "hl-hedge", "hl-adverb"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener("change", paintMarks);
+  });
+  sourceEl.addEventListener("input", () => { countMeta(); paintMarks(); });
+  const oldRead = readDraftOntoSliders;
+  readDraftOntoSliders = function () {
+    oldRead();
+    paintMarks();
+  };
+  paintMarks();
+
+  window.Dictio = { polish, planChunks, translateText, translateDirect, LANGUAGES, PROFILES, byteLen, SAMPLE_DRAFT, readStyle, affiliate: window.DictioAffiliate };
 }
 
 init();

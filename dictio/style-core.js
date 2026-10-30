@@ -115,8 +115,111 @@
     hemingway: { wordSize: 15, formality: 20, sentenceLength: 12, contractions: 82, hedging: 6, tone: 22, concreteness: 88, person: 70, punch: 90, jargon: 5, warmth: 45, citationDensity: 4 },
     shakespeare: { wordSize: 88, formality: 82, sentenceLength: 78, contractions: 8, hedging: 32, tone: 92, concreteness: 40, person: 80, punch: 35, jargon: 20, warmth: 55, citationDensity: 8 },
     thompson: { wordSize: 48, formality: 12, sentenceLength: 58, contractions: 90, hedging: 8, tone: 96, concreteness: 70, person: 55, punch: 85, jargon: 10, warmth: 30, citationDensity: 6 },
-    thesis: { wordSize: 78, formality: 94, sentenceLength: 82, contractions: 4, hedging: 58, tone: 28, concreteness: 35, person: 15, punch: 18, jargon: 55, warmth: 12, citationDensity: 80 }
+    thesis: { wordSize: 78, formality: 94, sentenceLength: 82, contractions: 4, hedging: 58, tone: 28, concreteness: 35, person: 15, punch: 18, jargon: 55, warmth: 12, citationDensity: 80 },
+    diary: { wordSize: 28, formality: 18, sentenceLength: 22, contractions: 88, hedging: 25, tone: 45, concreteness: 70, person: 20, punch: 55, jargon: 4, warmth: 60, citationDensity: 4 },
+    dearmom: { wordSize: 22, formality: 15, sentenceLength: 18, contractions: 90, hedging: 12, tone: 40, concreteness: 75, person: 88, punch: 50, jargon: 3, warmth: 92, citationDensity: 2 },
+    travellog: { wordSize: 35, formality: 30, sentenceLength: 40, contractions: 55, hedging: 15, tone: 48, concreteness: 88, person: 45, punch: 40, jargon: 8, warmth: 55, citationDensity: 8 }
   };
+
+  const REGISTERS = [
+    { id: "custom", name: "Custom" },
+    { id: "thesis", name: "Thesis" },
+    { id: "diary", name: "Diary" },
+    { id: "dearmom", name: "Dear Mom" },
+    { id: "travellog", name: "Travel log" }
+  ];
+
+  const REGISTER_SAMPLES = {
+    thesis: [
+      "This chapter examines how shoppers read a food label when they cannot see the kitchen. The argument is that trust is built from short, checkable claims rather than from slogans (Chen, 2021). Prior work has treated the label as a marketing surface (Okeke, 2019, p. 14). The present study treats it as a document with a countable style. Sentences in the corpus were long. Hedging was common. Citations were uneven. The evidence suggests that a plainer label is not a smaller idea. It is a different register. The method counts words, contractions, pronouns, and in-text citations, then reports those counts without inventing sources. Limitations are stated in chapter four. Further research should test the same counts on a diary and on a letter home, so that the instrument is not fitted only to academic prose.",
+      "The sample is small, and the findings should be read as a first pass rather than as a law of labels (Singh, 2020). Nevertheless, three patterns held. First, pages with more second-person address were shorter. Second, pages with more Latinate nouns carried more hedges. Third, citation density did not predict warmth. These observations do not prove a causal model. They do justify a tool that shows the counts before any rewrite. The left-hand draft in the interface is stored as the source of record. The right-hand page is a proposed polish. If the paste is under eighty words, no register is claimed. That rule is methodological, not cosmetic. A stub cannot support a style reading, and the report must say so."
+    ],
+    diary: [
+      "Rain again. I made tea and sat with the window cracked because the kitchen still smelled like onions from last night. I keep meaning to write in the morning, but the morning gets eaten by the list. Today I did write. Not well. Just enough. The neighbour's dog barked at a leaf and I laughed, which is a better start than most Tuesdays. I am tired of pretending the book is almost done. It is not. It is a pile. I can count the pile. I cannot yet love it. Tomorrow I will walk to the market and buy the cheap apples. If I remember, I will put one on the desk so the page has something living on it besides me.",
+      "I told myself I would not check the news before I wrote. I checked the news. Then I wrote anyway, which is the only win I am logging tonight. The draft is stubborn. My back hurts. I keep hearing Dad in the hallway even though he is three cities away. I should call. I will not call until I have one clean paragraph. That is a bargain I always break. Still: three pages in the notebook, tea gone cold, rain louder. I am here. That is the entry. If this is a style, it is the style of a person who stayed in the chair for twenty minutes and did not throw the notebook."
+    ],
+    dearmom: [
+      "Dear Mom, I got in late and I am writing before I sleep so you do not worry. The train was slow and the station coffee was terrible, but I am fine. You would have packed sandwiches. I bought a pear and a bun and I thought of your kitchen. Please do not send money. I have enough for the week. Tell Dad I did not lose the gloves. I folded them in the coat like you said. If you walk to the shop tomorrow, get the good butter. I will call Sunday. I love you. I am not being brave. I am just telling you the true small things so the big ones do not sound louder than they are. Sleep well. I will too, I think.",
+      "Dear Mom, thank you for the letter. I read it on the steps because the room was too warm. You asked if I am eating. I am. You asked if I am lonely. Sometimes. The people here are kind in a busy way. I miss your voice more than I miss the house, which surprised me. Do not come yet. Finish your week. I will send a photo of the river even though it is only a grey strip from here. Give the cat the ugly treat. He likes it. I am proud of you for going to the appointment. Call me if you want to talk after. I can listen. That is what I have. Love, me."
+    ],
+    travellog: [
+      "Tuesday, split stone harbour. We left before the stalls opened. The water was the colour of wet slate. I counted fourteen boats and one dog asleep on a coil of rope. You would have photographed the rope. I wrote the smell instead: diesel, bread, cold salt. Lunch was fish on a paper tray. No slogan on the tray. The hill behind the town is a farm, not a view. We walked it. Mud on the instep. A woman selling plums said the season is late. I believed her because the plums were small and the price was honest. Night in a room above the bar. The window does not close. I am not complaining. I came for the draft and the draft is this: place, food, weather, one true sentence about the dog.",
+      "The bus climbed out of the valley and the radio died. That is how you know the ridge. I got off at the unmarked shelter because the driver pointed and shrugged. Dust on the olives. A boy sold water from a crate. I paid too much and did not haggle, which is a kind of map: I was tired. The trail to the ruin is shorter than the guidebook says and steeper. At the top there is no speech, only wind and a wall with a door that goes nowhere. I sat. I ate the rest of the bread. I wrote the time in the notebook so the day cannot pretend it was longer than it was. Then I walked down before the light went."
+    ]
+  };
+
+  const PASSIVE_MARK = /\b(?:am|is|are|was|were|be|been|being)\s+(?:\w+ly\s+)?(?:\w+ed|built|chosen|done|given|known|made|seen|shown|taken|told|written)\b/gi;
+  const HEDGE_MARK = /\b(?:perhaps|maybe|might|may|could|suggests?|appears?|seems?|somewhat|kind of|sort of|I think|I believe|it is possible)\b/gi;
+  const SKIP_LY = /^(only|really|likely|early|family|supply|apply|holy|daily|weekly|monthly|yearly|simply|supply|reply)$/i;
+
+  function syllables(word) {
+    const w = word.toLowerCase().replace(/[^a-z]/g, "");
+    if (!w) return 0;
+    const groups = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, "").match(/[aeiouy]{1,2}/g);
+    return groups ? Math.max(1, groups.length) : 1;
+  }
+
+  function fleschKincaid(words, sentences, wordList) {
+    const sc = Math.max(sentences, 1);
+    const wc = Math.max(words, 1);
+    let syl = 0;
+    for (let i = 0; i < wordList.length; i++) syl += syllables(wordList[i]);
+    return Math.round((0.39 * (wc / sc) + 11.8 * (syl / wc) - 15.59) * 10) / 10;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function markDraft(text, opts) {
+    const flags = opts || { long: true, passive: true, hedge: true, adverb: true };
+    const raw = String(text || "");
+    const adverbs = [];
+    const hedges = [];
+    const passives = [];
+    const longs = [];
+    if (!raw.trim()) {
+      return { html: "", adverbs: adverbs, hedges: hedges, passives: passives, longs: longs };
+    }
+    const parts = raw.split(/((?:[.!?]+(?:\s+|$))|\n+)/);
+    let html = "";
+    let sid = 0;
+    for (let i = 0; i < parts.length; i++) {
+      const chunk = parts[i];
+      if (!chunk) continue;
+      if (/^[\s.!?]+$/.test(chunk) || chunk.indexOf("\n") !== -1) {
+        html += escapeHtml(chunk).replace(/\n/g, "<br>");
+        continue;
+      }
+      const wc = chunk.trim().split(/\s+/).filter(Boolean).length;
+      const long = flags.long && wc > 22;
+      if (long) longs.push({ id: "s" + sid, words: wc, text: chunk.trim().slice(0, 80) });
+      let inner = escapeHtml(chunk);
+      if (flags.hedge) {
+        inner = inner.replace(HEDGE_MARK, function (m) {
+          hedges.push(m);
+          return "<mark class=\"mk-hedge\">" + m + "</mark>";
+        });
+      }
+      if (flags.passive) {
+        inner = inner.replace(PASSIVE_MARK, function (m) {
+          passives.push(m);
+          return "<mark class=\"mk-passive\">" + m + "</mark>";
+        });
+      }
+      if (flags.adverb) {
+        inner = inner.replace(/\b[A-Za-z]{4,}ly\b/g, function (m) {
+          if (SKIP_LY.test(m)) return m;
+          adverbs.push(m);
+          return "<mark class=\"mk-adverb\">" + m + "</mark>";
+        });
+      }
+      if (long) inner = "<mark class=\"mk-long\" id=\"mark-s" + sid + "\">" + inner + "</mark>";
+      html += inner;
+      sid += 1;
+    }
+    return { html: html, adverbs: adverbs, hedges: hedges, passives: passives, longs: longs };
+  }
 
   function clamp(n, lo, hi) {
     return Math.max(lo, Math.min(hi, Math.round(n)));
@@ -199,6 +302,9 @@
     const adjectives = countAdjectives(wordList);
     const cites = countMatches(raw, CITE_RE);
     const please = countMatches(raw, /\b(?:please|thanks|thank you|together)\b/gi);
+    const adverbs = wordList.filter(function (w) { return /ly$/i.test(w.replace(/[^A-Za-z]/g, "")) && !SKIP_LY.test(w.replace(/[^A-Za-z]/g, "")); }).length;
+    const passives = countMatches(raw, PASSIVE_MARK);
+    const grade = fleschKincaid(wc, sc, wordList);
 
     const counts = {
       words: wc,
@@ -219,7 +325,10 @@
       intensifiers: intens,
       citations: cites,
       formalMarkers: formal,
-      casualMarkers: casual
+      casualMarkers: casual,
+      adverbs: adverbs,
+      passives: passives,
+      grade: grade
     };
 
     if (wc < MIN_WORDS) {
@@ -267,7 +376,10 @@
       pronouns + " pronouns (" + you + " you, " + we + " we, " + first + " I, " + they + " they), " +
       hedges + " hedges, " +
       jargon + " jargon hits, " +
-      cites + " citations. " +
+      cites + " citations, " +
+      adverbs + " -ly adverbs, " +
+      passives + " possible passives. " +
+      "Approximate grade (Flesch–Kincaid from vowel groups): " + grade + ". " +
       "Dials are set from those counts so you can see how we read the page. The left draft is not rewritten until you choose to replace it.";
     return style;
   }
@@ -443,7 +555,7 @@
     if (sentenceLength < 50 || punch > 50) out = splitLongSentences(out, punch > 50 ? Math.min(12, maxWords) : maxWords, notes);
     else if (sentenceLength > 50) out = joinShortSentences(out, notes);
 
-    if (writer === "thesis") out = applyCitations(out, citation, notes);
+    if (writer === "thesis" || Number(style.citationDensity) >= 70) out = applyCitations(out, citation, notes);
 
     out = cleanup(out);
     return { text: out, notes: notes };
@@ -456,6 +568,10 @@
     MIN_WORDS: MIN_WORDS,
     SLIDER_KEYS: SLIDER_KEYS,
     WRITER_PRESETS: WRITER_PRESETS,
+    REGISTERS: REGISTERS,
+    REGISTER_SAMPLES: REGISTER_SAMPLES,
+    markDraft: markDraft,
+    fleschKincaid: fleschKincaid,
     CITATION_LABELS: CITATION_LABELS,
     DEFAULT_STYLE: {
       writer: "custom",
