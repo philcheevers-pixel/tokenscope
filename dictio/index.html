@@ -275,10 +275,25 @@
     border-color: var(--green);
     font-weight: 700;
   }
-  .sliders { display: grid; grid-template-columns: 1fr; gap: 4px; }
+  .sliders { display: grid; grid-template-columns: 1fr; gap: 8px; }
   .slider { min-height: 0; }
-  .slider label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.78rem; margin: 0; }
+  .slider label { display: block; margin: 0; }
+  .slider-name {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
   .slider input[type="range"] { width: 100%; height: 18px; accent-color: var(--green); }
+  .slider-ends {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.72rem;
+    color: #444;
+    line-height: 1.2;
+  }
   #citation-wrap { margin-top: 10px; }
   #citation-wrap select {
     min-height: 44px;
@@ -356,52 +371,88 @@
       <h3>How this draft reads</h3>
       <div class="sliders">
         <div class="slider">
-          <label for="slider-wordSize">Word size <span id="val-wordSize">40</span></label>
-          <input id="slider-wordSize" type="range" min="0" max="100" value="40">
+          <label for="slider-wordSize">
+            <span class="slider-name">Word size <span id="val-wordSize">40</span></span>
+            <input id="slider-wordSize" type="range" min="0" max="100" value="40">
+            <span class="slider-ends"><span>short words</span><span>long words</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-formality">Formality <span id="val-formality">40</span></label>
-          <input id="slider-formality" type="range" min="0" max="100" value="40">
+          <label for="slider-formality">
+            <span class="slider-name">Formality <span id="val-formality">40</span></span>
+            <input id="slider-formality" type="range" min="0" max="100" value="40">
+            <span class="slider-ends"><span>casual</span><span>formal</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-sentenceLength">Sentence length <span id="val-sentenceLength">40</span></label>
-          <input id="slider-sentenceLength" type="range" min="0" max="100" value="40">
+          <label for="slider-sentenceLength">
+            <span class="slider-name">Sentence length <span id="val-sentenceLength">40</span></span>
+            <input id="slider-sentenceLength" type="range" min="0" max="100" value="40">
+            <span class="slider-ends"><span>short lines</span><span>long lines</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-contractions">Contractions <span id="val-contractions">70</span></label>
-          <input id="slider-contractions" type="range" min="0" max="100" value="70">
+          <label for="slider-contractions">
+            <span class="slider-name">Contractions <span id="val-contractions">70</span></span>
+            <input id="slider-contractions" type="range" min="0" max="100" value="70">
+            <span class="slider-ends"><span>written out</span><span>contracted</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-hedging">Hedging <span id="val-hedging">20</span></label>
-          <input id="slider-hedging" type="range" min="0" max="100" value="20">
+          <label for="slider-hedging">
+            <span class="slider-name">Hedging <span id="val-hedging">20</span></span>
+            <input id="slider-hedging" type="range" min="0" max="100" value="20">
+            <span class="slider-ends"><span>direct</span><span>hedged</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-tone">Tone <span id="val-tone">40</span></label>
-          <input id="slider-tone" type="range" min="0" max="100" value="40">
+          <label for="slider-tone">
+            <span class="slider-name">Tone <span id="val-tone">40</span></span>
+            <input id="slider-tone" type="range" min="0" max="100" value="40">
+            <span class="slider-ends"><span>plain</span><span>charged</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-concreteness">Concreteness <span id="val-concreteness">50</span></label>
-          <input id="slider-concreteness" type="range" min="0" max="100" value="50">
+          <label for="slider-concreteness">
+            <span class="slider-name">Concreteness <span id="val-concreteness">50</span></span>
+            <input id="slider-concreteness" type="range" min="0" max="100" value="50">
+            <span class="slider-ends"><span>abstract</span><span>concrete</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-person">Second person <span id="val-person">40</span></label>
-          <input id="slider-person" type="range" min="0" max="100" value="40">
+          <label for="slider-person">
+            <span class="slider-name">Person <span id="val-person">40</span></span>
+            <input id="slider-person" type="range" min="0" max="100" value="40">
+            <span class="slider-ends"><span>they / one</span><span>you</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-punch">Punch <span id="val-punch">40</span></label>
-          <input id="slider-punch" type="range" min="0" max="100" value="40">
+          <label for="slider-punch">
+            <span class="slider-name">Punch <span id="val-punch">40</span></span>
+            <input id="slider-punch" type="range" min="0" max="100" value="40">
+            <span class="slider-ends"><span>even</span><span>punchy</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-jargon">Jargon <span id="val-jargon">20</span></label>
-          <input id="slider-jargon" type="range" min="0" max="100" value="20">
+          <label for="slider-jargon">
+            <span class="slider-name">Jargon <span id="val-jargon">20</span></span>
+            <input id="slider-jargon" type="range" min="0" max="100" value="20">
+            <span class="slider-ends"><span>plain</span><span>jargon</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-warmth">Warmth <span id="val-warmth">40</span></label>
-          <input id="slider-warmth" type="range" min="0" max="100" value="40">
+          <label for="slider-warmth">
+            <span class="slider-name">Warmth <span id="val-warmth">40</span></span>
+            <input id="slider-warmth" type="range" min="0" max="100" value="40">
+            <span class="slider-ends"><span>cool</span><span>warm</span></span>
+          </label>
         </div>
         <div class="slider">
-          <label for="slider-citationDensity">Citations <span id="val-citationDensity">10</span></label>
-          <input id="slider-citationDensity" type="range" min="0" max="100" value="10">
+          <label for="slider-citationDensity">
+            <span class="slider-name">Citations <span id="val-citationDensity">10</span></span>
+            <input id="slider-citationDensity" type="range" min="0" max="100" value="10">
+            <span class="slider-ends"><span>uncited</span><span>cited</span></span>
+          </label>
         </div>
       </div>
       <div id="citation-wrap" hidden>
