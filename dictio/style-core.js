@@ -102,13 +102,91 @@
     [/\bjust\b\s*/gi, ""]
   ];
 
+  const SLIDER_KEYS = [
+    "wordSize", "formality", "sentenceLength", "contractions",
+    "hedging", "tone", "concreteness", "person",
+    "punch", "jargon", "warmth", "citationDensity"
+  ];
+
   const WRITER_PRESETS = {
     custom: null,
-    hemingway: { wordSize: 15, formality: 20, sentenceLength: 12, contractions: 82, hedging: 6, tone: 22 },
-    shakespeare: { wordSize: 88, formality: 82, sentenceLength: 78, contractions: 8, hedging: 32, tone: 92 },
-    thompson: { wordSize: 48, formality: 12, sentenceLength: 58, contractions: 90, hedging: 8, tone: 96 },
-    thesis: { wordSize: 78, formality: 94, sentenceLength: 82, contractions: 4, hedging: 58, tone: 28 }
+    hemingway: { wordSize: 15, formality: 20, sentenceLength: 12, contractions: 82, hedging: 6, tone: 22, concreteness: 88, person: 70, punch: 90, jargon: 5, warmth: 45, citationDensity: 4 },
+    shakespeare: { wordSize: 88, formality: 82, sentenceLength: 78, contractions: 8, hedging: 32, tone: 92, concreteness: 40, person: 80, punch: 35, jargon: 20, warmth: 55, citationDensity: 8 },
+    thompson: { wordSize: 48, formality: 12, sentenceLength: 58, contractions: 90, hedging: 8, tone: 96, concreteness: 70, person: 55, punch: 85, jargon: 10, warmth: 30, citationDensity: 6 },
+    thesis: { wordSize: 78, formality: 94, sentenceLength: 82, contractions: 4, hedging: 58, tone: 28, concreteness: 35, person: 15, punch: 18, jargon: 55, warmth: 12, citationDensity: 80 }
   };
+
+  function clamp(n, lo, hi) {
+    return Math.max(lo, Math.min(hi, Math.round(n)));
+  }
+
+  function countMatches(text, re) {
+    const m = text.match(re);
+    return m ? m.length : 0;
+  }
+
+  function readDraft(text) {
+    const raw = String(text || "").trim();
+    if (!raw) {
+      return {
+        writer: "custom",
+        wordSize: 40, formality: 40, sentenceLength: 40, contractions: 40,
+        hedging: 20, tone: 40, concreteness: 50, person: 40,
+        punch: 40, jargon: 20, warmth: 40, citationDensity: 10,
+        citation: "apa7",
+        reading: "Paste a draft. The sliders will read how it is written."
+      };
+    }
+    const words = raw.split(/\s+/).filter(Boolean);
+    const wc = words.length || 1;
+    const avgChars = words.reduce(function (s, w) { return s + w.replace(/[^A-Za-z]/g, "").length; }, 0) / wc;
+    const sentences = raw.split(/(?<=[.!?])\s+/).filter(function (s) { return s.trim(); });
+    const sc = sentences.length || 1;
+    const avgSent = wc / sc;
+    const shortSent = sentences.filter(function (s) { return s.trim().split(/\s+/).length <= 10; }).length / sc;
+    const contractions = countMatches(raw, /\b\w+n't\b|\b(?:I'm|you're|we're|they're|it's|that's|there's|we'll|I'll|you'll)\b/gi);
+    const hedges = countMatches(raw, /\b(?:perhaps|maybe|might|may|suggests?|appears?|seems?|somewhat|kind of|sort of|I think|I believe)\b/gi);
+    const formal = countMatches(raw, /\b(?:however|therefore|furthermore|moreover|thus|hence|utilize|obtain|demonstrate|subsequently)\b/gi);
+    const casual = countMatches(raw, /\b(?:but|so|also|gonna|yeah|okay)\b/gi);
+    const intens = countMatches(raw, /\b(?:very|really|wildly|quite|most)\b|[!]{1,}/gi);
+    const you = countMatches(raw, /\b(?:you|your|you're)\b/gi);
+    const we = countMatches(raw, /\b(?:we|our|us)\b/gi);
+    const third = countMatches(raw, /\b(?:the researcher|the committee|one must|subjects|participants)\b/gi);
+    const jargon = countMatches(raw, /\b(?:utilize|leverage|synergy|paradigm|stakeholders|bandwidth|learnings|actionable|best-in-class)\b/gi);
+    const abstract = countMatches(raw, /\b\w{8,}(?:tion|ment|ness|ity|ization)\b/gi);
+    const cites = countMatches(raw, /\([A-Z][A-Za-z'`-]+(?:,?\s+)\d{4}/g) + countMatches(raw, /\[[0-9]+\]/g);
+    const warmth = you + we + countMatches(raw, /\b(?:please|thanks|together)\b/gi);
+
+    const style = {
+      writer: "custom",
+      wordSize: clamp((avgChars - 3.2) * 28, 5, 95),
+      formality: clamp(40 + (formal - casual) * 8, 5, 95),
+      sentenceLength: clamp((avgSent - 8) * 5.5, 5, 95),
+      contractions: clamp((contractions / wc) * 900, 2, 95),
+      hedging: clamp((hedges / wc) * 1200, 2, 95),
+      tone: clamp(20 + intens * 6 + shortSent * 20, 5, 95),
+      concreteness: clamp(80 - (abstract / wc) * 600, 5, 95),
+      person: clamp((you / wc) * 1400, 5, 95),
+      punch: clamp(shortSent * 90 + (intens / sc) * 15, 5, 95),
+      jargon: clamp((jargon / wc) * 1800, 2, 95),
+      warmth: clamp((warmth / wc) * 900, 5, 95),
+      citationDensity: clamp((cites / Math.max(sc, 1)) * 120, 2, 95),
+      citation: "apa7"
+    };
+    style.reading = "This draft currently reads: word size " + style.wordSize +
+      ", formality " + style.formality +
+      ", sentence length " + style.sentenceLength +
+      ", contractions " + style.contractions +
+      ", hedging " + style.hedging +
+      ", tone " + style.tone +
+      ", concreteness " + style.concreteness +
+      ", second person " + style.person +
+      ", punch " + style.punch +
+      ", jargon " + style.jargon +
+      ", warmth " + style.warmth +
+      ", citations " + style.citationDensity + ".";
+    return style;
+  }
 
   const CITATION_LABELS = {
     apa7: "APA 7",
@@ -240,6 +318,8 @@
     const hedging = Number(style.hedging);
     const tone = Number(style.tone);
     const citation = style.citation || "apa7";
+    const punch = Number(style.punch);
+    const jargon = Number(style.jargon);
 
     if (writer && writer !== "custom") notes.push("Writer preset: " + writer);
 
@@ -267,7 +347,9 @@
       out = applyPairs(out, GONZO, notes, "Higher-voltage tone");
     }
 
-    if (sentenceLength <= 35) out = splitLongSentences(out, sentenceLength <= 15 ? 12 : 18, notes);
+    if (jargon <= 25) out = applyPairs(out, SHORT_WORDS, notes, "Cut jargon");
+
+    if (sentenceLength <= 35 || punch >= 80) out = splitLongSentences(out, sentenceLength <= 15 || punch >= 80 ? 12 : 18, notes);
     else if (sentenceLength >= 75) out = joinShortSentences(out, notes);
 
     if (writer === "thesis") out = applyCitations(out, citation, notes);
@@ -278,6 +360,8 @@
 
   const api = {
     applyStyle: applyStyle,
+    readDraft: readDraft,
+    SLIDER_KEYS: SLIDER_KEYS,
     WRITER_PRESETS: WRITER_PRESETS,
     CITATION_LABELS: CITATION_LABELS,
     DEFAULT_STYLE: {
@@ -288,6 +372,12 @@
       contractions: 70,
       hedging: 20,
       tone: 40,
+      concreteness: 50,
+      person: 40,
+      punch: 40,
+      jargon: 20,
+      warmth: 40,
+      citationDensity: 10,
       citation: "apa7"
     }
   };

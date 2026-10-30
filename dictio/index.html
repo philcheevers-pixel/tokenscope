@@ -37,8 +37,8 @@
     font-size: 16px;
     line-height: 1.5;
   }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 16px 72px; }
-  header.top { margin-bottom: 22px; }
+  .wrap { max-width: none; margin: 0; padding: 16px 18px 40px; }
+  header.top { margin-bottom: 12px; }
   .kicker {
     margin: 0 0 6px;
     font-size: 0.75rem;
@@ -55,8 +55,16 @@
     letter-spacing: -0.03em;
     line-height: 0.95;
   }
-  .tagline { margin: 10px 0 0; font-size: 1.15rem; max-width: 38rem; }
-  .note { margin: 8px 0 0; color: var(--muted); max-width: 40rem; }
+  .tagline { margin: 8px 0 0; font-size: 1.15rem; max-width: 52rem; }
+  .note { margin: 6px 0 0; color: var(--muted); max-width: 56rem; }
+  .how { margin: 8px 0 0; max-width: 56rem; color: var(--ink); }
+  .reading {
+    margin: 10px 0 0;
+    padding: 10px 12px;
+    background: var(--green-soft);
+    border-radius: 12px;
+    color: var(--ink);
+  }
   .tabs {
     display: flex;
     gap: 4px;
@@ -92,7 +100,20 @@
     box-shadow: var(--shadow);
     margin-bottom: 16px;
   }
-  .profiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .shell {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  .rail {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+  }
+  .profiles { display: none; }
   .profile {
     position: relative;
     display: flex;
@@ -164,7 +185,7 @@
     border-radius: 12px;
     font-size: 0.95rem;
   }
-  .workspace { display: grid; gap: 16px; }
+  .workspace { display: grid; gap: 14px; min-width: 0; }
   .col {
     background: var(--card);
     border: 1px solid var(--line);
@@ -183,9 +204,10 @@
   h2 { margin: 0; font-family: var(--serif); font-size: 1.45rem; font-weight: 600; }
   textarea {
     display: block;
-    min-height: 240px;
-    padding: 12px;
-    line-height: 1.55;
+    min-height: 62vh;
+    padding: 14px;
+    line-height: 1.6;
+    font-size: 17px;
     resize: vertical;
   }
   #output { background: #fcfbf7; }
@@ -239,22 +261,24 @@
   .pay p { margin: 8px 0 0; color: var(--muted); }
   code { font-size: 0.92em; }
   .hint { margin: 8px 0 0; color: var(--muted); font-size: 0.88rem; }
-  .style-block { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .style-block { margin: 0; padding: 0; border: 0; }
   .style-block h3 {
     margin: 0 0 8px;
     font-family: var(--serif);
     font-size: 1.05rem;
     font-weight: 600;
   }
-  .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .presets { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+  .presets button { width: 100%; text-align: left; border-radius: 12px; }
   .presets button[aria-pressed="true"] {
     background: var(--green-soft);
     border-color: var(--green);
     font-weight: 700;
   }
-  .sliders { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; }
-  .slider label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.9rem; }
-  .slider input[type="range"] { width: 100%; accent-color: var(--green); }
+  .sliders { display: grid; grid-template-columns: 1fr; gap: 4px; }
+  .slider { min-height: 0; }
+  .slider label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.78rem; margin: 0; }
+  .slider input[type="range"] { width: 100%; height: 18px; accent-color: var(--green); }
   #citation-wrap { margin-top: 10px; }
   #citation-wrap select {
     min-height: 44px;
@@ -266,12 +290,16 @@
     padding: 8px 10px;
   }
   .pay { display: none !important; }
-  @media (min-width: 860px) {
-    .workspace { grid-template-columns: 1fr 1fr; align-items: start; }
-    textarea { min-height: 320px; }
+  .col-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  @media (min-width: 900px) {
+    .workspace { grid-template-columns: 1fr 1fr; align-items: stretch; }
   }
-  @media (max-width: 720px) {
-    .profiles, .lang-row { grid-template-columns: 1fr; }
+  @media (max-width: 899px) {
+    .shell { grid-template-columns: 1fr; }
+    .presets { flex-direction: row; flex-wrap: wrap; }
+    .presets button { width: auto; }
+    .sliders { grid-template-columns: 1fr 1fr; }
+    .lang-row { grid-template-columns: 1fr; }
     .col-head { align-items: flex-start; flex-direction: column; }
   }
 </style>
@@ -281,8 +309,10 @@
   <header class="top">
     <p class="kicker">Test build</p>
     <h1>Dictio</h1>
-    <p class="tagline">Paste a draft. Pick a voice or a language. Read the result.</p>
+    <p class="tagline">Paste a draft. Read how it is written. Polish it, or translate it.</p>
     <p class="note">Test build for Phil Cheevers. Diction rules are starters, and translation runs on a test engine. The page does not store the draft.</p>
+    <p class="how">Paste or type on the left. The twelve sliders read the draft as it stands. Writer presets sit on the left. Move a slider after that if you want a different target. The three book-voice cards are parked to leave room for this.</p>
+    <p class="reading" id="draft-reading">Paste a draft. The sliders will read how it is written.</p>
   </header>
 
   <div class="tabs" role="tablist" aria-label="Mode">
@@ -290,24 +320,30 @@
     <button type="button" id="tab-translate" role="tab" aria-selected="false" aria-controls="panel-translate" tabindex="-1">Translate</button>
   </div>
 
-  <section class="panel" id="panel-diction" role="tabpanel" aria-labelledby="tab-diction">
-    <div class="profiles" role="radiogroup" aria-label="Diction profile">
-      <label class="profile">
-        <input type="radio" name="profile" value="food" checked>
-        <span class="profile-name">Food book voice</span>
-        <span class="profile-desc"></span>
-      </label>
-      <label class="profile">
-        <input type="radio" name="profile" value="dtc">
-        <span class="profile-name">DTC book voice</span>
-        <span class="profile-desc"></span>
-      </label>
-      <label class="profile">
-        <input type="radio" name="profile" value="phil">
-        <span class="profile-name">Phil's polished voice</span>
-        <span class="profile-desc"></span>
-      </label>
+  <section class="panel" id="panel-translate" role="tabpanel" aria-labelledby="tab-translate" hidden>
+    <div class="lang-row">
+      <div class="lang-field" id="source-field">
+        <label for="source-search">Source language</label>
+        <input id="source-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="source-list" autocomplete="off" autocorrect="off" spellcheck="false">
+        <ul id="source-list" class="lang-list" role="listbox" hidden></ul>
+      </div>
+      <div class="lang-field" id="target-field">
+        <label for="target-search">Target language</label>
+        <input id="target-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="target-list" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Search languages">
+        <ul id="target-list" class="lang-list" role="listbox" hidden></ul>
+      </div>
     </div>
+    <p class="engine-note" id="engine-note"></p>
+  </section>
+
+  <div class="profiles" hidden>
+    <label class="profile"><input type="radio" name="profile" value="food" checked><span class="profile-name">Food book voice</span><span class="profile-desc"></span></label>
+    <label class="profile"><input type="radio" name="profile" value="dtc"><span class="profile-name">DTC book voice</span><span class="profile-desc"></span></label>
+    <label class="profile"><input type="radio" name="profile" value="phil"><span class="profile-name">Phil's polished voice</span><span class="profile-desc"></span></label>
+  </div>
+
+  <div class="shell">
+  <aside class="rail" id="panel-diction">
     <div class="style-block">
       <h3>Writer presets</h3>
       <div class="presets" role="group" aria-label="Writer presets">
@@ -317,6 +353,7 @@
         <button type="button" data-writer="thompson" aria-pressed="false">Hunter S. Thompson</button>
         <button type="button" data-writer="thesis" aria-pressed="false">Thesis</button>
       </div>
+      <h3>How this draft reads</h3>
       <div class="sliders">
         <div class="slider">
           <label for="slider-wordSize">Word size <span id="val-wordSize">40</span></label>
@@ -342,6 +379,30 @@
           <label for="slider-tone">Tone <span id="val-tone">40</span></label>
           <input id="slider-tone" type="range" min="0" max="100" value="40">
         </div>
+        <div class="slider">
+          <label for="slider-concreteness">Concreteness <span id="val-concreteness">50</span></label>
+          <input id="slider-concreteness" type="range" min="0" max="100" value="50">
+        </div>
+        <div class="slider">
+          <label for="slider-person">Second person <span id="val-person">40</span></label>
+          <input id="slider-person" type="range" min="0" max="100" value="40">
+        </div>
+        <div class="slider">
+          <label for="slider-punch">Punch <span id="val-punch">40</span></label>
+          <input id="slider-punch" type="range" min="0" max="100" value="40">
+        </div>
+        <div class="slider">
+          <label for="slider-jargon">Jargon <span id="val-jargon">20</span></label>
+          <input id="slider-jargon" type="range" min="0" max="100" value="20">
+        </div>
+        <div class="slider">
+          <label for="slider-warmth">Warmth <span id="val-warmth">40</span></label>
+          <input id="slider-warmth" type="range" min="0" max="100" value="40">
+        </div>
+        <div class="slider">
+          <label for="slider-citationDensity">Citations <span id="val-citationDensity">10</span></label>
+          <input id="slider-citationDensity" type="range" min="0" max="100" value="10">
+        </div>
       </div>
       <div id="citation-wrap" hidden>
         <label class="field-label" for="citation-format">Citation format</label>
@@ -354,42 +415,31 @@
         </select>
       </div>
     </div>
-  </section>
-
-  <section class="panel" id="panel-translate" role="tabpanel" aria-labelledby="tab-translate" hidden>
-    <div class="lang-row">
-      <div class="lang-field" id="source-field">
-        <label for="source-search">Source language</label>
-        <input id="source-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="source-list" autocomplete="off" autocorrect="off" spellcheck="false">
-        <ul id="source-list" class="lang-list" role="listbox" hidden></ul>
-      </div>
-      <div class="lang-field" id="target-field">
-        <label for="target-search">Target language</label>
-        <input id="target-search" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="target-list" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Search languages">
-        <ul id="target-list" class="lang-list" role="listbox" hidden></ul>
-      </div>
-    </div>
-    <p class="engine-note" id="engine-note"></p>
-  </section>
+  </aside>
 
   <div class="workspace">
     <div class="col">
       <div class="col-head">
         <h2>Draft</h2>
-        <button type="button" class="ghost" id="load-sample">Load a test draft</button>
+        <div class="col-actions">
+          <button type="button" class="ghost" id="load-sample">Load a test draft</button>
+          <button type="button" id="save-draft">Save</button>
+          <button type="button" id="print-draft">Print</button>
+        </div>
       </div>
       <label class="field-label" for="source">Text to polish or translate</label>
       <textarea id="source" placeholder="Paste a draft here."></textarea>
       <p class="meta" id="source-meta"></p>
       <button type="button" class="primary" id="process">Polish this draft</button>
-      <p class="hint">Ctrl+Enter or ⌘+Enter runs it.</p>
+      <p class="hint">Ctrl+Enter or ⌘+Enter runs it. Ctrl+V paste also reads the sliders.</p>
     </div>
     <div class="col">
       <div class="col-head">
         <h2 id="result-title">Polished draft</h2>
-        <div>
+        <div class="col-actions">
           <button type="button" id="copy">Copy</button>
-          <button type="button" id="download">Download .txt</button>
+          <button type="button" id="download">Save</button>
+          <button type="button" id="print-result">Print</button>
         </div>
       </div>
       <label class="field-label" for="output">Result</label>
@@ -399,6 +449,7 @@
         <ul id="report-list"></ul>
       </div>
     </div>
+  </div>
   </div>
 
   <aside class="pay" hidden>
@@ -1883,17 +1934,14 @@ function finalCheck(text, profile) {
 
 function readStyle() {
   const S = window.DictioStyle;
-  const style = {
-    writer: document.querySelector('.presets button[aria-pressed="true"]')?.dataset.writer || "custom",
-    wordSize: Number(document.getElementById("slider-wordSize").value),
-    formality: Number(document.getElementById("slider-formality").value),
-    sentenceLength: Number(document.getElementById("slider-sentenceLength").value),
-    contractions: Number(document.getElementById("slider-contractions").value),
-    hedging: Number(document.getElementById("slider-hedging").value),
-    tone: Number(document.getElementById("slider-tone").value),
-    citation: document.getElementById("citation-format").value
-  };
-  return Object.assign({}, S ? S.DEFAULT_STYLE : {}, style);
+  const style = Object.assign({}, S ? S.DEFAULT_STYLE : {});
+  style.writer = document.querySelector('.presets button[aria-pressed="true"]')?.dataset.writer || "custom";
+  sliderKeys().forEach((key) => {
+    const el = document.getElementById("slider-" + key);
+    if (el) style[key] = Number(el.value);
+  });
+  style.citation = document.getElementById("citation-format").value;
+  return style;
 }
 
 function polish(text, profile, style) {
@@ -2144,7 +2192,16 @@ let lastDownloadName = "dictio.txt";
 
 function selectedProfile() {
   const checked = document.querySelector('input[name="profile"]:checked');
-  return PROFILES.find((profile) => profile.id === checked.value) || PROFILES[0];
+  const id = checked ? checked.value : "food";
+  return PROFILES.find((profile) => profile.id === id) || PROFILES[0];
+}
+
+function sliderKeys() {
+  return (window.DictioStyle && window.DictioStyle.SLIDER_KEYS) || [
+    "wordSize", "formality", "sentenceLength", "contractions",
+    "hedging", "tone", "concreteness", "person",
+    "punch", "jargon", "warmth", "citationDensity"
+  ];
 }
 
 function setReport(title, items, flags) {
@@ -2171,26 +2228,18 @@ function setMode(next) {
   document.getElementById("tab-translate").setAttribute("aria-selected", diction ? "false" : "true");
   document.getElementById("tab-diction").tabIndex = diction ? 0 : -1;
   document.getElementById("tab-translate").tabIndex = diction ? -1 : 0;
-  document.getElementById("panel-diction").hidden = !diction;
   document.getElementById("panel-translate").hidden = diction;
   processBtn.textContent = diction ? "Polish this draft" : "Translate";
   resultTitle.textContent = diction ? "Polished draft" : "Translation";
   outputEl.value = "";
   setReport(diction ? "What changed" : "Translation notes", [
     { text: diction
-      ? "Pick a voice, paste a draft, then polish it."
+      ? "Paste a draft. The sliders read how it is written. Then polish it."
       : "Paste a draft, then translate it. Auto-detect is fine for the source." }
   ]);
 }
 
-function renderProfiles() {
-  document.querySelectorAll(".profile").forEach((label) => {
-    const id = label.querySelector("input").value;
-    const profile = PROFILES.find((item) => item.id === id);
-    label.querySelector(".profile-name").textContent = profile.name;
-    label.querySelector(".profile-desc").textContent = profile.description;
-  });
-}
+function renderProfiles() {}
 
 function setupCombo(fieldId, inputId, listId, withAuto, initialId) {
   const field = document.getElementById(fieldId);
@@ -2362,20 +2411,7 @@ async function copyResult() {
 }
 
 function downloadResult() {
-  const text = outputEl.value;
-  if (!text.trim()) {
-    setReport(reportTitle.textContent, [{ text: "Nothing to download yet.", flag: true }]);
-    return;
-  }
-  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement("a");
-  anchor.href = url;
-  anchor.download = lastDownloadName;
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
-  URL.revokeObjectURL(url);
+  downloadText(outputEl.value, lastDownloadName);
 }
 
 async function run() {
@@ -2393,8 +2429,8 @@ async function run() {
     outputEl.value = result.text;
     lastDownloadName = "dictio-" + slug(profile.name) + ".txt";
     const items = [
-      { text: "Profile: " + profile.name },
-      { text: "Style: word size " + style.wordSize + ", formality " + style.formality + ", sentence length " + style.sentenceLength + ", contractions " + style.contractions + ", hedging " + style.hedging + ", tone " + style.tone },
+      { text: "Voice cards are parked. Polish uses the twelve sliders." },
+      { text: "Style: word size " + style.wordSize + ", formality " + style.formality + ", sentence length " + style.sentenceLength + ", contractions " + style.contractions + ", hedging " + style.hedging + ", tone " + style.tone + ", concreteness " + style.concreteness + ", second person " + style.person + ", punch " + style.punch + ", jargon " + style.jargon + ", warmth " + style.warmth + ", citations " + style.citationDensity },
       { text: result.swaps + (result.swaps === 1 ? " phrase swap" : " phrase swaps") },
       { text: result.rules + (result.rules === 1 ? " rule edit" : " rule edits") },
       { text: result.flags.length + (result.flags.length === 1 ? " final-check flag" : " final-check flags") }
@@ -2461,9 +2497,9 @@ async function run() {
 const STYLE_STORE = "dictio-style-v1";
 
 function paintStyle(style) {
-  const keys = ["wordSize", "formality", "sentenceLength", "contractions", "hedging", "tone"];
-  keys.forEach((key) => {
+  sliderKeys().forEach((key) => {
     const slider = document.getElementById("slider-" + key);
+    if (!slider || style[key] == null) return;
     slider.value = style[key];
     document.getElementById("val-" + key).textContent = String(style[key]);
   });
@@ -2488,9 +2524,53 @@ function loadStyle() {
   paintStyle(style);
 }
 
+function downloadText(text, name) {
+  if (!String(text || "").trim()) {
+    setReport(reportTitle.textContent, [{ text: "Nothing to save yet.", flag: true }]);
+    return;
+  }
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = name;
+  document.body.append(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+function printText(title, text) {
+  if (!String(text || "").trim()) {
+    setReport(reportTitle.textContent, [{ text: "Nothing to print yet.", flag: true }]);
+    return;
+  }
+  const win = window.open("", "_blank");
+  if (!win) {
+    setReport(reportTitle.textContent, [{ text: "The browser blocked the print window.", flag: true }]);
+    return;
+  }
+  const safe = String(text).replace(/[&<>]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[ch]));
+  win.document.write("<!DOCTYPE html><html><head><title>" + title + "</title><style>body{font:16px/1.5 Georgia,serif;color:#111;background:#fff;padding:24px;white-space:pre-wrap}</style></head><body>" + safe + "</body></html>");
+  win.document.close();
+  win.focus();
+  win.print();
+}
+
+function readDraftOntoSliders() {
+  const S = window.DictioStyle;
+  if (!S || !S.readDraft) return;
+  const reading = S.readDraft(sourceEl.value);
+  const box = document.getElementById("draft-reading");
+  if (box) box.textContent = reading.reading;
+  document.body.classList.toggle("has-draft", Boolean(sourceEl.value.trim()));
+  paintStyle(Object.assign({}, readStyle(), reading, { writer: "custom", citation: readStyle().citation }));
+  saveStyle();
+}
+
 function wireStyle() {
   loadStyle();
-  ["wordSize", "formality", "sentenceLength", "contractions", "hedging", "tone"].forEach((key) => {
+  sliderKeys().forEach((key) => {
     document.getElementById("slider-" + key).addEventListener("input", () => {
       document.querySelectorAll(".presets button").forEach((btn) => {
         btn.setAttribute("aria-pressed", btn.dataset.writer === "custom" ? "true" : "false");
@@ -2535,9 +2615,13 @@ function init() {
   document.getElementById("load-sample").addEventListener("click", () => {
     sourceEl.value = SAMPLE_DRAFT;
     countMeta();
+    readDraftOntoSliders();
     sourceEl.focus();
   });
   sourceEl.addEventListener("input", countMeta);
+  sourceEl.addEventListener("paste", () => {
+    setTimeout(readDraftOntoSliders, 0);
+  });
   sourceEl.addEventListener("keydown", (event) => {
     if ((event.ctrlKey || event.metaKey) && event.key === "Enter") {
       event.preventDefault();
@@ -2547,6 +2631,9 @@ function init() {
   processBtn.addEventListener("click", run);
   document.getElementById("copy").addEventListener("click", copyResult);
   document.getElementById("download").addEventListener("click", downloadResult);
+  document.getElementById("save-draft").addEventListener("click", () => downloadText(sourceEl.value, "dictio-draft.txt"));
+  document.getElementById("print-draft").addEventListener("click", () => printText("Dictio draft", sourceEl.value));
+  document.getElementById("print-result").addEventListener("click", () => printText("Dictio result", outputEl.value));
   countMeta();
   setMode("diction");
   window.Dictio = { polish, planChunks, translateText, translateDirect, LANGUAGES, PROFILES, byteLen, SAMPLE_DRAFT, readStyle };

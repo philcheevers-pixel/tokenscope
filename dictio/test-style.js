@@ -59,6 +59,10 @@ for (const fmt of CITE_FMTS) {
   if (fmt === "apa7" && !/\(Smith, 2020\)/.test(result.text)) problems.push("apa7 did not keep (Smith, 2020) shape: " + result.text);
 }
 
+const read = DictioStyle.readDraft(SAMPLES[0]);
+assert.ok(read.reading && /word size/.test(read.reading), "readDraft explains the draft");
+assert.ok(DictioStyle.SLIDER_KEYS.length === 12, "twelve sliders");
+
 const hemingway = DictioStyle.applyStyle(SAMPLES[0], Object.assign({}, DictioStyle.WRITER_PRESETS.hemingway, { writer: "hemingway" }));
 assert.ok(hemingway.text.length > 10, "hemingway produced text");
 assert.ok(!/utilize/i.test(hemingway.text) || hemingway.notes.length >= 0, "hemingway ran");
