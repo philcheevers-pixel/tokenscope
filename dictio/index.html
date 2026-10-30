@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="Dictio is a test page: polish a draft in one of three voices, or translate it with a test translation engine.">
+<meta name="description" content="Dictio reads how a draft is written, then polishes it.">
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#f3efe6">
 <title>Dictio</title>
@@ -41,11 +41,17 @@
   header.top { margin-bottom: 12px; }
   .kicker {
     margin: 0 0 6px;
-    font-size: 0.75rem;
+    font-size: 0.94rem;
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--clay);
     font-weight: 700;
+  }
+  .title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px 18px;
   }
   h1 {
     margin: 0;
@@ -54,6 +60,14 @@
     font-weight: 600;
     letter-spacing: -0.03em;
     line-height: 0.95;
+  }
+  .advert {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+    color: var(--ink);
+    max-width: 36rem;
+    line-height: 1.25;
   }
   .tagline { margin: 8px 0 0; font-size: 1.15rem; max-width: 52rem; }
   .note { margin: 6px 0 0; color: var(--muted); max-width: 56rem; }
@@ -64,9 +78,10 @@
     background: var(--green-soft);
     border-radius: 12px;
     color: var(--ink);
+    font-size: 1.05rem;
   }
   .tabs {
-    display: flex;
+    display: none;
     gap: 4px;
     width: fit-content;
     max-width: 100%;
@@ -134,7 +149,7 @@
   .lang-field { position: relative; }
   .lang-field label, .field-label {
     display: block;
-    font-size: 0.78rem;
+    font-size: 0.975rem;
     font-weight: 700;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -211,7 +226,7 @@
     resize: vertical;
   }
   #output { background: #fcfbf7; }
-  .meta { margin: 8px 0 0; color: var(--muted); font-size: 0.9rem; }
+  .meta { margin: 8px 0 0; color: var(--muted); font-size: 1.125rem; }
   button, .stripe {
     font: inherit;
     cursor: pointer;
@@ -260,12 +275,12 @@
   }
   .pay p { margin: 8px 0 0; color: var(--muted); }
   code { font-size: 0.92em; }
-  .hint { margin: 8px 0 0; color: var(--muted); font-size: 0.88rem; }
+  .hint { margin: 8px 0 0; color: var(--muted); font-size: 1.1rem; }
   .style-block { margin: 0; padding: 0; border: 0; }
   .style-block h3 {
     margin: 0 0 8px;
     font-family: var(--serif);
-    font-size: 1.05rem;
+    font-size: 1.31rem;
     font-weight: 600;
   }
   .presets { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
@@ -281,7 +296,7 @@
   .slider-name {
     display: flex;
     justify-content: space-between;
-    font-size: 0.78rem;
+    font-size: 0.975rem;
     font-weight: 700;
     color: var(--ink);
   }
@@ -290,10 +305,11 @@
     display: flex;
     justify-content: space-between;
     gap: 8px;
-    font-size: 0.72rem;
+    font-size: 0.9rem;
     color: #444;
     line-height: 1.2;
   }
+  .preset-park { display: none; }
   #citation-wrap { margin-top: 10px; }
   #citation-wrap select {
     min-height: 44px;
@@ -322,11 +338,12 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <p class="kicker">Test build</p>
-    <h1>Dictio</h1>
-    <p class="tagline">Paste a draft. Read how it is written. Polish it, or translate it.</p>
-    <p class="note">Test build for Phil Cheevers. Diction rules are starters, and translation runs on a test engine. The page does not store the draft.</p>
-    <p class="how">Paste or type on the left. The twelve sliders read the draft as it stands. Writer presets sit on the left. Move a slider after that if you want a different target. The three book-voice cards are parked to leave room for this.</p>
+    <p class="kicker">v1.4</p>
+    <div class="title-row">
+      <h1>Dictio</h1>
+      <p class="advert">See how a draft is written. Then polish it.</p>
+    </div>
+    <p class="tagline">Paste a draft. Read how it is written. Polish it.</p>
     <p class="reading" id="draft-reading">Paste a draft. The sliders will read how it is written.</p>
   </header>
 
@@ -360,6 +377,7 @@
   <div class="shell">
   <aside class="rail" id="panel-diction">
     <div class="style-block">
+      <div class="preset-park">
       <h3>Writer presets</h3>
       <div class="presets" role="group" aria-label="Writer presets">
         <button type="button" data-writer="custom" aria-pressed="true">Custom sliders</button>
@@ -367,6 +385,7 @@
         <button type="button" data-writer="shakespeare" aria-pressed="false">Shakespeare</button>
         <button type="button" data-writer="thompson" aria-pressed="false">Hunter S. Thompson</button>
         <button type="button" data-writer="thesis" aria-pressed="false">Thesis</button>
+      </div>
       </div>
       <h3>How this draft reads</h3>
       <div class="sliders">
@@ -478,7 +497,7 @@
           <button type="button" id="print-draft">Print</button>
         </div>
       </div>
-      <label class="field-label" for="source">Text to polish or translate</label>
+      <label class="field-label" for="source">Text to polish</label>
       <textarea id="source" placeholder="Paste a draft here."></textarea>
       <p class="meta" id="source-meta"></p>
       <button type="button" class="primary" id="process">Polish this draft</button>
