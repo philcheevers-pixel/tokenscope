@@ -80,6 +80,10 @@
     color: var(--ink);
     font-size: 1.05rem;
   }
+  .reading.short {
+    background: var(--amber-soft);
+    color: #111;
+  }
   .tabs {
     display: none;
     gap: 4px;
@@ -338,7 +342,7 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <p class="kicker">v1.5</p>
+    <p class="kicker">v1.6</p>
     <div class="title-row">
       <h1>Dictio</h1>
       <p class="advert">See how a draft is written. Then polish it.</p>
@@ -2497,6 +2501,15 @@ function polishNow() {
   const result = polish(text, profile, style);
   outputEl.value = result.text;
   lastDownloadName = "dictio-" + slug(profile.name) + ".txt";
+  const review = window.DictioStyle ? window.DictioStyle.reviewDraft(text) : null;
+  if (review && review.tooShort) {
+    outputEl.value = "";
+    setReport("What changed", [
+      { text: "Minimal data to develop a style. This paste is " + review.counts.words + " words. Paste 80 words or more before we propose a sound reading.", flag: true },
+      { text: "Raw count: " + review.counts.sentences + " sentences, " + review.counts.contractions + " contractions, " + review.counts.adjectives + " likely adjectives, " + review.counts.pronouns + " pronouns." }
+    ]);
+    return;
+  }
   const items = [
     { text: "Voice cards are parked. Polish uses the twelve sliders." },
     { text: "Style: word size " + style.wordSize + ", formality " + style.formality + ", sentence length " + style.sentenceLength + ", contractions " + style.contractions + ", hedging " + style.hedging + ", tone " + style.tone + ", concreteness " + style.concreteness + ", second person " + style.person + ", punch " + style.punch + ", jargon " + style.jargon + ", warmth " + style.warmth + ", citations " + style.citationDensity },
@@ -2653,7 +2666,10 @@ function readDraftOntoSliders() {
   if (!S || !S.readDraft) return;
   const reading = S.readDraft(sourceEl.value);
   const box = document.getElementById("draft-reading");
-  if (box) box.textContent = reading.reading;
+  if (box) {
+    box.textContent = reading.reading;
+    box.classList.toggle("short", Boolean(reading.tooShort));
+  }
   document.body.classList.toggle("has-draft", Boolean(sourceEl.value.trim()));
   paintStyle(Object.assign({}, readStyle(), reading, { writer: "custom", citation: readStyle().citation }));
   saveStyle();

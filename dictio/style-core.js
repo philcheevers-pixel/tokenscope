@@ -102,6 +102,8 @@
     [/\bjust\b\s*/gi, ""]
   ];
 
+  const MIN_WORDS = 80;
+
   const SLIDER_KEYS = [
     "wordSize", "formality", "sentenceLength", "contractions",
     "hedging", "tone", "concreteness", "person",
@@ -169,6 +171,8 @@
         punch: 40, jargon: 10, warmth: 20, citationDensity: 2,
         citation: "apa7",
         counts: null,
+        tooShort: false,
+        proposedStyle: null,
         reading: "Paste a draft. We count words, sentences, contractions, pronouns, likely adjectives, hedges, and citations, then set the dials from those counts. The draft on the left stays as you pasted it."
       };
     }
@@ -218,6 +222,24 @@
       casualMarkers: casual
     };
 
+    if (wc < MIN_WORDS) {
+      return {
+        writer: "custom",
+        wordSize: 40, formality: 40, sentenceLength: 40, contractions: 40,
+        hedging: 20, tone: 40, concreteness: 50, person: 40,
+        punch: 40, jargon: 20, warmth: 40, citationDensity: 10,
+        citation: "apa7",
+        counts: counts,
+        tooShort: true,
+        proposedStyle: null,
+        reading: "Minimal data to develop a style. This paste is " + wc +
+          " words. We need 80 words or more before the dials can claim a sound reading. " +
+          "Raw count only: " + sc + " sentences, " + contractions + " contractions, " +
+          adjectives + " likely adjectives, " + pronouns + " pronouns, " +
+          hedges + " hedges, " + cites + " citations. Paste more of the document."
+      };
+    }
+
     const style = {
       writer: "custom",
       wordSize: clamp(((avgChars - 3.4) / 3.2) * 100, 2, 98),
@@ -233,7 +255,9 @@
       warmth: clamp(perThousand(you + we + please, wc) / 0.5, 2, 98),
       citationDensity: clamp((cites / sc) * 140, 2, 98),
       citation: "apa7",
-      counts: counts
+      counts: counts,
+      tooShort: false,
+      proposedStyle: null
     };
     style.reading =
       "Counted in this draft: " + wc + " words, " + sc + " sentences" +
@@ -429,6 +453,7 @@
     applyStyle: applyStyle,
     readDraft: readDraft,
     reviewDraft: reviewDraft,
+    MIN_WORDS: MIN_WORDS,
     SLIDER_KEYS: SLIDER_KEYS,
     WRITER_PRESETS: WRITER_PRESETS,
     CITATION_LABELS: CITATION_LABELS,

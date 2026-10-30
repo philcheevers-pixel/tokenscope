@@ -59,7 +59,13 @@ for (const fmt of CITE_FMTS) {
   if (fmt === "apa7" && !/\(Smith, 2020\)/.test(result.text)) problems.push("apa7 did not keep (Smith, 2020) shape: " + result.text);
 }
 
-const read = DictioStyle.readDraft(SAMPLES[0]);
+const longPaste = (SAMPLES.join(" ") + " ").repeat(8);
+const read = DictioStyle.readDraft(longPaste);
+const shortRead = DictioStyle.readDraft("Hello there. This is tiny.");
+assert.ok(shortRead.tooShort, "under 80 words is too short");
+assert.ok(/Minimal data/.test(shortRead.reading), "short paste asks for more content");
+assert.ok(!shortRead.proposedStyle, "short paste does not propose a style");
+
 assert.ok(read.reading && /Counted/.test(read.reading), "readDraft explains the counts");
 assert.ok(read.counts && read.counts.words > 0, "readDraft returns counts");
 assert.ok(DictioStyle.SLIDER_KEYS.length === 12, "twelve sliders");
