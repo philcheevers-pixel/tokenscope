@@ -2465,6 +2465,39 @@ function downloadResult() {
   downloadText(outputEl.value, lastDownloadName);
 }
 
+function polishNow() {
+  const text = sourceEl.value;
+  if (!text.trim()) {
+    outputEl.value = "";
+    setReport("What changed", [{ text: "Paste some text first.", flag: true }]);
+    return;
+  }
+  const profile = selectedProfile();
+  const style = readStyle();
+  const result = polish(text, profile, style);
+  outputEl.value = result.text;
+  lastDownloadName = "dictio-" + slug(profile.name) + ".txt";
+  const items = [
+    { text: "Voice cards are parked. Polish uses the twelve sliders." },
+    { text: "Style: word size " + style.wordSize + ", formality " + style.formality + ", sentence length " + style.sentenceLength + ", contractions " + style.contractions + ", hedging " + style.hedging + ", tone " + style.tone + ", concreteness " + style.concreteness + ", second person " + style.person + ", punch " + style.punch + ", jargon " + style.jargon + ", warmth " + style.warmth + ", citations " + style.citationDensity },
+    { text: result.swaps + (result.swaps === 1 ? " phrase swap" : " phrase swaps") },
+    { text: result.rules + (result.rules === 1 ? " rule edit" : " rule edits") },
+    { text: result.flags.length + (result.flags.length === 1 ? " final-check flag" : " final-check flags") }
+  ];
+  (result.styleNotes || []).forEach((note) => items.push({ text: note }));
+  if (!result.flags.length) items.push({ text: "Final check: nothing to flag." });
+  result.flags.forEach((flag) => items.push({ text: flag, flag: true }));
+  setReport("What changed", items);
+}
+
+let liveTimer = 0;
+function schedulePolish() {
+  if (mode !== "diction") return;
+  if (!sourceEl.value.trim()) return;
+  clearTimeout(liveTimer);
+  liveTimer = setTimeout(polishNow, 60);
+}
+
 async function run() {
   if (busy) return;
   const text = sourceEl.value;
@@ -2474,22 +2507,7 @@ async function run() {
     return;
   }
   if (mode === "diction") {
-    const profile = selectedProfile();
-    const style = readStyle();
-    const result = polish(text, profile, style);
-    outputEl.value = result.text;
-    lastDownloadName = "dictio-" + slug(profile.name) + ".txt";
-    const items = [
-      { text: "Voice cards are parked. Polish uses the twelve sliders." },
-      { text: "Style: word size " + style.wordSize + ", formality " + style.formality + ", sentence length " + style.sentenceLength + ", contractions " + style.contractions + ", hedging " + style.hedging + ", tone " + style.tone + ", concreteness " + style.concreteness + ", second person " + style.person + ", punch " + style.punch + ", jargon " + style.jargon + ", warmth " + style.warmth + ", citations " + style.citationDensity },
-      { text: result.swaps + (result.swaps === 1 ? " phrase swap" : " phrase swaps") },
-      { text: result.rules + (result.rules === 1 ? " rule edit" : " rule edits") },
-      { text: result.flags.length + (result.flags.length === 1 ? " final-check flag" : " final-check flags") }
-    ];
-    (result.styleNotes || []).forEach((note) => items.push({ text: note }));
-    if (!result.flags.length) items.push({ text: "Final check: nothing to flag." });
-    result.flags.forEach((flag) => items.push({ text: flag, flag: true }));
-    setReport("What changed", items);
+    polishNow();
     return;
   }
 
@@ -2617,6 +2635,7 @@ function readDraftOntoSliders() {
   document.body.classList.toggle("has-draft", Boolean(sourceEl.value.trim()));
   paintStyle(Object.assign({}, readStyle(), reading, { writer: "custom", citation: readStyle().citation }));
   saveStyle();
+  schedulePolish();
 }
 
 function wireStyle() {
@@ -2628,9 +2647,13 @@ function wireStyle() {
       });
       document.getElementById("val-" + key).textContent = document.getElementById("slider-" + key).value;
       saveStyle();
+      schedulePolish();
     });
   });
-  document.getElementById("citation-format").addEventListener("change", saveStyle);
+  document.getElementById("citation-format").addEventListener("change", () => {
+    saveStyle();
+    schedulePolish();
+  });
   document.querySelectorAll(".presets button").forEach((btn) => {
     btn.addEventListener("click", () => {
       const writer = btn.dataset.writer;
@@ -2641,6 +2664,7 @@ function wireStyle() {
       }
       paintStyle(next);
       saveStyle();
+      schedulePolish();
     });
   });
 }

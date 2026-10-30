@@ -323,34 +323,37 @@
 
     if (writer && writer !== "custom") notes.push("Writer preset: " + writer);
 
-    if (wordSize <= 35) out = applyPairs(out, SHORT_WORDS, notes, "Shorter words");
-    else if (wordSize >= 70) out = applyPairs(out, LONG_WORDS, notes, "Longer words");
+    if (wordSize < 50) out = applyPairs(out, SHORT_WORDS, notes, "Shorter words");
+    else if (wordSize > 50) out = applyPairs(out, LONG_WORDS, notes, "Longer words");
 
-    if (formality <= 35) out = applyPairs(out, CASUAL, notes, "Less formal");
-    else if (formality >= 70) out = applyPairs(out, FORMAL, notes, "More formal");
+    if (formality < 50) out = applyPairs(out, CASUAL, notes, "Less formal");
+    else if (formality > 50) out = applyPairs(out, FORMAL, notes, "More formal");
 
-    if (contractions <= 35) out = applyPairs(out, EXPAND, notes, "Expanded contractions");
+    if (contractions < 50) out = applyPairs(out, EXPAND, notes, "Expanded contractions");
 
-    if (hedging <= 30) out = applyPairs(out, HEDGES_STRIP, notes, "Cut hedging");
-    else if (hedging >= 70) {
+    if (hedging < 50) out = applyPairs(out, HEDGES_STRIP, notes, "Cut hedging");
+    else if (hedging > 50) {
       if (!/^(perhaps|it appears|the evidence)/i.test(out)) {
-        out = "The evidence suggests that " + out.charAt(0).toLowerCase() + out.slice(1);
+        const keepCap = /^[A-Z][a-z]+\s/.test(out) && !/^(The|This|That|These|Those|It|We|There|A|An)\b/.test(out);
+        const rest = keepCap ? out : out.charAt(0).toLowerCase() + out.slice(1);
+        out = "The evidence suggests that " + rest;
         notes.push("Added a cautious academic opener");
       }
     }
 
-    if (tone <= 30 || writer === "hemingway") out = applyPairs(out, ICEBERG_STRIP, notes, "Iceberg cuts");
-    if (writer === "shakespeare" || (tone >= 80 && writer !== "thompson" && writer !== "thesis")) {
+    if (tone < 50 || writer === "hemingway") out = applyPairs(out, ICEBERG_STRIP, notes, "Iceberg cuts");
+    if (writer === "shakespeare" || (tone > 50 && writer !== "thompson" && writer !== "thesis")) {
       out = applyPairs(out, SHAKESPEARE, notes, "Elevated / Shakespeare diction");
     }
-    if (writer === "thompson" || (tone >= 85 && writer === "thompson")) {
+    if (writer === "thompson") {
       out = applyPairs(out, GONZO, notes, "Higher-voltage tone");
     }
 
-    if (jargon <= 25) out = applyPairs(out, SHORT_WORDS, notes, "Cut jargon");
+    if (jargon < 50) out = applyPairs(out, SHORT_WORDS, notes, "Cut jargon");
 
-    if (sentenceLength <= 35 || punch >= 80) out = splitLongSentences(out, sentenceLength <= 15 || punch >= 80 ? 12 : 18, notes);
-    else if (sentenceLength >= 75) out = joinShortSentences(out, notes);
+    const maxWords = Math.max(8, Math.round(8 + (Number(sentenceLength) / 100) * 30));
+    if (sentenceLength < 50 || punch > 50) out = splitLongSentences(out, punch > 50 ? Math.min(12, maxWords) : maxWords, notes);
+    else if (sentenceLength > 50) out = joinShortSentences(out, notes);
 
     if (writer === "thesis") out = applyCitations(out, citation, notes);
 
