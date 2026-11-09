@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Tasks — Pink House 111</title>
+<link rel="stylesheet" href="style.css?v=18">
+<script src="/a11y/ph-site.js?v=1"></script>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Pink House · 111</div>
+    <h1>Tasks on the go</h1>
+    <p class="sub">Four columns — Phil, Cursor, Grokbot, Claude — about fifty characters wide. Tick the box, type done in notes, or spaces on the name to finish.</p>
+    <div class="meta-row">
+      <span id="meta-updated">Last updated (Toronto): loading…</span>
+      <span>Refresh: every 2 seconds</span>
+      <span id="voice-picked">Voice: loading…</span>
+      <span id="backup-meta">Backups: —</span>
+    </div>
+  </header>
+  <div id="notice-refresh" class="notice err hidden"></div>
+  <div class="above-fold" aria-label="Tasks overview">
+    <div class="status-band" id="status-band">
+      <p id="notice-stale" class="notice warn hidden">Data may be stale — updatedAt is older than 15 minutes.</p>
+      <div class="counts" id="counts" aria-label="Status counts">
+        <span data-k="running">Running 0</span>
+        <span data-k="waiting">Waiting 0</span>
+        <span data-k="blocked">Blocked 0</span>
+        <span data-k="done">Done 0</span>
+        <span data-k="total">Total 0</span>
+      </div>
+      <div class="card card-blocked-why" aria-label="Why blocked"><span class="l">Blocked</span><p class="blocked-why" id="sum-blocked">Nothing blocked.</p></div>
+    </div>
+    <div class="tool-strip" aria-label="Board tools">
+      <button type="button" class="tool-btn" id="btn-backup">Save backup</button>
+      <button type="button" class="tool-btn secondary" id="btn-nudge">Write speaker nudge</button>
+      <span class="tool-hint" id="say-hint">Speaker: idle</span>
+    </div>
+    <div class="board-cols" id="task-board" aria-label="Four-column task board">
+      <section class="board-col" data-lane="Phil" aria-labelledby="head-phil">
+        <h2 class="col-head" id="head-phil">Phil</h2>
+        <div class="col-body" id="col-phil"></div>
+        <input type="text" class="task-add-input" data-owner="Phil" placeholder="New task…" aria-label="New task for Phil" autocomplete="off">
+      </section>
+      <section class="board-col" data-lane="Cursor" aria-labelledby="head-cursor">
+        <h2 class="col-head" id="head-cursor">Cursor</h2>
+        <div class="col-body" id="col-cursor"></div>
+        <input type="text" class="task-add-input" data-owner="Cursor" placeholder="New task…" aria-label="New task for Cursor" autocomplete="off">
+      </section>
+      <section class="board-col" data-lane="Grok" aria-labelledby="head-grok">
+        <h2 class="col-head" id="head-grok">Grokbot</h2>
+        <div class="col-body" id="col-grok"></div>
+        <input type="text" class="task-add-input" data-owner="Grok" placeholder="New task…" aria-label="New task for Grokbot" autocomplete="off">
+      </section>
+      <section class="board-col" data-lane="Claude" aria-labelledby="head-claude">
+        <h2 class="col-head" id="head-claude">Claude</h2>
+        <div class="col-body" id="col-claude"></div>
+        <input type="text" class="task-add-input" data-owner="Claude" placeholder="New task…" aria-label="New task for Claude" autocomplete="off">
+      </section>
+    </div>
+    <div class="cards" id="task-cards" aria-label="Task cards"></div>
+  </div>
+  <section class="handoff" aria-label="Ad-hoc handoff">
+    <div class="handoff-head">
+      <h2>Ad-hoc</h2>
+      <button type="button" class="handoff-copy" id="handoff-copy">Copy</button>
+    </div>
+    <p class="handoff-hint">Paste or type. It stays here so Phil can copy it.</p>
+    <textarea id="handoff-text" class="handoff-text" rows="5" aria-label="Ad-hoc paste box" placeholder="Paste a note here." autocomplete="off" spellcheck="true"></textarea>
+  </section>
+  <section class="backup-panel" aria-label="Backups">
+    <h2>Backups</h2>
+    <p class="handoff-hint">Each add, edit, or tick copies tasks.json. Tick a file name is enough to know it is there. Restore is a later step.</p>
+    <ul id="backup-list" class="backup-list"></ul>
+  </section>
+</div>
+<script src="app.js?v=18"></script>
+</body>
+</html>
