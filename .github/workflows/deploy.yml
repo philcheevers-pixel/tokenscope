@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - cursor/dashboard-111-complete-88e8
 
 jobs:
   deploy:
@@ -12,7 +13,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to DigitalOcean
+      - name: Deploy tokenscope git
+        if: github.ref == 'refs/heads/main'
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.DEPLOY_HOST }}
@@ -23,4 +25,30 @@ jobs:
             git fetch origin
             git checkout main
             git pull origin main
-            echo "Deploy completed at $(date)"
+            echo "tokenscope git deploy completed at $(date)"
+
+      - name: Upload 111 and pitching
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          source: "site/111,site/pitching"
+          target: "/tmp/ph-site-deploy"
+          overwrite: true
+
+      - name: Install 111 and pitching onto web root
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_KEY }}
+          script: |
+            set -e
+            mkdir -p /var/www/html/111 /var/www/html/pitching /var/www/html/111/backups
+            rsync -a --exclude tasks.json --exclude handoff.json --exclude backups --exclude say.txt \
+              /tmp/ph-site-deploy/site/111/ /var/www/html/111/
+            rsync -a /tmp/ph-site-deploy/site/pitching/ /var/www/html/pitching/
+            if [ -f /var/www/html/111/backups/.htaccess ]; then true; fi
+            chown -R www-data:www-data /var/www/html/111 /var/www/html/pitching || true
+            echo "111 and pitching installed at $(date)"

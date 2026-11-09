@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Pitching Pipeline — publications</title>
+<link rel="stylesheet" href="style.css?v=2">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Pink House · Pitching Pipeline</div>
+    <h1>Publications phone book</h1>
+    <p class="sub">Sunday night, 8 Nov 2026: one big flat table you can scroll, like a phone book. Search and filters sit on top. They do not replace the scroll. This is the browse tool. It does not send mail.</p>
+    <p class="sub">Lingua20 was the scrape. Pitching Pipeline is what it becomes. Spec: Pitching Pipeline brick 2. Live board: <a href="/111/">pinkhouse.tech/111</a>.</p>
+  </header>
+  <section class="toolbar" aria-label="Search and filters">
+    <label>Find
+      <input id="q" type="search" placeholder="Name, genre, country…" autocomplete="off">
+    </label>
+    <label>Letter
+      <select id="letter">
+        <option value="">All</option>
+      </select>
+    </label>
+    <label>Country
+      <select id="country"><option value="">All</option></select>
+    </label>
+    <label>Language
+      <select id="language"><option value="">All</option></select>
+    </label>
+    <label>Pays
+      <select id="pays">
+        <option value="">All</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+        <option value="Unknown">Unknown</option>
+      </select>
+    </label>
+    <span class="count" id="count">Loading…</span>
+  </section>
+  <nav class="letters" id="letters" aria-label="A to Z"></nav>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Country</th>
+          <th>Language</th>
+          <th>Genre</th>
+          <th>Pays</th>
+          <th>Website</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="6">Loading publications.json…</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="foot">Verify a market before you pitch. Seed data only. No autonomous sending.</p>
+</div>
+<script src="app.js?v=2"></script>
+</body>
+</html>
