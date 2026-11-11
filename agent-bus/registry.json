@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "updatedAt": "2026-11-11T02:37:09Z",
+  "agents": [
+    {
+      "id": "show-progress",
+      "role": "parent",
+      "cursorAgentId": "bc-5be7d981-006e-49eb-911c-b3b1d67dbb9a",
+      "inbox": "agent-bus/inbox/show-progress.jsonl",
+      "notes": "Cloud run Show progress report. Sends on the bus and via Task resume."
+    },
+    {
+      "id": "show-worker",
+      "role": "worker",
+      "cursorAgentId": "bc-31261ada-52be-5d85-9c82-474177fb9537",
+      "inbox": "agent-bus/inbox/show-worker.jsonl",
+      "notes": "Local Task sibling. Answered msg-1 with pong msg-2."
+    }
+  ]
+}
